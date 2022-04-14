@@ -1,0 +1,9 @@
++get intial repo setup
+
++use CRA to create basic typescript react app
+
++create POC for uploading images and storing them in indexedDB
+
++create POC for affine transformation based image alignment 
+
++develop general outline of app 
