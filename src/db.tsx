@@ -2,8 +2,9 @@ import Dexie, { Table } from 'dexie';
 
 export type Entry = {
 	id?: number;
-	date?: string;
+	date: string;
 	weight: number;
+	notes?: string;
 	image: string;
 }
 
@@ -13,7 +14,7 @@ export class TypedDexie extends Dexie {
 	constructor() {
 		super('db');
 		this.version(1).stores({
-			entries: '++id, date, weight, image'
+			entries: '++id, date, weight, notes, image'
 		});
 	}
 }

@@ -5,26 +5,14 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import './index.css';
 import App from './App';
-import Entry from './Entry';
-import Viewer from './Viewer';
-import Export from './Export';
-import Settings from './Settings';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
 root.render(
   <React.StrictMode>
-		<BrowserRouter>
-			<Routes>
-    		<Route path="/" element={<App />}>
-					<Route path="entry" element={<Entry />} />
-					<Route path="viewer" element={<Viewer />} />
-					<Route path="export" element={<Export />} />
-					<Route path="settings" element={<Settings />} />
-				</Route>
-			</Routes>
-		</BrowserRouter>
+		<App />
   </React.StrictMode>
 );
 
