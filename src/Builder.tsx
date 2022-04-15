@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { Outlet, Link } from 'react-router-dom';
+
 import { db, Entry } from './db';
 
-function ImageStorePOC() {
-	let storeImageRef = useRef<HTMLButtonElement>(null);
+
+function Builder() {
+/*	let storeImageRef = useRef<HTMLButtonElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
   
 	const entries = useLiveQuery(
@@ -41,9 +44,6 @@ function ImageStorePOC() {
 					if(typeof event.target.result === "string") {
 						addDbEntry(event.target.result);
 						//let newImage = document.createElement("img");
-						/*let newImage = new Image();
-						newImage.src = event.target.result;
-						document.body.append(newImage);*/
 					}
 				}
 			};
@@ -85,7 +85,7 @@ function ImageStorePOC() {
 			<input ref={imageUploadRef} type="file" id="image_upload" name="image_upload"></input>
 			<button ref={storeImageRef} type="button" id="store_image">Store Image</button>
 			<div>
-				<h1>Entries</h1>
+				<h1>Entries in Builder</h1>
 				{ 
 					entries?.map( entry => 
 						<div key={entry.id} style={{border: '1px solid black', padding: '1rem', margin: '1rem'}}>
@@ -96,7 +96,27 @@ function ImageStorePOC() {
 				}
 			</div>
     </div>
-  );
+  );*/
+
+	return (
+		<div>
+			<h1>Builder</h1>
+			<nav style={{
+				display: "flex",
+				flexDirection: "row",
+				justifyContent: "space-around",
+				alignItems: "center",
+				border: "1px solid red",
+				padding: "1rem"
+			}}>
+				<Link to="/entry">Entry</Link>
+				<Link to="/viewer">Viewer</Link>
+				<Link to="/export">Export</Link>
+				<Link to="/settings">Settings</Link>
+			</nav>
+			<Outlet />
+		</div>
+	);
 }
 
-export default ImageStorePOC;
+export default Builder;
