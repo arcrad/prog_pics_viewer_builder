@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+
 import { db, Entry } from './db';
+import { GlobalState } from './App';
 
 type EntryAttributes = {
-	currentEntryId: number,
-	setCurrentEntryId: Dispatch<SetStateAction<number>>
+	globalState: GlobalState,
+	setGlobalState: Dispatch<SetStateAction<GlobalState>>
 };
 
-function EntryComponent( {
-	currentEntryId, 
-	setCurrentEntryId
-}:EntryAttributes ) {
+function EntryComponent({
+	globalState, 
+	setGlobalState
+} : EntryAttributes ) {
 	let storeImageRef = useRef<HTMLButtonElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
   
@@ -81,6 +83,8 @@ function EntryComponent( {
 				const numberDeleted = await db.entries
 					.where("id").anyOf(parseInt(event.target.dataset.entryId))
 					.delete();
+				let newState = { currentEntryId: parseInt(event.target.dataset.entryId)};
+				setGlobalState( (prevState):GlobalState => { return {...prevState, ...newState}});
 				console.log(`Successfully deleted ${numberDeleted} records.`);
 			} catch(error) {
 				console.error(`encountered error trying to delete record with id = ${event.target.dataset.entryId}`);
@@ -93,7 +97,7 @@ function EntryComponent( {
 			<input ref={imageUploadRef} type="file" id="image_upload" name="image_upload"></input>
 			<button ref={storeImageRef} type="button" id="store_image">Store Image</button>
 			<div>
-				<h1>Entries ( id = {currentEntryId} )</h1>
+				<h1>Entries ( id = {globalState.currentEntryId} )</h1>
 				{ 
 					entries?.map( entry => 
 						<div key={entry.id} style={{border: '1px solid black', padding: '1rem', margin: '1rem'}}>
