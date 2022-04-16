@@ -6,12 +6,14 @@ import
 		useRef, 
 		Dispatch, 
 		SetStateAction, 
+		MouseEvent,
 		ChangeEvent 
 	} from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
+import ChangeImageModal from './ChangeImageModal';
 
 type EntryAttributes = {
 	globalState: GlobalState,
@@ -25,8 +27,9 @@ function EntryComponent({
 
 	let [currentEntryWeight, setCurrentEntryWeight] = useState("123");
 	let [currentEntryDate, setCurrentEntryDate] = useState("april 5, 2022");
-	
-	let storeImageRef = useRef<HTMLButtonElement>(null);
+	let [changeImageModalIsVisible, setChangeImageModalIsVisible] = useState(false);
+
+	let addEntryRef = useRef<HTMLButtonElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
   let entrySelectRef = useRef<HTMLSelectElement>(null);
 
@@ -70,6 +73,30 @@ function EntryComponent({
 		);
 	}, []);*/
 
+	const addDbEntry = async (imageData:string) => {
+		console.log("adding db entry...");
+	};
+
+	const handleAddEntry = async (event:MouseEvent<HTMLButtonElement>) => {
+		//console.dir(imageUploadRef.current);
+		console.log("handle add entry..");
+		try {
+			const date = ((new Date()).toISOString()).substring(0, 16); 
+			//datetime needs to be more robust
+			const id = await db.entries.add({
+				date
+			});
+			console.log( 'new id =', id);
+			setGlobalState( (cs):GlobalState => {
+				console.log('inner id=',id);
+				let ns = { currentEntryId: id as number};
+				return { ...cs, ...ns };
+			});
+		} catch(error) {
+			console.error(`failed to add db entry. ${error}`);
+		}
+	};
+/*
 	useEffect( () => {
 		const addDbEntry = async (imageData:string) => {
 			console.log("adding db entry...");
@@ -87,9 +114,9 @@ function EntryComponent({
 			}
 		};
 
-		const storeImageHandler = () => {
+		const addEntryHandler = () => {
 			//console.dir(imageUploadRef.current);
-			console.log("handle store image...");
+			console.log("handle add entry..");
 			let selectedFile;
 			if(imageUploadRef.current && imageUploadRef.current.files) {
 				selectedFile = imageUploadRef.current.files[0];
@@ -100,10 +127,6 @@ function EntryComponent({
 					console.log("result=", event.target.result);
 					if(typeof event.target.result === "string") {
 						addDbEntry(event.target.result);
-						//let newImage = document.createElement("img");
-						/*let newImage = new Image();
-						newImage.src = event.target.result;
-						document.body.append(newImage);*/
 					}
 				}
 			};
@@ -113,18 +136,18 @@ function EntryComponent({
 			}
 		};
 
-		if(storeImageRef.current) {
-			storeImageRef.current.addEventListener("click", storeImageHandler);
+		if(addEntryRef.current) {
+			addEntryRef.current.addEventListener("click", storeImageHandler);
 		}
 
 		return () => {
-			if(storeImageRef.current) {
-				storeImageRef.current.removeEventListener("click", storeImageHandler);
+			if(addEntryRef.current) {
+				addEntryRef.current.removeEventListener("click", storeImageHandler);
 			}
 		}
-	}, []);
+	}, []);*/
 
-	const handleDeleteEntry = async (event:React.MouseEvent<HTMLButtonElement>) => {
+	const handleDeleteEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log("handle delete entry...");
 		//console.dir(event);
 		if(event.target && event.target instanceof HTMLButtonElement && event.target.dataset.entryId) {
@@ -142,16 +165,17 @@ function EntryComponent({
 		}
 	};
 
-	const handleMarkEntry = async (event:React.MouseEvent<HTMLButtonElement>) => {
+	const handleMarkEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log('handleMarkEntry');
 	};
 	
-	const handleChangeImageEntry = async (event:React.MouseEvent<HTMLButtonElement>) => {
+	const handleChangeImageEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log('handleChangeImageEntry');
+		setChangeImageModalIsVisible(true);
 	};
 
 	let debounceInputTimeout = useRef(0);
-	const handleEntryInputChange = async (event:React.ChangeEvent<HTMLInputElement>) => {
+	const handleEntryInputChange = async (event:ChangeEvent<HTMLInputElement>) => {
 		console.log('handleEntryInputChange');
 		if(
 			event.target
@@ -184,10 +208,10 @@ function EntryComponent({
 		}
 	};
 
+	//<input ref={imageUploadRef} type="file" id="image_upload" name="image_upload"></input>
+	
 	return (
     <div>
-			<input ref={imageUploadRef} type="file" id="image_upload" name="image_upload"></input>
-			<button ref={storeImageRef} type="button" id="store_image">Store Image</button>
 			<div>
 				<h1>Entries ( id = {globalState.currentEntryId} )</h1>
 				<select ref={entrySelectRef} value={globalState.currentEntryId} onChange={handleEntrySelectChange}>
@@ -197,6 +221,7 @@ function EntryComponent({
 					)
 				}
 				</select>
+				<button ref={addEntryRef} type="button" onClick={handleAddEntry}>Add Entry</button>
 				<hr/>
 							<div>
 								<input 
@@ -214,7 +239,12 @@ function EntryComponent({
 									onChange={handleEntryInputChange}
 								/>
 							</div>
-							<img src={currentEntry?.image} style={{maxWidth: '30rem'}}/>
+							{ 
+								currentEntry?.image ? 
+									<img src={currentEntry?.image} style={{maxWidth: '30rem'}}/>
+									:
+									<p>No image loaded...</p>
+							}
 							<div>
 								<button 
 									type="button" 
@@ -247,6 +277,12 @@ function EntryComponent({
 							<button type="button" data-entry-id={entry.id} onClick={handleDeleteEntry}>Delete</button>
 						</div> )
 				}
+				<ChangeImageModal 
+					globalState={globalState} 
+					setGlobalState={setGlobalState} 
+					isModalVisible={changeImageModalIsVisible}
+					setIsModalVisible={setChangeImageModalIsVisible}
+				/>
 			</div>
     </div>
   );

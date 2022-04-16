@@ -8,9 +8,9 @@ export type MarkPoint = {
 export type Entry = {
 	id?: number;
 	date: string;
-	weight: number;
+	weight?: number;
 	notes?: string;
-	image: string;
+	image?: string;
 	marks?: MarkPoint[];
 }
 
