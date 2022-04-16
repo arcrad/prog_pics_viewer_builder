@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useLiveQuery } from 'dexie-react-hooks';
 
+import { db, Entry } from './db';
 import './App.css';
-import Entry from './Entry';
+import EntryComponent from './Entry';
 import Viewer from './Viewer';
 import Export from './Export';
 import Settings from './Settings';
@@ -14,7 +16,27 @@ export type GlobalState = {
 };
 
 function App() {
-	let [globalState, setGlobalState] = useState<GlobalState>({ currentEntryId: 123});
+	let [globalState, setGlobalState] = useState<GlobalState>({ currentEntryId: 0 });
+
+	/*const entries = useLiveQuery(
+		() => db.entries.toArray()
+	);*/
+	
+	useEffect( () => {
+		console.log('app initialize currentEntryId');
+		async function initializeCurrentEntryId() {
+			const entries = await db.entries.toArray();
+			setGlobalState( (cs):GlobalState => {
+				console.log(JSON.stringify(cs));
+				if(entries) {
+					let ns = { currentEntryId: entries[0].id || 0 };
+					return {...cs, ...ns};
+				}
+				return cs;
+			});
+		}
+		initializeCurrentEntryId();
+	}, []);
 
   return (
     <div className="App">
@@ -24,7 +46,7 @@ function App() {
 					<Route 
 						path="entry" 
 						element={
-							<Entry 
+							<EntryComponent
 								globalState={globalState} 
 								setGlobalState={setGlobalState}
 							/>

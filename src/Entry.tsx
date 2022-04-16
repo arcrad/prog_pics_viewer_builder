@@ -1,4 +1,13 @@
-import React, { useState, useEffect, useRef, Dispatch, SetStateAction, ChangeEvent } from 'react';
+import 
+	React, 
+	{ 
+		useState, 
+		useEffect, 
+		useRef, 
+		Dispatch, 
+		SetStateAction, 
+		ChangeEvent 
+	} from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
@@ -17,7 +26,7 @@ function EntryComponent({
 	let [currentEntryWeight, setCurrentEntryWeight] = useState("123");
 	let [currentEntryDate, setCurrentEntryDate] = useState("april 5, 2022");
 	
-let storeImageRef = useRef<HTMLButtonElement>(null);
+	let storeImageRef = useRef<HTMLButtonElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
   let entrySelectRef = useRef<HTMLSelectElement>(null);
 
@@ -33,7 +42,19 @@ let storeImageRef = useRef<HTMLButtonElement>(null);
 		setCurrentEntryWeight( c => currentEntry?.weight ? String(currentEntry.weight) : '');
 		setCurrentEntryDate( c => currentEntry?.date ? currentEntry.date : '');
 	}, [currentEntry]);
-	useEffect( () => {
+	
+
+	let handleEntrySelectChange = (event:ChangeEvent<HTMLSelectElement>) => {
+		//console.dir(event);
+		let newEntryId = parseInt( (event.target as HTMLSelectElement).value );
+		//console.log('value=', newEntryId);
+		setGlobalState( (cs):GlobalState => {
+			let ns = { currentEntryId: newEntryId };
+			return { ...cs, ...ns }; 
+		});
+	};
+	
+	/*useEffect( () => {
 		let handleEntrySelectChange = (event:Event) => {
 			//console.dir(event);
 			let newEntryId = parseInt( (event.target as HTMLSelectElement).value );
@@ -47,13 +68,13 @@ let storeImageRef = useRef<HTMLButtonElement>(null);
 		return (
 			() => entrySelectRef.current?.removeEventListener('change', handleEntrySelectChange)
 		);
-	}, []);
+	}, []);*/
 
 	useEffect( () => {
 		const addDbEntry = async (imageData:string) => {
 			console.log("adding db entry...");
 			try {
-				const date = (new Date()).toLocaleString();
+				const date = ((new Date()).toISOString()).substring(0, 16); //datetime needs to be more robust
 				const weight = parseFloat((Math.random()*200).toFixed(2));
 				const image = imageData;
 				const id = await db.entries.add({
@@ -139,9 +160,11 @@ let storeImageRef = useRef<HTMLButtonElement>(null);
 			&& event.target.dataset.entryKeyToModify
 		) {
 			let entryIdToModify = parseInt(event.target.dataset.entryId);
+			let entryKeyToModify = event.target.dataset.entryKeyToModify;
+			let newValue = event.target.value;
 			console.log('entryId = ', entryIdToModify);
-			console.log('entryKeyToModify = ', event.target.dataset.entryKeyToModify);
-			console.log('value = ', event.target.value);
+			console.log('entryKeyToModify = ', entryKeyToModify);
+			console.log('value = ', newValue);
 			if(event.target.dataset.entryKeyToModify === 'weight') {
 				setCurrentEntryWeight(event.target.value);
 			} else {
@@ -149,15 +172,15 @@ let storeImageRef = useRef<HTMLButtonElement>(null);
 			}
 			clearTimeout(debounceInputTimeout.current);
 			let modifyDbValueHandler = () => {
-					console.log('fire update db with new input');
+					console.log('fire update db with new input', newValue, entryIdToModify);
 					if(event.target.dataset.entryKeyToModify) {
 					db.entries.update(entryIdToModify, {
-						[event.target.dataset.entryKeyToModify]: event.target.value
+						[entryKeyToModify]: newValue
 					});
 					}
 			};
 
-			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 300);
+			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);
 		}
 	};
 
@@ -167,7 +190,7 @@ let storeImageRef = useRef<HTMLButtonElement>(null);
 			<button ref={storeImageRef} type="button" id="store_image">Store Image</button>
 			<div>
 				<h1>Entries ( id = {globalState.currentEntryId} )</h1>
-				<select ref={entrySelectRef} value={globalState.currentEntryId}>
+				<select ref={entrySelectRef} value={globalState.currentEntryId} onChange={handleEntrySelectChange}>
 				{
 					entries?.map( entry =>
 						<option value={entry.id} key={entry.id}>{entry.id}: {entry.date}</option>
@@ -177,14 +200,14 @@ let storeImageRef = useRef<HTMLButtonElement>(null);
 				<hr/>
 							<div>
 								<input 
-									type="text" 
+									type="number" 
 									value={currentEntryWeight} 
 									data-entry-id={currentEntry?.id} 
 									data-entry-key-to-modify="weight" 
 									onChange={handleEntryInputChange}
 								/> @ 
 								<input 
-									type="text" 
+									type="datetime-local" 
 									value={currentEntryDate}
 									data-entry-id={currentEntry?.id} 
 									data-entry-key-to-modify="date"
