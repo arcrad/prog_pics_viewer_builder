@@ -30,6 +30,10 @@ let storeImageRef = useRef<HTMLButtonElement>(null);
 	, [globalState]);
 
 	useEffect( () => {
+		setCurrentEntryWeight( c => currentEntry?.weight ? String(currentEntry.weight) : '');
+		setCurrentEntryDate( c => currentEntry?.date ? currentEntry.date : '');
+	}, [currentEntry]);
+	useEffect( () => {
 		let handleEntrySelectChange = (event:Event) => {
 			//console.dir(event);
 			let newEntryId = parseInt( (event.target as HTMLSelectElement).value );
