@@ -14,6 +14,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Entry } from './db';
 import { GlobalState } from './App';
 import ChangeImageModal from './ChangeImageModal';
+import MarkImageModal from './MarkImageModal';
 
 type EntryAttributes = {
 	globalState: GlobalState,
@@ -28,13 +29,14 @@ function EntryComponent({
 	let [currentEntryWeight, setCurrentEntryWeight] = useState("123");
 	let [currentEntryDate, setCurrentEntryDate] = useState("april 5, 2022");
 	let [changeImageModalIsVisible, setChangeImageModalIsVisible] = useState(false);
+	let [markImageModalIsVisible, setMarkImageModalIsVisible] = useState(false);
 
 	let addEntryRef = useRef<HTMLButtonElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
   let entrySelectRef = useRef<HTMLSelectElement>(null);
 
 	const entries = useLiveQuery(
-		() => db.entries.toArray()
+		() => db.entries.orderBy('date').reverse().toArray()
 	);
 
 	const currentEntry = useLiveQuery(
@@ -167,6 +169,7 @@ function EntryComponent({
 
 	const handleMarkEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log('handleMarkEntry');
+		setMarkImageModalIsVisible(true);
 	};
 	
 	const handleChangeImageEntry = async (event:MouseEvent<HTMLButtonElement>) => {
@@ -282,6 +285,12 @@ function EntryComponent({
 					setGlobalState={setGlobalState} 
 					isModalVisible={changeImageModalIsVisible}
 					setIsModalVisible={setChangeImageModalIsVisible}
+				/>
+				<MarkImageModal 
+					globalState={globalState} 
+					setGlobalState={setGlobalState} 
+					isModalVisible={markImageModalIsVisible}
+					setIsModalVisible={setMarkImageModalIsVisible}
 				/>
 			</div>
     </div>

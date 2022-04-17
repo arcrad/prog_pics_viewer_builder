@@ -16,7 +16,7 @@ export type GlobalState = {
 };
 
 function App() {
-	let [globalState, setGlobalState] = useState<GlobalState>({ currentEntryId: 0 });
+	let [globalState, setGlobalState] = useState<GlobalState>({ currentEntryId: -1 });
 
 	/*const entries = useLiveQuery(
 		() => db.entries.toArray()
@@ -25,7 +25,7 @@ function App() {
 	useEffect( () => {
 		console.log('app initialize currentEntryId');
 		async function initializeCurrentEntryId() {
-			const entries = await db.entries.toArray();
+			const entries = await db.entries.orderBy('date').reverse().toArray();
 			setGlobalState( (cs):GlobalState => {
 				console.log(JSON.stringify(cs));
 				if(entries) {
