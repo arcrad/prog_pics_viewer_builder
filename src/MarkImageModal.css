@@ -1,4 +1,8 @@
 
+h2 {
+	margin: 0.5rem 0;
+}
+
 .modalOverlay {
 	background: rgba(0,0,0,0.5);
 	z-index: 9000;
@@ -12,23 +16,81 @@
 }
 
 .modalVisible {
-	display: block;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: center;
+	align-items: center;
 }
 
-.controlsContainer {
+.contentContainer {
 	border: 1px solid black;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
 	background: #fff;
-	padding: 1rem;
+	padding: 0.5rem;
 	width: 70rem;
 	max-width: 85vw;
-	max-height: 85vh;
-	margin: 0 auto;
+	height: 90vh;
+	margin: 0;
+}
+
+.header {
+	flex: 0 1 auto;
+}
+
+.debugInfo {
+	font-size: 0.6rem;
 }
 
 .imageContainer {
+	flex: 1 1 auto;
 	height: 50vh;
-	width: 50rem;
-	max-width: 100%;
-	border:1px solid red;
 	box-sizing: border-box;
+	background-position: center center;
+	background-size: contain;
+	background-repeat: no-repeat;
+}
+
+.entryImage {
+	max-width: 100%;
+	max-height: 100%;
+	display: block;
+	margin: 0 auto;
+	box-sizing: border-box;
+	position: relative;
+}
+
+.hoverMarker {
+	height: 18vh;
+	width: 18vh;
+	border:1px solid red;
+	border-radius: 9vh;
+	/*height: 100vh;
+	width: 100vw;*/
+	position: fixed;
+	z-index: 9500;
+	transform: translate(-9vh, -9vh);
+	pointer-events: none;
+	display: none;
+	background-origin: border-box;
+}
+
+.clickMarker {
+	height:5px;
+	width:5px;
+	background:red;
+	z-index:9250;
+	position:fixed;
+	pointer-events:none;
+	box-sizing: border-box;
+}
+
+.hoverMarkerVisible {
+	display: block;
+}
+
+.footer {
+	flex: 0 1 auto;
 }

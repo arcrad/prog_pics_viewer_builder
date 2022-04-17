@@ -273,12 +273,12 @@ function EntryComponent({
 							</div>
 				<hr/>
 				{ 
-					entries?.map( entry => 
+					/*entries?.map( entry => 
 						<div key={entry.id} style={{border: '1px solid black', padding: '1rem', margin: '1rem'}}>
 							<p>{entry.weight} @ {entry.date}</p>
 							<img src={entry.image} style={{maxWidth: '30rem'}}/>
 							<button type="button" data-entry-id={entry.id} onClick={handleDeleteEntry}>Delete</button>
-						</div> )
+						</div> )*/
 				}
 				<ChangeImageModal 
 					globalState={globalState} 
