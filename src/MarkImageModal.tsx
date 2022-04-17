@@ -22,6 +22,26 @@ type MarkImageModalAttributes = {
 	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
 };
 
+type MarkPoint = {
+	x: number,
+	y: number,
+	fillStyle: string
+}
+
+type Marks = {
+	[key:string]: MarkPoint
+}
+
+type MarkFillStyles = {
+	[key: string]: string
+}
+
+const markFillStyles:MarkFillStyles = {
+	'A': 'red',
+	'B': 'green',
+	'C': 'blue'
+}
+
 function MarkImageModal({
 	globalState, 
 	setGlobalState,
@@ -39,19 +59,32 @@ function MarkImageModal({
 	let [offsetLeft, setOffsetLeft] = useState(0);
 	let [offsetTop, setOffsetTop] = useState(0);
 	let [isHoverMarkerVisible, setIsHoverMarkerVisible] = useState(false);
-	let [clickX, setClickX] = useState(0);
-	let [clickY, setClickY] = useState(0);
+	let [activeMark, setActiveMark] = useState("A");
+	let [marks, setMarks] = useState<Marks>({});
+	let [fullResImageData, setFullResImageData] = useState('');
+	let [resizeCanary, setResizeCanary] = useState(false);
 
 	const modalOverlayRef = useRef<HTMLDivElement>(null);
 	const imageUploadRef = useRef<HTMLInputElement>(null);
   const loadImageButtonRef = useRef<HTMLButtonElement>(null);
 	const imageCanvasRef = useRef<HTMLCanvasElement>(null);
 	const imageContainerRef = useRef<HTMLDivElement>(null);
+	const fullResImageCanvasRef = useRef<HTMLCanvasElement>(null);
 
 	const currentEntry = useLiveQuery(
 		() => db.entries.get(globalState.currentEntryId)
 	, [globalState]);
 
+	useEffect( () => {
+		function updateResizeCanary() {
+			setResizeCanary( (cs) => !cs );
+		}
+		window.addEventListener('resize', updateResizeCanary);
+		return( () => {
+			window.removeEventListener('resize', updateResizeCanary);
+		});
+
+	}, []);
 	useEffect( () => {
 		if(currentEntry && currentEntry.image) {
 			let image = new Image();
@@ -62,9 +95,62 @@ function MarkImageModal({
 	}, [currentEntry]);
 
 	useEffect( () => {
+		console.log('intialize full-res canvas');
+		if(!isModalVisible) {
+				console.log('modal is not visisble, aborting...');
+				return;
+		}
+		if(
+			fullResImageCanvasRef.current 
+			&& currentEntry 
+			&& currentEntry.image
+		) {
+			const context = fullResImageCanvasRef.current.getContext('2d');
+			const image = new Image();
+			image.src = currentEntry.image;
+			fullResImageCanvasRef.current.width = image.naturalWidth;
+			fullResImageCanvasRef.current.height = image.naturalHeight;
+			if(context) {
+				context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
+				if(currentEntry.marks) {
+					if(Object.keys(currentEntry.marks)) {
+						console.log('found marks');
+						Object.keys(currentEntry.marks).forEach( (key) => {
+							//console.log('loop mark key = ', key);
+							//console.dir(currentEntry?.marks?.[key]);
+							if(
+								currentEntry
+								&& currentEntry.marks
+								//&& currentEntry.marks[key]
+								//&& currentEntry.marks[key].style 
+								//&& currentEntry.marks[key].x
+								//&& currentEntry.marks[key].y
+							) {
+								console.log('draw mark, mark key = ', key, 'style =',currentEntry.marks[key].style);
+								context.strokeStyle = currentEntry.marks[key].style;
+								context.lineWidth = 10;
+								context.beginPath();
+								context.arc(currentEntry.marks[key].x, currentEntry.marks[key].y, 15, 0, 2*Math.PI);
+								context.stroke();
+							}
+						});
+					}
+				}
+			}
+			setFullResImageData(fullResImageCanvasRef.current?.toDataURL());
+		}
+		
+	}, [currentEntry, isModalVisible, resizeCanary]);
+
+
+	useEffect( () => {
 		//initialize canvas
 		console.log('intialize canvas, current entry id = ', currentEntry?.id);
-		console.log(`before: clientWidth = ${imageContainerRef?.current?.clientWidth}, clientHeight = ${imageContainerRef?.current?.clientHeight}`);
+		if(!isModalVisible) {
+				console.log('modal is not visisble, aborting...');
+				return;
+		}
+		//console.log(`before: clientWidth = ${imageContainerRef?.current?.clientWidth}, clientHeight = ${imageContainerRef?.current?.clientHeight}`);
 		if(
 			imageCanvasRef.current 
 			&& currentEntry 
@@ -72,13 +158,15 @@ function MarkImageModal({
 			&& imageContainerRef.current
 			&& imageContainerRef.current.clientWidth
 			&& imageContainerRef.current.clientHeight
+			&& fullResImageCanvasRef.current
 		) {
 		const context = imageCanvasRef.current.getContext('2d');
-		const image = new Image();
-		image.src = currentEntry.image;
+		//const image = new Image();
+		//image.src = currentEntry.image;
+		//image.src = fullResImageCanvasRef.current.toDataURL();
 		//setup canvas dimensions
-		console.log(`clientWidth = ${imageContainerRef.current.clientWidth}, clientHeight = ${imageContainerRef.current.clientHeight}`);
-		let imageAspectRatio = image.naturalWidth/image.naturalHeight;
+		//console.log(`clientWidth = ${imageContainerRef.current.clientWidth}, clientHeight = ${imageContainerRef.current.clientHeight}`);
+		let imageAspectRatio = fullResImageCanvasRef.current.width/fullResImageCanvasRef.current.height;
 		let scaledImageWidth = imageContainerRef.current.clientHeight*imageAspectRatio;
 		let scaledImageHeight = imageContainerRef.current.clientHeight;
 		imageCanvasRef.current.width = scaledImageWidth;
@@ -86,37 +174,10 @@ function MarkImageModal({
 		
 		if(context) {	
 		//context.clearRect(0,0,imageCanvasRef.current.width,imageCanvasRef.current.height);
-		context.drawImage(image, 0, 0, scaledImageWidth, scaledImageHeight);
+		context.drawImage(fullResImageCanvasRef.current, 0, 0, scaledImageWidth, scaledImageHeight);
 		}
 		}
-	}, [currentEntry, isModalVisible]);
-	/*
-	const loadImageHandler = async (event:MouseEvent<HTMLButtonElement>) => {
-		//console.dir(imageUploadRef.current);
-		console.log("handle load image..");
-		let selectedFile;
-		if(imageUploadRef.current && imageUploadRef.current.files) {
-			selectedFile = imageUploadRef.current.files[0];
-		}
-		const reader = new FileReader();
-		reader.onload = (event) => {
-			if(event.target && event.target.result) {
-				console.log("result=", event.target.result);
-				if(typeof event.target.result === "string") {
-					//update current entry with image data
-					db.entries.update(globalState.currentEntryId, {
-						image: event.target.result
-					});
-					setIsModalVisible(false);
-				}
-			}
-		};
-		if(selectedFile) {
-			//reader.readAsText(selectedFile);
-			reader.readAsDataURL(selectedFile);
-		}
-	};
-	*/
+	}, [currentEntry, isModalVisible, resizeCanary]);
 
 	let handleImageHover = (event:MouseEvent<HTMLCanvasElement>) => {
 		//console.dir(event);
@@ -127,8 +188,8 @@ function MarkImageModal({
 			//&& target.offsetRight 
 			&& target.offsetTop
 			//&& target.offsetBottom
-			&& target.width
-			&& target.height
+			&& target.clientWidth
+			&& target.clientHeight
 			//&& target.naturalWidth
 			//&& target.naturalHeight
 			&& event.clientX
@@ -136,10 +197,11 @@ function MarkImageModal({
 			&& currentEntry
 			&& currentEntry.image
 		)	{
+			//console.log(`target.clientWidth = ${target.clientWidth}, target.clientHeight = ${target.clientHeight}`);
 			let image = new Image();
 			image.src = currentEntry.image;
-			let widthRatio = image.naturalWidth / target.width;
-			let heightRatio = image.naturalHeight / target.height;
+			let widthRatio = image.naturalWidth / target.clientWidth;
+			let heightRatio = image.naturalHeight / target.clientHeight;
 			let xHoverCoord = event.clientX - target.offsetLeft;
 			let yHoverCoord = event.clientY - target.offsetTop;
 			setXHoverCoord(xHoverCoord);
@@ -169,11 +231,43 @@ function MarkImageModal({
 			target 
 			&& target.offsetLeft 
 			&& target.offsetTop
+			&& fullResImageCanvasRef.current
+			&& imageCanvasRef.current
+			&& currentEntry
 		)	{
-			let xClickCoord = event.clientX - target.offsetLeft;
-			let yClickCoord = event.clientY - target.offsetTop;
-			setClickX(event.clientX);
-			setClickY(event.clientY);
+			let widthRatio = fullResImageCanvasRef.current.width / imageCanvasRef.current.width;
+			let heightRatio = fullResImageCanvasRef.current.height / imageCanvasRef.current.height;
+			let xClickValue = event.clientX - target.offsetLeft;
+			let yClickValue = event.clientY - target.offsetTop;
+			let fullResXClickValue = xClickValue * widthRatio;
+			let fullResYClickValue = yClickValue * heightRatio;
+			console.log(`xClickValue = ${xClickValue}, yClickValue = ${yClickValue}`);
+			console.log(`fullResXClickValue = ${fullResXClickValue}, fullResYClickValue = ${fullResYClickValue}`);
+			/*setMarks( (cs) => {
+				let ns = { [activeMark]: {
+										x: fullResXClickValue, 
+										y: fullResYClickValue, 
+										fillStyle: markFillStyles[activeMark]
+									}}
+				return {...cs, ...ns};
+			});*/
+			/*let newMark = { [activeMark]: {
+									x: fullResXClickValue, 
+									y: fullResYClickValue, 
+									style: markFillStyles[activeMark]
+								}}*/
+			let newMarkData = { 
+									x: fullResXClickValue, 
+									y: fullResYClickValue, 
+									style: markFillStyles[activeMark]
+								}
+			const markUpdateKey = 'marks.'+activeMark;
+			//let updatedMarks = {...currentEntry.marks, ...newMark};
+			db.entries.update(globalState.currentEntryId, {
+				['marks.'+activeMark]: newMarkData
+			});
+			//console.log('marks = ');
+			//console.dir(currentEntry.marks);
 		}
 	}
 
@@ -203,7 +297,7 @@ function MarkImageModal({
 							yNaturalHoverCoord = {yNaturalHoverCoord.toFixed(2)},
 							clientX = {clientX}, clientY = {clientY},
 							offsetLeft = {offsetLeft}, offsetTop = {offsetTop},
-							clickX = {clickX}, clickY = {clickY}
+							activeMark = {activeMark}
 						</p>
 					</div>
 				</div>
@@ -217,28 +311,60 @@ function MarkImageModal({
 						onClick={handleImageClick}
 					/>
 					<div 
-						className={"hoverMarker" + (isHoverMarkerVisible ? " hoverMarkerVisible" : "")} 
+						className={"hoverMarker" + (isHoverMarkerVisible ? " hoverMarkerVisible" : "") + ( activeMark ? ' activeMark'+activeMark : '')}
 						style={{
 							left: clientX, 
 							top: clientY,
-							backgroundImage: 'url("'+currentEntry?.image+'")',
+							backgroundImage: 'url("'+fullResImageData+'")',
 							//backgroundPosition: 'right '+(xNaturalHoverCoord-offsetLeft-xHoverCoord)+'px bottom '+(yNaturalHoverCoord-offsetTop-yHoverCoord)+'px',
 							//backgroundPosition: 'left 0px top 0px'
-							backgroundPosition: 'left calc(-'+(xNaturalHoverCoord)+'px + 9vw) top calc(-'+(yNaturalHoverCoord)+'px + 9vh)',
+							backgroundPosition: 'left calc(-'+(xNaturalHoverCoord)+'px + 9vh) top calc(-'+(yNaturalHoverCoord)+'px + 9vh)',
 						}}
 					>
 					</div>
-					<div 
+					{
+					/*<div 
 						className="clickMarker" 
 						style={{
 							left: clickX, 
 							top: clickY,
 						}}
 					>
-					</div>
+					</div>*/
+					}
+					<canvas ref={fullResImageCanvasRef} style={{visibility: "hidden"}} />
+						
 				</div>
 				<div className="footer">
-					<button type="button" onClick={ () => setIsModalVisible(false) }>Close</button>
+					<button 
+						type="button"
+						className={ 'markButtonA' + (activeMark === 'A' ? ' markButtonCurrentlyActive' : '')}
+						onClick={ () => setActiveMark('A') }
+					>
+						Set Mark A
+					</button>
+					<button 
+						type="button" 
+						className={ 'markButtonB' + (activeMark === 'B' ? ' markButtonCurrentlyActive' : '')}
+						onClick={ () => setActiveMark('B') }
+					>
+						Set Mark B
+					</button>
+					<button 
+						type="button" 
+						className={ 'markButtonC' + (activeMark === 'C' ? ' markButtonCurrentlyActive' : '')}
+						onClick={ () => setActiveMark('C')}
+					>
+						Set Mark C
+					</button>
+					&nbsp; -- &nbsp; 
+					<button 
+						type="button" 
+						className="closeButton"
+						onClick={ () => setIsModalVisible(false) }
+					>
+							Close
+					</button>
 				</div>
 			</div>
     </div>
