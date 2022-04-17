@@ -45,6 +45,8 @@ function MarkImageModal({
 	const modalOverlayRef = useRef<HTMLDivElement>(null);
 	const imageUploadRef = useRef<HTMLInputElement>(null);
   const loadImageButtonRef = useRef<HTMLButtonElement>(null);
+	const imageCanvasRef = useRef<HTMLCanvasElement>(null);
+	const imageContainerRef = useRef<HTMLDivElement>(null);
 
 	const currentEntry = useLiveQuery(
 		() => db.entries.get(globalState.currentEntryId)
@@ -59,6 +61,35 @@ function MarkImageModal({
 		}
 	}, [currentEntry]);
 
+	useEffect( () => {
+		//initialize canvas
+		console.log('intialize canvas, current entry id = ', currentEntry?.id);
+		console.log(`before: clientWidth = ${imageContainerRef?.current?.clientWidth}, clientHeight = ${imageContainerRef?.current?.clientHeight}`);
+		if(
+			imageCanvasRef.current 
+			&& currentEntry 
+			&& currentEntry.image
+			&& imageContainerRef.current
+			&& imageContainerRef.current.clientWidth
+			&& imageContainerRef.current.clientHeight
+		) {
+		const context = imageCanvasRef.current.getContext('2d');
+		const image = new Image();
+		image.src = currentEntry.image;
+		//setup canvas dimensions
+		console.log(`clientWidth = ${imageContainerRef.current.clientWidth}, clientHeight = ${imageContainerRef.current.clientHeight}`);
+		let imageAspectRatio = image.naturalWidth/image.naturalHeight;
+		let scaledImageWidth = imageContainerRef.current.clientHeight*imageAspectRatio;
+		let scaledImageHeight = imageContainerRef.current.clientHeight;
+		imageCanvasRef.current.width = scaledImageWidth;
+		imageCanvasRef.current.height = scaledImageHeight;
+		
+		if(context) {	
+		//context.clearRect(0,0,imageCanvasRef.current.width,imageCanvasRef.current.height);
+		context.drawImage(image, 0, 0, scaledImageWidth, scaledImageHeight);
+		}
+		}
+	}, [currentEntry, isModalVisible]);
 	/*
 	const loadImageHandler = async (event:MouseEvent<HTMLButtonElement>) => {
 		//console.dir(imageUploadRef.current);
@@ -87,9 +118,9 @@ function MarkImageModal({
 	};
 	*/
 
-	let handleImageHover = (event:MouseEvent<HTMLImageElement>) => {
+	let handleImageHover = (event:MouseEvent<HTMLCanvasElement>) => {
 		//console.dir(event);
-		let target = event.target as HTMLImageElement;
+		let target = event.target as HTMLCanvasElement;
 		if(
 			target 
 			&& target.offsetLeft 
@@ -98,13 +129,17 @@ function MarkImageModal({
 			//&& target.offsetBottom
 			&& target.width
 			&& target.height
-			&& target.naturalWidth
-			&& target.naturalHeight
+			//&& target.naturalWidth
+			//&& target.naturalHeight
 			&& event.clientX
 			&& event.clientY
+			&& currentEntry
+			&& currentEntry.image
 		)	{
-			let widthRatio = target.naturalWidth / target.width;
-			let heightRatio = target.naturalHeight / target.height;
+			let image = new Image();
+			image.src = currentEntry.image;
+			let widthRatio = image.naturalWidth / target.width;
+			let heightRatio = image.naturalHeight / target.height;
 			let xHoverCoord = event.clientX - target.offsetLeft;
 			let yHoverCoord = event.clientY - target.offsetTop;
 			setXHoverCoord(xHoverCoord);
@@ -120,22 +155,20 @@ function MarkImageModal({
 		}
 	};
 
-	let handleImageMouseOver = (event:MouseEvent<HTMLImageElement>) => {
+	let handleImageMouseOver = (event:MouseEvent<HTMLCanvasElement>) => {
 		setIsHoverMarkerVisible(true);
 	}
 	
-	let handleImageMouseOut = (event:MouseEvent<HTMLImageElement>) => {
+	let handleImageMouseOut = (event:MouseEvent<HTMLCanvasElement>) => {
 		setIsHoverMarkerVisible(false);
 	}
 
-	let handleImageClick = (event:MouseEvent<HTMLImageElement>) => {
-		let target = event.target as HTMLImageElement;
+	let handleImageClick = (event:MouseEvent<HTMLCanvasElement>) => {
+		let target = event.target as HTMLCanvasElement;
 		if(
 			target 
 			&& target.offsetLeft 
 			&& target.offsetTop
-			&& target.naturalWidth
-			&& target.naturalHeight
 		)	{
 			let xClickCoord = event.clientX - target.offsetLeft;
 			let yClickCoord = event.clientY - target.offsetTop;
@@ -174,10 +207,10 @@ function MarkImageModal({
 						</p>
 					</div>
 				</div>
-				<div className="imageContainer">
-					<img 
+				<div ref={imageContainerRef} className="imageContainer">
+					<canvas
+						ref={imageCanvasRef}
 						className="entryImage" 
-						src={currentEntry?.image} 
 						onMouseMove={handleImageHover}
 						onMouseOver={handleImageMouseOver}
 						onMouseOut={handleImageMouseOut}
