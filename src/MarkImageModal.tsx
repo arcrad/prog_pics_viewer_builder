@@ -3,6 +3,7 @@ import
 	{ 
 		useState, 
 		useEffect, 
+		useLayoutEffect,
 		useRef, 
 		Dispatch, 
 		SetStateAction, 
@@ -48,16 +49,16 @@ function MarkImageModal({
 	isModalVisible,
 	setIsModalVisible,
 } : MarkImageModalAttributes ) {
-	let [imageNaturalWidth, setImageNaturalWidth] = useState(0);
-	let [imageNaturalHeight, setImageNaturalHeight] = useState(0);
-	let [xHoverCoord, setXHoverCoord] = useState(0);
-	let [yHoverCoord, setYHoverCoord] = useState(0);
+	//let [imageNaturalWidth, setImageNaturalWidth] = useState(0);
+	//let [imageNaturalHeight, setImageNaturalHeight] = useState(0);
+	//let [xHoverCoord, setXHoverCoord] = useState(0);
+	//let [yHoverCoord, setYHoverCoord] = useState(0);
 	let [xNaturalHoverCoord, setXNaturalHoverCoord] = useState(0);
 	let [yNaturalHoverCoord, setYNaturalHoverCoord] = useState(0);
 	let [clientX, setClientX] = useState(0);
 	let [clientY, setClientY] = useState(0);
-	let [offsetLeft, setOffsetLeft] = useState(0);
-	let [offsetTop, setOffsetTop] = useState(0);
+	//let [offsetLeft, setOffsetLeft] = useState(0);
+	//let [offsetTop, setOffsetTop] = useState(0);
 	let [isHoverMarkerVisible, setIsHoverMarkerVisible] = useState(false);
 	let [activeMark, setActiveMark] = useState("A");
 	let [marks, setMarks] = useState<Marks>({});
@@ -76,6 +77,9 @@ function MarkImageModal({
 	, [globalState]);
 
 	useEffect( () => {
+		setActiveMark('A');
+	}, [isModalVisible]);
+	useEffect( () => {
 		function updateResizeCanary() {
 			setResizeCanary( (cs) => !cs );
 		}
@@ -85,19 +89,12 @@ function MarkImageModal({
 		});
 
 	}, []);
-	useEffect( () => {
-		if(currentEntry && currentEntry.image) {
-			let image = new Image();
-			image.src = currentEntry.image;
-			setImageNaturalWidth(image.naturalWidth);
-			setImageNaturalHeight(image.naturalHeight);
-		}
-	}, [currentEntry]);
 
 	useEffect( () => {
-		console.log('intialize full-res canvas');
+		//render full-res entry image
+		console.log('render full-res canvas');
 		if(!isModalVisible) {
-				console.log('modal is not visisble, aborting...');
+				console.log('modal is not visible, aborting render...');
 				return;
 		}
 		if(
@@ -121,16 +118,28 @@ function MarkImageModal({
 							if(
 								currentEntry
 								&& currentEntry.marks
+								&& fullResImageCanvasRef.current
 								//&& currentEntry.marks[key]
 								//&& currentEntry.marks[key].style 
 								//&& currentEntry.marks[key].x
 								//&& currentEntry.marks[key].y
 							) {
-								console.log('draw mark, mark key = ', key, 'style =',currentEntry.marks[key].style);
+								console.log(
+									'draw mark, mark key = ', key, 
+									'style =',currentEntry.marks[key].style,
+									'x = ', currentEntry.marks[key].x, 
+									'y = ', currentEntry.marks[key].y
+								);
 								context.strokeStyle = currentEntry.marks[key].style;
-								context.lineWidth = 10;
+								context.lineWidth = fullResImageCanvasRef.current.width * 0.005;
 								context.beginPath();
-								context.arc(currentEntry.marks[key].x, currentEntry.marks[key].y, 15, 0, 2*Math.PI);
+								context.arc(
+									currentEntry.marks[key].x, 
+									currentEntry.marks[key].y, 
+									fullResImageCanvasRef.current.width * 0.01, 
+									0, 
+									2*Math.PI
+								);
 								context.stroke();
 							}
 						});
@@ -144,10 +153,10 @@ function MarkImageModal({
 
 
 	useEffect( () => {
-		//initialize canvas
-		console.log('intialize canvas, current entry id = ', currentEntry?.id);
+		//render scaled canvas
+		console.log('render scaled canvas, current entry id = ', currentEntry?.id);
 		if(!isModalVisible) {
-				console.log('modal is not visisble, aborting...');
+				console.log('modal is not visible, aborting render...');
 				return;
 		}
 		//console.log(`before: clientWidth = ${imageContainerRef?.current?.clientWidth}, clientHeight = ${imageContainerRef?.current?.clientHeight}`);
@@ -160,22 +169,46 @@ function MarkImageModal({
 			&& imageContainerRef.current.clientHeight
 			&& fullResImageCanvasRef.current
 		) {
-		const context = imageCanvasRef.current.getContext('2d');
-		//const image = new Image();
-		//image.src = currentEntry.image;
-		//image.src = fullResImageCanvasRef.current.toDataURL();
-		//setup canvas dimensions
-		//console.log(`clientWidth = ${imageContainerRef.current.clientWidth}, clientHeight = ${imageContainerRef.current.clientHeight}`);
-		let imageAspectRatio = fullResImageCanvasRef.current.width/fullResImageCanvasRef.current.height;
-		let scaledImageWidth = imageContainerRef.current.clientHeight*imageAspectRatio;
-		let scaledImageHeight = imageContainerRef.current.clientHeight;
-		imageCanvasRef.current.width = scaledImageWidth;
-		imageCanvasRef.current.height = scaledImageHeight;
-		
-		if(context) {	
-		//context.clearRect(0,0,imageCanvasRef.current.width,imageCanvasRef.current.height);
-		context.drawImage(fullResImageCanvasRef.current, 0, 0, scaledImageWidth, scaledImageHeight);
-		}
+			const context = imageCanvasRef.current.getContext('2d');
+			console.log(`clientWidth = ${imageContainerRef.current.clientWidth}, clientHeight = ${imageContainerRef.current.clientHeight}`);
+			let imageAspectRatio = 
+				fullResImageCanvasRef.current.width/fullResImageCanvasRef.current.height;
+			let imageContainerAspectRatio = 
+				imageContainerRef.current.clientWidth/imageContainerRef.current.clientHeight;
+			//determine image scaling based on aspect ratio of image and container 
+			let scaledImageWidth = 0;
+			let scaledImageHeight = 0;
+			if(imageAspectRatio > 1) {
+				//image is wider than tall
+				console.log('image is wider than tall');
+				//so scale by width
+				scaledImageWidth = imageContainerRef.current.clientWidth;
+				scaledImageHeight = imageContainerRef.current.clientWidth/imageAspectRatio;
+				//unless container is shorter than image, then limit on height
+				if(imageContainerRef.current.clientHeight < scaledImageHeight) {
+					scaledImageWidth = imageContainerRef.current.clientHeight*imageAspectRatio;
+					scaledImageHeight = imageContainerRef.current.clientHeight;
+				}
+			} else {
+				//image is taller than wide or square
+				console.log('image is taller than wide');
+				//so scale by height
+				scaledImageWidth = imageContainerRef.current.clientHeight*imageAspectRatio;
+				scaledImageHeight = imageContainerRef.current.clientHeight;
+				//unless container is narrower than image, then limit on width
+				if(imageContainerRef.current.clientWidth < scaledImageWidth) {
+					scaledImageWidth = imageContainerRef.current.clientWidth;
+					scaledImageHeight = imageContainerRef.current.clientWidth/imageAspectRatio;
+				}
+			}
+			//update canvas dimensions
+			imageCanvasRef.current.width = scaledImageWidth;
+			imageCanvasRef.current.height = scaledImageHeight;
+			
+			if(context) {	
+				//context.clearRect(0,0,imageCanvasRef.current.width,imageCanvasRef.current.height);
+				context.drawImage(fullResImageCanvasRef.current, 0, 0, scaledImageWidth, scaledImageHeight);
+			}
 		}
 	}, [currentEntry, isModalVisible, resizeCanary]);
 
@@ -204,15 +237,15 @@ function MarkImageModal({
 			let heightRatio = image.naturalHeight / target.clientHeight;
 			let xHoverCoord = event.clientX - target.offsetLeft;
 			let yHoverCoord = event.clientY - target.offsetTop;
-			setXHoverCoord(xHoverCoord);
-			setYHoverCoord(yHoverCoord);
+			//setXHoverCoord(xHoverCoord);
+			//setYHoverCoord(yHoverCoord);
 			setXNaturalHoverCoord(xHoverCoord*widthRatio);
 			setYNaturalHoverCoord(yHoverCoord*heightRatio);
 			setClientX(event.clientX);	
 			setClientY(event.clientY);
-			setOffsetLeft(target.offsetLeft);	
+			//setOffsetLeft(target.offsetLeft);	
 			//setOffsetRight(target.offsetRight);	
-			setOffsetTop(target.offsetTop);	
+			//setOffsetTop(target.offsetTop);	
 			//setOffsetBottom(target.offsetBottom);	
 		}
 	};
@@ -235,6 +268,8 @@ function MarkImageModal({
 			&& imageCanvasRef.current
 			&& currentEntry
 		)	{
+			console.log(`full width = ${fullResImageCanvasRef.current.width} / scale width = ${imageCanvasRef.current.width}`);
+			console.log(`full height = ${fullResImageCanvasRef.current.height} / scale height = ${imageCanvasRef.current.height}`);
 			let widthRatio = fullResImageCanvasRef.current.width / imageCanvasRef.current.width;
 			let heightRatio = fullResImageCanvasRef.current.height / imageCanvasRef.current.height;
 			let xClickValue = event.clientX - target.offsetLeft;
@@ -287,19 +322,18 @@ function MarkImageModal({
     <div ref={modalOverlayRef} className="modalOverlay">
 			<div className="contentContainer">
 				<div className="header">
-					<h2>Mark Image</h2>
+					<h2>Mark Image</h2>	
+					{/*
 					<div className="debugInfo">
 						<p>
 							Updating entry with id = { globalState.currentEntryId }, 
-							imageNatWidth = {imageNaturalWidth}, imageNatHeight = {imageNaturalHeight}, 
-							xHoverCoord = {xHoverCoord}, yHoverCoord = {yHoverCoord}, 
 							xNaturalHoverCoord = {xNaturalHoverCoord.toFixed(2)}, 
 							yNaturalHoverCoord = {yNaturalHoverCoord.toFixed(2)},
 							clientX = {clientX}, clientY = {clientY},
-							offsetLeft = {offsetLeft}, offsetTop = {offsetTop},
 							activeMark = {activeMark}
 						</p>
 					</div>
+					*/}
 				</div>
 				<div ref={imageContainerRef} className="imageContainer">
 					<canvas
