@@ -169,7 +169,22 @@ function EntryComponent({
 
 	const handleMarkEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log('handleMarkEntry');
-		setMarkImageModalIsVisible(true);
+		if(
+			event.target
+			&& event.target instanceof HTMLButtonElement
+			&& event.target.dataset.entryId
+		) {
+			setGlobalState( (cs):GlobalState =>{
+				let eventTargetElement = event.target as HTMLButtonElement;
+				if(eventTargetElement && eventTargetElement.dataset.entryId) {
+					let newCurrentEntryId = parseInt(eventTargetElement.dataset.entryId);
+					let ns = { currentEntryId: newCurrentEntryId };
+					return { ...cs, ...ns};
+				}
+				return cs;
+			});
+			setMarkImageModalIsVisible(true);
+		}
 	};
 	
 	const handleChangeImageEntry = async (event:MouseEvent<HTMLButtonElement>) => {
@@ -216,7 +231,7 @@ function EntryComponent({
 	return (
     <div>
 			<div>
-				<h1>Entries ( id = {globalState.currentEntryId} )</h1>
+				<h2>Entries ( id = {globalState.currentEntryId} )</h2>
 				<select ref={entrySelectRef} value={globalState.currentEntryId} onChange={handleEntrySelectChange}>
 				{
 					entries?.map( entry =>
@@ -227,13 +242,14 @@ function EntryComponent({
 				<button ref={addEntryRef} type="button" onClick={handleAddEntry}>Add Entry</button>
 				<hr/>
 							<div>
+								Weight: 
 								<input 
 									type="number" 
 									value={currentEntryWeight} 
 									data-entry-id={currentEntry?.id} 
 									data-entry-key-to-modify="weight" 
 									onChange={handleEntryInputChange}
-								/> @ 
+								/> on&nbsp;
 								<input 
 									type="datetime-local" 
 									value={currentEntryDate}
@@ -272,6 +288,39 @@ function EntryComponent({
 								</button>
 							</div>
 				<hr/>
+				<ol>
+				{
+					entries?.map( entry =>
+						<li key={entry.id}>
+							<img src={entry.image} style={{maxWidth: "6rem"}} />
+							({entry.id}) Weight: {entry.weight} @ {entry.date}
+							<div>
+								<button 
+									type="button" 
+									data-entry-id={entry.id} 
+									onClick={handleMarkEntry}
+								>
+									Mark
+								</button>
+								<button 
+									type="button" 
+									data-entry-id={entry.id} 
+									onClick={handleChangeImageEntry}
+								>
+									Change Image
+								</button>
+								<button 
+									type="button" 
+									data-entry-id={entry.id} 
+									onClick={handleDeleteEntry}
+								>
+									Delete
+								</button>
+							</div>
+						</li>
+					)
+				}
+				</ol>
 				{ 
 					/*entries?.map( entry => 
 						<div key={entry.id} style={{border: '1px solid black', padding: '1rem', margin: '1rem'}}>

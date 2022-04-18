@@ -15,6 +15,7 @@ export type Entry = {
 	weight?: number;
 	notes?: string;
 	image?: string;
+	alignedImage?: string;
 	marks?: MarkCollection;
 }
 
@@ -23,8 +24,8 @@ export class TypedDexie extends Dexie {
 
 	constructor() {
 		super('db');
-		this.version(3).stores({
-			entries: '++id, date, weight, notes, image, marks'
+		this.version(4).stores({
+			entries: '++id, date, weight, notes, image, alignedImage, marks'
 		});
 	}
 }

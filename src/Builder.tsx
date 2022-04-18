@@ -18,6 +18,7 @@ function Builder() {
 				padding: "1rem"
 			}}>
 				<Link to="/entry">Entry</Link>
+				<Link to="/adjust">Adjust</Link>
 				<Link to="/viewer">Viewer</Link>
 				<Link to="/export">Export</Link>
 				<Link to="/settings">Settings</Link>

@@ -64,6 +64,7 @@ function MarkImageModal({
 	let [marks, setMarks] = useState<Marks>({});
 	let [fullResImageData, setFullResImageData] = useState('');
 	let [resizeCanary, setResizeCanary] = useState(false);
+	let [isLoaded, setIsLoaded] = useState(false);
 
 	const modalOverlayRef = useRef<HTMLDivElement>(null);
 	const imageUploadRef = useRef<HTMLInputElement>(null);
@@ -108,6 +109,7 @@ function MarkImageModal({
 			fullResImageCanvasRef.current.width = image.naturalWidth;
 			fullResImageCanvasRef.current.height = image.naturalHeight;
 			if(context) {
+				context.clearRect(0, 0, image.naturalWidth, image.naturalHeight);
 				context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
 				if(currentEntry.marks) {
 					if(Object.keys(currentEntry.marks)) {
@@ -149,7 +151,7 @@ function MarkImageModal({
 			setFullResImageData(fullResImageCanvasRef.current?.toDataURL());
 		}
 		
-	}, [currentEntry, isModalVisible, resizeCanary]);
+	}, [currentEntry]);
 
 
 	useEffect( () => {
@@ -201,16 +203,22 @@ function MarkImageModal({
 					scaledImageHeight = imageContainerRef.current.clientWidth/imageAspectRatio;
 				}
 			}
+			//ensure image ultimately doesnt end up bigger than full-res
+			if(scaledImageWidth > fullResImageCanvasRef.current.width || scaledImageHeight > fullResImageCanvasRef.current.height) {
+				scaledImageWidth = fullResImageCanvasRef.current.width;
+				scaledImageHeight = fullResImageCanvasRef.current.height;
+			}
 			//update canvas dimensions
 			imageCanvasRef.current.width = scaledImageWidth;
 			imageCanvasRef.current.height = scaledImageHeight;
 			
 			if(context) {	
-				//context.clearRect(0,0,imageCanvasRef.current.width,imageCanvasRef.current.height);
+				context.clearRect(0, 0, imageCanvasRef.current.width, imageCanvasRef.current.height);
 				context.drawImage(fullResImageCanvasRef.current, 0, 0, scaledImageWidth, scaledImageHeight);
+				setIsLoaded(true);
 			}
 		}
-	}, [currentEntry, isModalVisible, resizeCanary]);
+	}, [currentEntry, resizeCanary]);
 
 	let handleImageHover = (event:MouseEvent<HTMLCanvasElement>) => {
 		//console.dir(event);
@@ -306,6 +314,11 @@ function MarkImageModal({
 		}
 	}
 
+	let handleCloseButton = () => {
+			setIsLoaded(false);
+			setIsModalVisible(false);
+	};
+
 	useEffect( () => {
 		if(modalOverlayRef.current) {
 			isModalVisible ? 
@@ -316,14 +329,12 @@ function MarkImageModal({
 
 	}, [isModalVisible]);
 
-	//<div className="imageContainer" style={{backgroundImage: 'url("'+currentEntry?.image+'")'}}>
-	
 	return (
     <div ref={modalOverlayRef} className="modalOverlay">
 			<div className="contentContainer">
 				<div className="header">
 					<h2>Mark Image</h2>	
-					{/*
+					{
 					<div className="debugInfo">
 						<p>
 							Updating entry with id = { globalState.currentEntryId }, 
@@ -331,19 +342,22 @@ function MarkImageModal({
 							yNaturalHoverCoord = {yNaturalHoverCoord.toFixed(2)},
 							clientX = {clientX}, clientY = {clientY},
 							activeMark = {activeMark}
+							isLoaded = { isLoaded ? 'true' : 'false' }
 						</p>
 					</div>
-					*/}
+					}
 				</div>
 				<div ref={imageContainerRef} className="imageContainer">
 					<canvas
-						ref={imageCanvasRef}
-						className="entryImage" 
-						onMouseMove={handleImageHover}
-						onMouseOver={handleImageMouseOver}
-						onMouseOut={handleImageMouseOut}
-						onClick={handleImageClick}
-					/>
+							ref={imageCanvasRef}
+							className="entryImage"
+							style={{display: (isLoaded ? 'block' : 'none')}}
+							onMouseMove={handleImageHover}
+							onMouseOver={handleImageMouseOver}
+							onMouseOut={handleImageMouseOut}
+							onClick={handleImageClick}
+						/> 
+						{ !isLoaded && <p>loading image...</p> }
 					<div 
 						className={"hoverMarker" + (isHoverMarkerVisible ? " hoverMarkerVisible" : "") + ( activeMark ? ' activeMark'+activeMark : '')}
 						style={{
@@ -395,7 +409,7 @@ function MarkImageModal({
 					<button 
 						type="button" 
 						className="closeButton"
-						onClick={ () => setIsModalVisible(false) }
+						onClick={ handleCloseButton }
 					>
 							Close
 					</button>

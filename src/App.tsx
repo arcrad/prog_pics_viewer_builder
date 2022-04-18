@@ -5,6 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Entry } from './db';
 import './App.css';
 import EntryComponent from './Entry';
+import Adjust from './Adjust';
 import Viewer from './Viewer';
 import Export from './Export';
 import Settings from './Settings';
@@ -51,6 +52,15 @@ function App() {
 								setGlobalState={setGlobalState}
 							/>
 						} 
+					/>
+					<Route 
+						path="adjust" 
+						element={
+							<Adjust
+								globalState={globalState} 
+								setGlobalState={setGlobalState}
+							/>
+						}
 					/>
 					<Route 
 						path="viewer" 
