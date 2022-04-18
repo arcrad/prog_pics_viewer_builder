@@ -30,6 +30,7 @@ function EntryComponent({
 	let [currentEntryDate, setCurrentEntryDate] = useState("april 5, 2022");
 	let [changeImageModalIsVisible, setChangeImageModalIsVisible] = useState(false);
 	let [markImageModalIsVisible, setMarkImageModalIsVisible] = useState(false);
+	let [entryIdBeingEdited, setEntryIdBeingEdited] = useState(-1);
 
 	let addEntryRef = useRef<HTMLButtonElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
@@ -167,6 +168,17 @@ function EntryComponent({
 		}
 	};
 
+	const handleEditEntry = async (event:MouseEvent<HTMLButtonElement>) => {
+		console.log('handleEditEntry');
+		if(
+			event.target
+			&& event.target instanceof HTMLButtonElement
+			&& event.target.dataset.entryId
+		) {
+			setEntryIdBeingEdited(parseInt(event.target.dataset.entryId));
+		}
+	};
+
 	const handleMarkEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log('handleMarkEntry');
 		if(
@@ -232,75 +244,55 @@ function EntryComponent({
     <div>
 			<div>
 				<h2>Entries ( id = {globalState.currentEntryId} )</h2>
-				<select ref={entrySelectRef} value={globalState.currentEntryId} onChange={handleEntrySelectChange}>
-				{
-					entries?.map( entry =>
-						<option value={entry.id} key={entry.id}>{entry.id}: {entry.date}</option>
-					)
-				}
-				</select>
 				<button ref={addEntryRef} type="button" onClick={handleAddEntry}>Add Entry</button>
-				<hr/>
-							<div>
-								Weight: 
-								<input 
-									type="number" 
-									value={currentEntryWeight} 
-									data-entry-id={currentEntry?.id} 
-									data-entry-key-to-modify="weight" 
-									onChange={handleEntryInputChange}
-								/> on&nbsp;
-								<input 
-									type="datetime-local" 
-									value={currentEntryDate}
-									data-entry-id={currentEntry?.id} 
-									data-entry-key-to-modify="date"
-									onChange={handleEntryInputChange}
-								/>
-							</div>
-							{ 
-								currentEntry?.image ? 
-									<img src={currentEntry?.image} style={{maxWidth: '30rem'}}/>
-									:
-									<p>No image loaded...</p>
-							}
-							<div>
-								<button 
-									type="button" 
-									data-entry-id={currentEntry?.id} 
-									onClick={handleMarkEntry}
-								>
-									Mark
-								</button>
-								<button 
-									type="button" 
-									data-entry-id={currentEntry?.id} 
-									onClick={handleChangeImageEntry}
-								>
-									Change Image
-								</button>
-								<button 
-									type="button" 
-									data-entry-id={currentEntry?.id} 
-									onClick={handleDeleteEntry}
-								>
-									Delete
-								</button>
-							</div>
 				<hr/>
 				<ol>
 				{
 					entries?.map( entry =>
 						<li key={entry.id}>
 							<img src={entry.image} style={{maxWidth: "6rem"}} />
-							({entry.id}) Weight: {entry.weight} @ {entry.date}
+							{ ( entryIdBeingEdited === entry.id ) ? 
+								<div>
+									Weight: 
+									<input 
+										type="number" 
+										defaultValue={entry.weight} 
+										data-entry-id={entry.id} 
+										data-entry-key-to-modify="weight" 
+										onChange={handleEntryInputChange}
+									/> on&nbsp;
+									<input 
+										type="datetime-local" 
+										defaultValue={entry.date}
+										data-entry-id={entry.id} 
+										data-entry-key-to-modify="date"
+										onChange={handleEntryInputChange}
+									/>
+									<button 
+										type="button" 
+										data-entry-id="-1" 
+										onClick={handleEditEntry}
+									>
+										Close
+									</button>
+								</div> 
+								:
+								<span>({entry.id}) Weight: {entry.weight} @ {entry.date}</span>
+							}
 							<div>
+								<button 
+									type="button" 
+									data-entry-id={entry.id} 
+									onClick={handleEditEntry}
+								>
+									Edit Data
+								</button>
 								<button 
 									type="button" 
 									data-entry-id={entry.id} 
 									onClick={handleMarkEntry}
 								>
-									Mark
+									{ 'Mark (' + ( entry.marks ? Object.keys(entry.marks).length : 0) + ')'}
 								</button>
 								<button 
 									type="button" 

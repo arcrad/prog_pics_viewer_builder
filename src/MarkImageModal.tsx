@@ -334,7 +334,7 @@ function MarkImageModal({
 			<div className="contentContainer">
 				<div className="header">
 					<h2>Mark Image</h2>	
-					{
+					{/*
 					<div className="debugInfo">
 						<p>
 							Updating entry with id = { globalState.currentEntryId }, 
@@ -345,7 +345,7 @@ function MarkImageModal({
 							isLoaded = { isLoaded ? 'true' : 'false' }
 						</p>
 					</div>
-					}
+					*/}
 				</div>
 				<div ref={imageContainerRef} className="imageContainer">
 					<canvas
