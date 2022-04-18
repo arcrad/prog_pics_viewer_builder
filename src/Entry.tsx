@@ -201,7 +201,22 @@ function EntryComponent({
 	
 	const handleChangeImageEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log('handleChangeImageEntry');
-		setChangeImageModalIsVisible(true);
+		if(
+			event.target
+			&& event.target instanceof HTMLButtonElement
+			&& event.target.dataset.entryId
+		) {
+			setGlobalState( (cs):GlobalState =>{
+				let eventTargetElement = event.target as HTMLButtonElement;
+				if(eventTargetElement && eventTargetElement.dataset.entryId) {
+					let newCurrentEntryId = parseInt(eventTargetElement.dataset.entryId);
+					let ns = { currentEntryId: newCurrentEntryId };
+					return { ...cs, ...ns};
+				}
+				return cs;
+			});
+			setChangeImageModalIsVisible(true);
+		}
 	};
 
 	let debounceInputTimeout = useRef(0);
