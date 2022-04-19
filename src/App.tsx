@@ -13,7 +13,8 @@ import ImageStorePOC from './ImageStorePOC';
 import Builder from './Builder';
 
 export type GlobalState = {
-	currentEntryId: number
+	currentEntryId: number;
+	settings?: object;
 };
 
 function App() {
@@ -71,8 +72,22 @@ function App() {
 							/>
 						}
 					/>
-					<Route path="export" element={<Export />} />
-					<Route path="settings" element={<Settings />} />
+					<Route 
+						path="export" 
+						element={
+							<Export 
+							/>
+						} 
+					/>
+					<Route 
+						path="settings" 
+						element={
+							<Settings 
+								globalState={globalState} 
+								setGlobalState={setGlobalState}
+							/>
+						} 
+					/>
 				</Route>
 			</Routes>
 		</BrowserRouter>

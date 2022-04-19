@@ -8,7 +8,8 @@ export type MarkPoint = {
 
 export type MarkCollection = {
 	[key: string]: MarkPoint;
-}
+};
+
 export type Entry = {
 	id?: number;
 	date: string;
@@ -17,15 +18,21 @@ export type Entry = {
 	image?: string;
 	alignedImage?: string;
 	marks?: MarkCollection;
-}
+};
 
+export type Setting = {
+	key?: string;
+	value: string | number;
+};
 export class TypedDexie extends Dexie {
 	entries!: Table<Entry>;
+	settings!: Table<Setting>;
 
 	constructor() {
 		super('db');
-		this.version(4).stores({
-			entries: '++id, date, weight, notes, image, alignedImage, marks'
+		this.version(16).stores({
+			entries: '++id, date, weight, notes, marks',
+			settings: 'key, value'
 		});
 	}
 }
