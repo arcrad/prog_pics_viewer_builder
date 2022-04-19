@@ -62,7 +62,7 @@ function App() {
 		updateGlobalStateSettings();
 	}, [currentSettings]);
 
-	/*useEffect( () => {
+	useEffect( () => {
 		console.log('app initialize currentEntryId');
 		async function initializeCurrentEntryId() {
 			const entries = await db.entries.orderBy('date').reverse().toArray();
@@ -76,7 +76,7 @@ function App() {
 			});
 		}
 		initializeCurrentEntryId();
-	}, []);*/
+	}, []);
 
   return (
     <div className="App">
