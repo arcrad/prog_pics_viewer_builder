@@ -133,12 +133,12 @@ function MarkImageModal({
 									'y = ', currentEntry.marks[key].y
 								);
 								context.strokeStyle = currentEntry.marks[key].style;
-								context.lineWidth = fullResImageCanvasRef.current.width * 0.005;
+								context.lineWidth = fullResImageCanvasRef.current.width * globalState.settings.markLineWidthScalePercent;
 								context.beginPath();
 								context.arc(
 									currentEntry.marks[key].x, 
 									currentEntry.marks[key].y, 
-									fullResImageCanvasRef.current.width * 0.01, 
+									fullResImageCanvasRef.current.width * globalState.settings.markRadiusScalePercent, 
 									0, 
 									2*Math.PI
 								);

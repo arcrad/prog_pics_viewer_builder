@@ -2,29 +2,67 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
-import { db, Entry } from './db';
+import { db, Entry, Setting } from './db';
 import './App.css';
 import EntryComponent from './Entry';
 import Adjust from './Adjust';
 import Viewer from './Viewer';
 import Export from './Export';
-import Settings from './Settings';
+import SettingsComponent from './Settings';
 import ImageStorePOC from './ImageStorePOC';
 import Builder from './Builder';
 
-export type GlobalState = {
-	currentEntryId: number;
-	settings?: object;
+export type Settings = {
+	//[key: string]: string | number;
+	markLineWidthScalePercent: number,
+	markRadiusScalePercent: number
 };
 
+export type GlobalState = {
+	currentEntryId: number;
+	settings: Settings;
+};
+
+const defaultSettings:Settings = {
+	markLineWidthScalePercent: 0.007,
+	markRadiusScalePercent: 0.015
+};
 function App() {
-	let [globalState, setGlobalState] = useState<GlobalState>({ currentEntryId: -1 });
+	let [globalState, setGlobalState] = useState<GlobalState>({ 
+		currentEntryId: -1,
+		settings: defaultSettings
+	});
 
 	/*const entries = useLiveQuery(
 		() => db.entries.toArray()
 	);*/
 	
+	const updateGlobalStateSettings = () => {	
+		console.log('update settings in globalState');
+		console.dir(currentSettings);
+		setGlobalState( (cs):GlobalState => {
+			if(currentSettings) {
+				const settingsObject:Settings = currentSettings.reduce( (accumulator, currentSetting) => { 
+					return { ...accumulator, ...{ [currentSetting.key as string]: currentSetting.value } }
+				}, {} as Settings );
+				console.dir(settingsObject);
+				const ns = { settings: settingsObject };
+				return { ...cs, ...ns };
+			}
+			return cs;
+		});
+	}
+	
+	let currentSettings = useLiveQuery( () => {
+		return db.settings.toArray()
+	});
+	
 	useEffect( () => {
+		console.log('app initialize settings from db');
+		updateGlobalStateSettings();
+	}, [currentSettings]);
+
+	/*useEffect( () => {
 		console.log('app initialize currentEntryId');
 		async function initializeCurrentEntryId() {
 			const entries = await db.entries.orderBy('date').reverse().toArray();
@@ -38,7 +76,7 @@ function App() {
 			});
 		}
 		initializeCurrentEntryId();
-	}, []);
+	}, []);*/
 
   return (
     <div className="App">
@@ -82,7 +120,7 @@ function App() {
 					<Route 
 						path="settings" 
 						element={
-							<Settings 
+							<SettingsComponent
 								globalState={globalState} 
 								setGlobalState={setGlobalState}
 							/>

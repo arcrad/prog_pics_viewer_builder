@@ -12,7 +12,7 @@ from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Setting } from './db';
-import { GlobalState } from './App';
+import { GlobalState, Settings } from './App';
 //import './Settings.css';
 
 type SettingsAttributes = {
@@ -20,10 +20,26 @@ type SettingsAttributes = {
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;	
 };
 
-function Settings({
+function SettingsComponent({
 	globalState,
 	setGlobalState
 }: SettingsAttributes) {
+
+	const updateGlobalStateSettings = () => {	
+		console.log('update settings in globalState');
+		console.dir(currentSettings);
+		setGlobalState( (cs):GlobalState => {
+			if(currentSettings) {
+				const settingsObject:Settings = currentSettings.reduce( (accumulator, currentSetting) => { 
+					return { ...accumulator, ...{ [currentSetting.key as string]: currentSetting.value } }
+				}, {} as Settings );
+				console.dir(settingsObject);
+				const ns = { settings: settingsObject };
+				return { ...cs, ...ns };
+			}
+			return cs;
+		});
+	}
 	
 	let currentSettings = useLiveQuery( () => {
 		return db.settings.toArray()
@@ -47,19 +63,8 @@ function Settings({
 	}, []);
 	
 	useEffect( () => {
-		console.log('update settings in globalState');
-		console.dir(currentSettings);
-		setGlobalState( (cs):GlobalState => {
-			if(currentSettings) {
-				const settingsObject = currentSettings.reduce( (accumulator, currentSetting) => { 
-					return { ...accumulator, ...{ [currentSetting.key as string]: currentSetting.value } }
-				}, {} );
-				console.dir(settingsObject);
-				const ns = { settings: currentSettings };
-				return { ...cs, ...ns };
-			}
-			return cs;
-		});
+		console.log('based on current settings change, update settings');
+		updateGlobalStateSettings();
 	}, [currentSettings]);
 	
 	let debounceInputTimeout = useRef(0);
@@ -111,4 +116,4 @@ function Settings({
   );
 }
 
-export default Settings;
+export default SettingsComponent;
