@@ -12,13 +12,18 @@ import
 from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 
-//import './Adjust.css';
+import './Adjust.css';
 import { db, Entry } from './db';
 import { GlobalState  } from './App';
 
 type AdjustAttributes = {
 	globalState: GlobalState;
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
+}
+
+type CropCornerCoordinate = {
+	x: number,
+	y: number
 }
 
 function Adjust({
@@ -29,8 +34,24 @@ function Adjust({
 	let [currentSelectValue, setCurrentSelectValue] = useState(-1);
 	let [scaleWidth, setScaleWidth] = useState('0');
 	let [scaleHeight, setScaleHeight] = useState('0');
-	
-const imageSelectRef = useRef<HTMLSelectElement>(null);
+
+	let [topLeftCornerCoordinate, setTopLeftCornerCoordinate] 
+		= useState<CropCornerCoordinate>({ x: 0, y:0});
+	let [topRightCornerCoordinate, setTopRightCornerCoordinate] 
+		= useState<CropCornerCoordinate>({ x: 0, y:0});
+	let [bottomRightCornerCoordinate, setBottomRightCornerCoordinate] 
+		= useState<CropCornerCoordinate>({ x: 0, y:0});
+	let [bottomLeftCornerCoordinate, setBottomLeftCornerCoordinate] 
+		= useState<CropCornerCoordinate>({ x: 0, y:0});
+
+	//let [activeCornerControl, setActiveCornerControl] = useState("none");
+	const activeCornerControl = useRef('none');
+
+	const topLeftCornerControl = useRef<HTMLDivElement>(null);	
+	const topRightCornerControl = useRef<HTMLDivElement>(null);	
+	const bottomRightCornerControl = useRef<HTMLDivElement>(null);	
+	const bottomLeftCornerControl = useRef<HTMLDivElement>(null);	
+	const imageSelectRef = useRef<HTMLSelectElement>(null);
 
 	const entries = useLiveQuery(
 		() => db.entries.orderBy('date').reverse().toArray()
@@ -58,6 +79,52 @@ const imageSelectRef = useRef<HTMLSelectElement>(null);
 	, [chosenEntryIdForAdjustments]);
 	
 
+	useEffect( () => {
+		let handleMouseDown = (event: any) => {
+			console.log('handleMouseDown() called');
+			//console.dir(event.target);
+			if(event.target.classList.contains('cropCornerControl')) {
+			event.preventDefault();
+				console.log('target is cropCornerControl');
+				console.log('controlId = ', event.target.dataset.controlId);
+				activeCornerControl.current = event.target.dataset.controlId;
+				/*if(event.target.dataset.controlId === 'topLeft') {
+					
+				} else if(event.target.dataset.controlId === 'topRight') {
+				} else if(event.target.dataset.controlId === 'bottomRight') {
+				} else if(event.target.dataset.controlId === 'bottomLeft') {
+				}	*/
+			}
+		}
+		let handleMouseUp = (event: any) => {
+			activeCornerControl.current = 'none';
+		}
+		let handleMouseMove = (event: any) => {
+			//console.dir(event);
+			if(activeCornerControl.current === 'topLeft') {
+				setTopLeftCornerCoordinate({x: event.pageX, y:event.pageY});
+			} else if(activeCornerControl.current === 'topRight') {
+				setTopRightCornerCoordinate({x: event.pageX, y:event.pageY});
+			} else if(activeCornerControl.current === 'bottomRight') {
+				setBottomRightCornerCoordinate({x: event.pageX, y:event.pageY});
+			} else if(activeCornerControl.current === 'bottomLeft') {
+				setBottomLeftCornerCoordinate({x: event.pageX, y:event.pageY});
+			}		
+		}
+
+		window.addEventListener('mousedown', handleMouseDown);
+		window.addEventListener('mouseup', handleMouseUp);
+		window.addEventListener('mousemove', handleMouseMove);
+		
+		return( () => {
+			window.removeEventListener('mousedown', handleMouseDown);
+			window.removeEventListener('mouseup', handleMouseUp);
+			window.removeEventListener('mousemove', handleMouseMove);
+
+		});
+				
+	}, []);
+	
 	useEffect( () => {
 		if(scaleWidthSetting) {
 			setScaleWidth(scaleWidthSetting.value as string);
@@ -171,7 +238,15 @@ const imageSelectRef = useRef<HTMLSelectElement>(null);
 		}
 	};
  
-	console.log('RENDER!');
+	const handleCornerControlMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+		console.log('handleCornerControlMouseDown() called');
+	};
+
+	const handleCornerControlMouseUp = (event: MouseEvent<HTMLDivElement>) => {
+		console.log('handleCornerControlMouseUp() called');
+	};
+	
+	//console.log('RENDER!');
  
 	return (
     <div>
@@ -204,7 +279,61 @@ const imageSelectRef = useRef<HTMLSelectElement>(null);
 				<input type="text" value={scaleHeight} data-settings-key-to-modify="scaleHeight" onChange={handleInputChange} />
 			</label>
 			<div>
-				<img src={currentEntry?.image} style={{maxWidth: '25rem'}}/>
+				<div className="cropImageContainer">
+					<img src={currentEntry?.image} style={{ maxWidth: '90vw', maxHeight: '90vh'}}/>
+					<div 
+						ref={topLeftCornerControl} 
+						data-control-id="topLeft" 
+						className="cropCornerControl"
+						onMouseDown={handleCornerControlMouseDown}
+						onMouseUp={handleCornerControlMouseUp}
+						style={{
+							left: topLeftCornerCoordinate.x,
+							top: topLeftCornerCoordinate.y,
+							background: 'red'
+						}}
+					>
+					</div>
+					<div 
+						ref={topRightCornerControl} 
+						data-control-id="topRight" 
+						className="cropCornerControl"
+						onMouseDown={handleCornerControlMouseDown}
+						onMouseUp={handleCornerControlMouseUp}
+						style={{
+							left: topRightCornerCoordinate.x,
+							top: topRightCornerCoordinate.y,
+							background: 'green'
+						}}
+					>
+					</div>
+					<div 
+						ref={bottomRightCornerControl} 
+						data-control-id="bottomRight" 
+						className="cropCornerControl"
+						onMouseDown={handleCornerControlMouseDown}
+						onMouseUp={handleCornerControlMouseUp}
+						style={{
+							left: bottomRightCornerCoordinate.x,
+							top: bottomRightCornerCoordinate.y,
+							background: 'blue'
+						}}
+					>
+					</div>
+					<div 
+						ref={bottomLeftCornerControl} 
+						data-control-id="bottomLeft" 
+						className="cropCornerControl"
+						onMouseDown={handleCornerControlMouseDown}
+						onMouseUp={handleCornerControlMouseUp}
+						style={{
+							left: bottomLeftCornerCoordinate.x,
+							top: bottomLeftCornerCoordinate.y,
+							background: 'purple'
+						}}
+					>
+					</div>
+				</div>
 				<p>{currentEntry?.id} date = {currentEntry?.date}</p>
 			</div>
 		</div>

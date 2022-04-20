@@ -1,0 +1,19 @@
+.cropImageContainer {
+	border: 1px solid orange;
+	box-sizing: border-box;
+}
+
+.cropCornerControl {
+	z-index: 9000;
+	width: 3rem;
+	height: 3rem;
+	border-radius: 1.5rem;
+	border:1px solid red;
+	background:red;
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform: translate(-1.5rem, -1.5rem);
+}
+
+
