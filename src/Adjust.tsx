@@ -27,8 +27,10 @@ function Adjust({
 }:AdjustAttributes) {
 	let [cropAdjustActive, setCropAdjustActive] = useState(false);
 	let [currentSelectValue, setCurrentSelectValue] = useState(-1);
-
-	const imageSelectRef = useRef<HTMLSelectElement>(null);
+	let [scaleWidth, setScaleWidth] = useState('0');
+	let [scaleHeight, setScaleHeight] = useState('0');
+	
+const imageSelectRef = useRef<HTMLSelectElement>(null);
 
 	const entries = useLiveQuery(
 		() => db.entries.orderBy('date').reverse().toArray()
@@ -36,6 +38,14 @@ function Adjust({
 
 	let chosenEntryIdForAdjustments = useLiveQuery( () => {
 		return db.settings.get('chosenEntryIdForAdjustments')
+	});
+	
+	let scaleWidthSetting = useLiveQuery( () => {
+		return db.settings.get('scaleWidth')
+	});
+	
+	let scaleHeightSetting = useLiveQuery( () => {
+		return db.settings.get('scaleHeight')
 	});
 
 	let currentEntry = useLiveQuery(
@@ -48,6 +58,14 @@ function Adjust({
 	, [chosenEntryIdForAdjustments]);
 	
 
+	useEffect( () => {
+		if(scaleWidthSetting) {
+			setScaleWidth(scaleWidthSetting.value as string);
+		}
+		if(scaleHeightSetting) {
+			setScaleHeight(scaleHeightSetting.value as string);
+		}
+	}, [scaleWidthSetting, scaleHeightSetting]);
 	useEffect( () => {
 		if(
 			chosenEntryIdForAdjustments
@@ -86,13 +104,71 @@ function Adjust({
 			} catch(error) {
 				console.error(`failed to add db entry. ${error}`);
 			}
+			//console.log('get entry with id = ', imageSelectRef.current.value );
+			const newEntry = await db.entries.get( parseInt(imageSelectRef.current.value) );
+			//console.log('newEntry = ');
+			//console.dir(newEntry);
+			if(newEntry && newEntry.image) {
+				let image = new Image();
+				image.src = newEntry.image;
+				//console.dir(image);
+				image.onload = async () => {
+				console.log('image width = ',image.naturalWidth, 'image height = ', image.naturalHeight);
+				try {
+					const id = await db.settings.put(
+						{ key: "scaleWidth", value: image.naturalWidth }
+					);
+					const id2 = await db.settings.put(
+						{ key: "scaleHeight", value: image.naturalHeight }
+					);
+					console.log('new id1 =', id, 'new id2 = ', id2);
+				} catch(error) {
+					console.error(`failed to add db entry. ${error}`);
+				}
+				}
+			}
+			
 		}
 	};
 		
 
-	let handleAdjustCropping = (event: MouseEvent<HTMLButtonElement>) => {
+	const handleAdjustCropping = (event: MouseEvent<HTMLButtonElement>) => {
 		console.log('handleAdjustCropping() called');
 		setCropAdjustActive( cs => !cs);
+	};
+	
+	let debounceInputTimeout = useRef(0);
+	const handleInputChange = async (event:ChangeEvent<HTMLInputElement>) => {
+		console.log('handleInputChange() called');
+		if(
+			event.target
+			&& event.target instanceof HTMLInputElement
+			&& event.target.dataset.settingsKeyToModify
+		) {
+			let settingsKeyToModify = event.target.dataset.settingsKeyToModify;
+			let newValue = event.target.value;
+			console.log('settingsKeyToModify = ', settingsKeyToModify);
+			console.log('value = ', newValue);
+			if(event.target.dataset.settingsKeyToModify === 'scaleWidth') {
+				setScaleWidth(newValue);
+			} else if(event.target.dataset.settingsKeyToModify === 'scaleHeight') {
+				setScaleHeight(newValue);
+			}
+			clearTimeout(debounceInputTimeout.current);
+			let modifyDbValueHandler = async () => {
+					console.log('fire update db with new input', newValue, settingsKeyToModify);
+						try {
+							const id = await db.settings.put(
+								{ key: settingsKeyToModify, value: parseInt(newValue) }, 
+							);
+							console.log('new id =', id);
+						} catch(error) {
+							console.error(`failed to add db entry. ${error}`);
+						}
+			};
+
+			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);
+		}
 	};
  
 	console.log('RENDER!');
@@ -122,10 +198,10 @@ function Adjust({
 				Adjust Cropping { cropAdjustActive ? 'Y' : 'N' }
 			</button>
 			<label>Width:
-				<input type="text" defaultValue="123" />
+				<input type="text" value={scaleWidth} data-settings-key-to-modify="scaleWidth" onChange={handleInputChange} />
 			</label>
 			<label>Height:
-				<input type="text" defaultValue="123" />
+				<input type="text" value={scaleHeight} data-settings-key-to-modify="scaleHeight" onChange={handleInputChange} />
 			</label>
 			<div>
 				<img src={currentEntry?.image} style={{maxWidth: '25rem'}}/>
