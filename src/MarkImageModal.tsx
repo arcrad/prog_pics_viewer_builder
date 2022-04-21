@@ -80,6 +80,7 @@ function MarkImageModal({
 	useEffect( () => {
 		setActiveMark('A');
 	}, [isModalVisible]);
+
 	useEffect( () => {
 		function updateResizeCanary() {
 			setResizeCanary( (cs) => !cs );

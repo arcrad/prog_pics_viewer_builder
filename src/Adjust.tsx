@@ -21,7 +21,7 @@ type AdjustAttributes = {
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
 }
 
-type CropCornerCoordinate = {
+type Coordinate = {
 	x: number,
 	y: number
 }
@@ -36,16 +36,40 @@ function Adjust({
 	let [scaleHeight, setScaleHeight] = useState('0');
 
 	let [topLeftCornerCoordinate, setTopLeftCornerCoordinate] 
-		= useState<CropCornerCoordinate>({ x: 0, y:0});
+		= useState<Coordinate>({ x: 0, y:0});
 	let [topRightCornerCoordinate, setTopRightCornerCoordinate] 
-		= useState<CropCornerCoordinate>({ x: 0, y:0});
+		= useState<Coordinate>({ x: 0, y:0});
 	let [bottomRightCornerCoordinate, setBottomRightCornerCoordinate] 
-		= useState<CropCornerCoordinate>({ x: 0, y:0});
+		= useState<Coordinate>({ x: 0, y:0});
 	let [bottomLeftCornerCoordinate, setBottomLeftCornerCoordinate] 
-		= useState<CropCornerCoordinate>({ x: 0, y:0});
+		= useState<Coordinate>({ x: 0, y:0});
+
+	/*let [imageTopLeftCoordinate, setImageTopLeftCoordinate]
+		= useState<Coordinate>({ x: 0, y: 0});
+	let [imageTopRightCoordinate, setImageTopRightCoordinate]
+		= useState<Coordinate>({ x: 0, y: 0});
+	let [imageBottomRightCoordinate, setImageBottomRightCoordinate]
+		= useState<Coordinate>({ x: 0, y: 0});
+	let [imageBottomLeftCoordinate, setImageBottomLeftCoordinate]
+		= useState<Coordinate>({ x: 0, y: 0});*/
+
+	
+	let imageTopLeftCoordinateRef
+		= useRef<Coordinate>({ x: 0, y: 0});
+	let imageTopRightCoordinateRef
+		= useRef<Coordinate>({ x: 0, y: 0});
+	let imageBottomRightCoordinateRef
+		= useRef<Coordinate>({ x: 0, y: 0});
+	let imageBottomLeftCoordinateRef
+		= useRef<Coordinate>({ x: 0, y: 0});
+
+	let [resizeCanary, setResizeCanary] = useState(false);
 
 	//let [activeCornerControl, setActiveCornerControl] = useState("none");
 	const activeCornerControl = useRef('none');
+
+	const currentCropImageContainerRef = useRef<HTMLImageElement>(null);
+	const currentCropImageRef = useRef<HTMLImageElement>(null);
 
 	const topLeftCornerControl = useRef<HTMLDivElement>(null);	
 	const topRightCornerControl = useRef<HTMLDivElement>(null);	
@@ -80,6 +104,68 @@ function Adjust({
 	
 
 	useEffect( () => {
+		function updateResizeCanary() {
+			setResizeCanary( (cs) => !cs );
+		}
+		window.addEventListener('resize', updateResizeCanary);
+		return( () => {
+			window.removeEventListener('resize', updateResizeCanary);
+		});
+
+	}, []);
+
+	const updateAdjustmentImageCornerCoordinates = () => {
+		if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
+			//console.log('currentCropImageContainerRef.current = ');
+			//console.dir(currentCropImageRef.current);
+			console.log(`offsetLeft = ${currentCropImageContainerRef.current.offsetLeft}, offsetTop = ${currentCropImageContainerRef.current.offsetTop}`);
+			imageTopLeftCoordinateRef.current = {
+				x: currentCropImageContainerRef.current.offsetLeft,
+				y: currentCropImageContainerRef.current.offsetTop
+			};
+			imageTopRightCoordinateRef.current = {
+				x: currentCropImageContainerRef.current.offsetLeft + currentCropImageRef.current.clientWidth,
+				y: currentCropImageContainerRef.current.offsetTop
+			};
+			imageBottomRightCoordinateRef.current = {
+				x: currentCropImageContainerRef.current.offsetLeft + currentCropImageRef.current.clientWidth,
+				y: currentCropImageContainerRef.current.offsetTop + currentCropImageRef.current.clientHeight
+			};
+			imageBottomLeftCoordinateRef.current = {
+				x: currentCropImageContainerRef.current.offsetLeft,
+				y: currentCropImageContainerRef.current.offsetTop + currentCropImageRef.current.clientHeight
+			};
+		}
+	};
+
+	const resetCropCornerCoordinates = () => {
+		updateAdjustmentImageCornerCoordinates();
+		setCropCoordinatesToImageCorners();
+	}
+
+	/*useEffect( () => {
+		
+		const updateImageCornerCoordinatesOnImageLoad = () => {
+			console.log('adjust corner coordinates onload!');
+			updateAdjustmentImageCornerCoordinates();
+		};
+		if(currentCropImageRef.current) {
+			currentCropImageRef.current.addEventListener('load', updateImageCornerCoordinatesOnImageLoad);
+		}
+		return () => {
+			if(currentCropImageRef.current) {
+				currentCropImageRef.current.removeEventListener('load', updateImageCornerCoordinatesOnImageLoad);
+			}
+		}
+	}, []);*/
+
+	useEffect( () => {
+		//handle resize
+		console.log('handle resize');
+		updateAdjustmentImageCornerCoordinates();
+	}, [resizeCanary]);
+	
+	useEffect( () => {
 		let handleMouseDown = (event: any) => {
 			console.log('handleMouseDown() called');
 			//console.dir(event.target);
@@ -99,17 +185,75 @@ function Adjust({
 		let handleMouseUp = (event: any) => {
 			activeCornerControl.current = 'none';
 		}
+
+		const getCoordinateBoundToImage = (baseCoordinate: Coordinate):Coordinate => {
+			let boundCoordinate = { x: baseCoordinate.x, y: baseCoordinate.y };
+			if(!currentCropImageRef.current){
+				return boundCoordinate;
+			}
+			if(!currentCropImageRef.current){
+				return boundCoordinate;
+			}
+			if(baseCoordinate.x < 0) {
+				boundCoordinate.x = 0;
+			}
+			if(baseCoordinate.y < 0) {
+				boundCoordinate.y = 0;
+			}
+			if(baseCoordinate.x > currentCropImageRef.current.clientWidth) {
+				boundCoordinate.x = currentCropImageRef.current.clientWidth;
+			}
+			if(baseCoordinate.y > currentCropImageRef.current.clientHeight) {
+				boundCoordinate.y = currentCropImageRef.current.clientHeight;
+			}
+			return boundCoordinate;
+		};
+/*
+		const  getBoundTopLeftCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+			let boundCoordinate = getCoordinateBoundToImage(baseCoordinate);
+			return boundCoordinate;
+		};
+
+		const  getBoundTopRightCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+			let boundCoordinate = getCoordinateBoundToImage(baseCoordinate);
+			return boundCoordinate;
+		};
+		
+		const  getBoundBottomRightCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+			let boundCoordinate = getCoordinateBoundToImage(baseCoordinate);
+			return boundCoordinate;
+		};
+		
+		const  getBoundBottomLeftCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+			let boundCoordinate = getCoordinateBoundToImage(baseCoordinate);
+			return boundCoordinate;
+		};*/
 		let handleMouseMove = (event: any) => {
 			//console.dir(event);
-			if(activeCornerControl.current === 'topLeft') {
-				setTopLeftCornerCoordinate({x: event.pageX, y:event.pageY});
-			} else if(activeCornerControl.current === 'topRight') {
-				setTopRightCornerCoordinate({x: event.pageX, y:event.pageY});
-			} else if(activeCornerControl.current === 'bottomRight') {
-				setBottomRightCornerCoordinate({x: event.pageX, y:event.pageY});
-			} else if(activeCornerControl.current === 'bottomLeft') {
-				setBottomLeftCornerCoordinate({x: event.pageX, y:event.pageY});
-			}		
+			if(currentCropImageContainerRef.current) {
+				const newCoordinate = {
+						x: event.pageX - currentCropImageContainerRef.current.offsetLeft, 
+						y: event.pageY - currentCropImageContainerRef.current.offsetTop
+					};
+				const boundCoordinate = getCoordinateBoundToImage(newCoordinate);
+				if(activeCornerControl.current === 'topLeft') {
+					setTopLeftCornerCoordinate(boundCoordinate);
+					setTopRightCornerCoordinate( (cs) => ({
+						x: cs.x,
+						y: boundCoordinate.y
+					}));
+					setBottomLeftCornerCoordinate( (cs) => ({
+						x: boundCoordinate.x,
+						y: cs.y
+					}));
+				} else if(activeCornerControl.current === 'topRight') {
+					setTopRightCornerCoordinate(boundCoordinate);
+				} else if(activeCornerControl.current === 'bottomRight') {
+					setBottomRightCornerCoordinate(boundCoordinate);
+				} else if(activeCornerControl.current === 'bottomLeft') {
+					setBottomLeftCornerCoordinate(boundCoordinate);
+				}		
+			}
 		}
 
 		window.addEventListener('mousedown', handleMouseDown);
@@ -157,6 +301,27 @@ function Adjust({
 		}
 	};
 
+	const setCropCoordinatesToImageCorners = () => {
+			if(currentCropImageContainerRef.current) {
+				setTopLeftCornerCoordinate({
+					x: imageTopLeftCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
+					y: imageTopLeftCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
+				});
+				setTopRightCornerCoordinate({
+					x: imageTopRightCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
+					y: imageTopRightCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
+				});
+				setBottomRightCornerCoordinate({
+					x: imageBottomRightCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
+					y: imageBottomRightCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
+				});
+				setBottomLeftCornerCoordinate({
+					x: imageBottomLeftCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
+					y: imageBottomLeftCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
+				});
+			}
+	};
+
 	let handleSelectImage = async () => {
 		console.log('handleSelectImage() called');
 		if(
@@ -192,9 +357,9 @@ function Adjust({
 				} catch(error) {
 					console.error(`failed to add db entry. ${error}`);
 				}
+				setCropCoordinatesToImageCorners();
 				}
 			}
-			
 		}
 	};
 		
@@ -279,8 +444,18 @@ function Adjust({
 				<input type="text" value={scaleHeight} data-settings-key-to-modify="scaleHeight" onChange={handleInputChange} />
 			</label>
 			<div>
-				<div className="cropImageContainer">
-					<img src={currentEntry?.image} style={{ maxWidth: '90vw', maxHeight: '90vh'}}/>
+				<div 
+					ref={currentCropImageContainerRef}
+					className="cropImageContainer"
+				>
+					<img 
+						ref={currentCropImageRef}
+						src={currentEntry?.image} 
+						onLoad={resetCropCornerCoordinates}
+						style={{ 
+							maxWidth: '90vw', 
+							maxHeight: '90vh'
+						}}/>
 					<div 
 						ref={topLeftCornerControl} 
 						data-control-id="topLeft" 
