@@ -208,35 +208,60 @@ function Adjust({
 			}
 			return boundCoordinate;
 		};
-/*
-		const  getBoundTopLeftCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
-			let boundCoordinate = getCoordinateBoundToImage(baseCoordinate);
+
+		const getBoundTopLeftCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+			let boundCoordinate = { ...baseCoordinate }
+			if(baseCoordinate.x > topRightCornerCoordinate.x) {
+				boundCoordinate.x = topRightCornerCoordinate.x
+			}
+			if(baseCoordinate.y > bottomLeftCornerCoordinate.y) {
+				boundCoordinate.y = bottomLeftCornerCoordinate.y
+			}
 			return boundCoordinate;
 		};
 
-		const  getBoundTopRightCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
-			let boundCoordinate = getCoordinateBoundToImage(baseCoordinate);
+		const getBoundTopRightCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+			let boundCoordinate = { ...baseCoordinate }
+			if(baseCoordinate.x < topLeftCornerCoordinate.x) {
+				boundCoordinate.x = topLeftCornerCoordinate.x
+			}
+			if(baseCoordinate.y > bottomRightCornerCoordinate.y) {
+				boundCoordinate.y = bottomRightCornerCoordinate.y
+			}
 			return boundCoordinate;
 		};
 		
-		const  getBoundBottomRightCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
-			let boundCoordinate = getCoordinateBoundToImage(baseCoordinate);
+		const getBoundBottomRightCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+			let boundCoordinate = { ...baseCoordinate }
+			if(baseCoordinate.x < bottomLeftCornerCoordinate.x) {
+				boundCoordinate.x = bottomLeftCornerCoordinate.x
+			}
+			if(baseCoordinate.y < topRightCornerCoordinate.y) {
+				boundCoordinate.y = topRightCornerCoordinate.y
+			}
 			return boundCoordinate;
 		};
 		
-		const  getBoundBottomLeftCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
-			let boundCoordinate = getCoordinateBoundToImage(baseCoordinate);
+		const getBoundBottomLeftCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+			let boundCoordinate = { ...baseCoordinate }
+			if(baseCoordinate.x > bottomRightCornerCoordinate.x) {
+				boundCoordinate.x = bottomRightCornerCoordinate.x
+			}
+			if(baseCoordinate.y < topLeftCornerCoordinate.y) {
+				boundCoordinate.y = topLeftCornerCoordinate.y
+			}
 			return boundCoordinate;
-		};*/
+		};
+		
 		let handleMouseMove = (event: any) => {
 			//console.dir(event);
 			if(currentCropImageContainerRef.current) {
-				const newCoordinate = {
+				const newCoordinate = getCoordinateBoundToImage({
 						x: event.pageX - currentCropImageContainerRef.current.offsetLeft, 
 						y: event.pageY - currentCropImageContainerRef.current.offsetTop
-					};
-				const boundCoordinate = getCoordinateBoundToImage(newCoordinate);
+					});
 				if(activeCornerControl.current === 'topLeft') {
+					const boundCoordinate = getBoundTopLeftCornerCoordinate(newCoordinate);
 					setTopLeftCornerCoordinate(boundCoordinate);
 					setTopRightCornerCoordinate( (cs) => ({
 						x: cs.x,
@@ -247,11 +272,38 @@ function Adjust({
 						y: cs.y
 					}));
 				} else if(activeCornerControl.current === 'topRight') {
+					const boundCoordinate = getBoundTopRightCornerCoordinate(newCoordinate);
 					setTopRightCornerCoordinate(boundCoordinate);
+					setTopLeftCornerCoordinate( (cs) => ({
+						x: cs.x,
+						y: boundCoordinate.y
+					}));
+					setBottomRightCornerCoordinate( (cs) => ({
+						x: boundCoordinate.x,
+						y: cs.y
+					}));
 				} else if(activeCornerControl.current === 'bottomRight') {
+					const boundCoordinate = getBoundBottomRightCornerCoordinate(newCoordinate);
 					setBottomRightCornerCoordinate(boundCoordinate);
+					setTopRightCornerCoordinate( (cs) => ({
+						x: boundCoordinate.x,
+						y: cs.y
+					}));
+					setBottomLeftCornerCoordinate( (cs) => ({
+						x: cs.x,
+						y: boundCoordinate.y
+					}));
 				} else if(activeCornerControl.current === 'bottomLeft') {
+					const boundCoordinate = getBoundBottomLeftCornerCoordinate(newCoordinate);
 					setBottomLeftCornerCoordinate(boundCoordinate);
+					setTopLeftCornerCoordinate( (cs) => ({
+						x: boundCoordinate.x,
+						y: cs.y
+					}));
+					setBottomRightCornerCoordinate( (cs) => ({
+						x: cs.x,
+						y: boundCoordinate.y
+					}));
 				}		
 			}
 		}
@@ -267,7 +319,7 @@ function Adjust({
 
 		});
 				
-	}, []);
+	}, [topLeftCornerCoordinate, topRightCornerCoordinate, bottomRightCornerCoordinate, bottomLeftCornerCoordinate]);
 	
 	useEffect( () => {
 		if(scaleWidthSetting) {
@@ -447,6 +499,12 @@ function Adjust({
 				<div 
 					ref={currentCropImageContainerRef}
 					className="cropImageContainer"
+					style={{
+						//background: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${currentEntry?.image})`, 
+						background: `url(${currentEntry?.image})`, 
+						backgroundSize: 'contain'
+//						background: `rgba(0,255,255,0.5)`
+					}}
 				>
 					<img 
 						ref={currentCropImageRef}
@@ -454,7 +512,8 @@ function Adjust({
 						onLoad={resetCropCornerCoordinates}
 						style={{ 
 							maxWidth: '90vw', 
-							maxHeight: '90vh'
+							maxHeight: '90vh',
+							clipPath: `inset(${topLeftCornerCoordinate.y}px ${(currentCropImageRef?.current?.clientWidth || 0) - topRightCornerCoordinate.x}px ${(currentCropImageRef?.current?.clientHeight || 0 ) - bottomRightCornerCoordinate.y}px ${bottomLeftCornerCoordinate.x}px)`
 						}}/>
 					<div 
 						ref={topLeftCornerControl} 
@@ -508,6 +567,25 @@ function Adjust({
 						}}
 					>
 					</div>
+					{/*
+					<div
+						style={{
+							background: 'rgba(0,0,0,0.2)',
+							position: 'absolute',
+							height: '100%',
+							width: '100%',
+							left: 0,
+							top: 0,
+							//clipPath: `inset(${topLeftCornerCoordinate.y}px, ${topRightCornerCoordinate.y}px, ${bottomRightCornerCoordinate.y}px, ${bottomLeftCornerCoordinate.x}px)`,
+							//left: topLeftCornerCoordinate.x,
+							//top: topLeftCornerCoordinate.y,
+							//width: topRightCornerCoordinate.x - topLeftCornerCoordinate.x,
+							//height: bottomRightCornerCoordinate.y - topRightCornerCoordinate.y,
+							zIndex: 7000
+						}}
+					>
+					</div>
+					*/}
 				</div>
 				<p>{currentEntry?.id} date = {currentEntry?.date}</p>
 			</div>
