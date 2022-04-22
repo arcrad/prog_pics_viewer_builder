@@ -93,6 +93,35 @@ function Adjust({
 		return db.settings.get('scaleHeight')
 	});
 
+	/*let topLeftCornerCropCoordinateXSetting = useLiveQuery( () => {
+		return db.settings.get('topLeftCornerCropCoordinateX')
+	});
+	let topLeftCornerCropCoordinateYSetting = useLiveQuery( () => {
+		return db.settings.get('topLeftCornerCropCoordinateY')
+	});
+
+	let topRightCornerCropCoordinateXSetting = useLiveQuery( () => {
+		return db.settings.get('topRightCornerCropCoordinateX')
+	});
+	let topRightCornerCropCoordinateYSetting = useLiveQuery( () => {
+		return db.settings.get('topRightCornerCropCoordinateY')
+	});
+
+
+	let bottomRightCornerCropCoordinateXSetting = useLiveQuery( () => {
+		return db.settings.get('bottomRightCornerCropCoordinateX')
+	});
+	let bottomRightCornerCropCoordinateYSetting = useLiveQuery( () => {
+		return db.settings.get('bottomRightCornerCropCoordinateY')
+	});
+
+	let bottomLeftCornerCropCoordinateXSetting = useLiveQuery( () => {
+		return db.settings.get('bottomLeftCornerCropCoordinateX')
+	});
+	let bottomLeftCornerCropCoordinateYSetting = useLiveQuery( () => {
+		return db.settings.get('bottomLeftCornerCropCoordinateY')
+	});*/
+
 	let currentEntry = useLiveQuery(
 		() => {
 			if(chosenEntryIdForAdjustments) {
@@ -139,8 +168,9 @@ function Adjust({
 	};
 
 	const resetCropCornerCoordinates = () => {
-		updateAdjustmentImageCornerCoordinates();
-		setCropCoordinatesToImageCorners();
+		//updateAdjustmentImageCornerCoordinates();
+		//setCropCoordinatesToImageCorners();
+		initializeCropCornerCoordinates();
 	}
 
 	/*useEffect( () => {
@@ -164,6 +194,92 @@ function Adjust({
 		console.log('handle resize');
 		updateAdjustmentImageCornerCoordinates();
 	}, [resizeCanary]);
+
+	const debounceUpdateCoordinatesInDbTimeout = useRef(0);
+
+
+//	useEffect( () => {
+		function initializeCropCornerCoordinates() {
+		if(globalState.settings.topLeftCornerCropCoordinateX
+		&& globalState.settings.topLeftCornerCropCoordinateY) {
+			setTopLeftCornerCoordinate({
+				x: globalState.settings.topLeftCornerCropCoordinateX as number,
+				y: globalState.settings.topLeftCornerCropCoordinateY as number
+			});
+		}
+		if( globalState.settings.topRightCornerCropCoordinateX
+		&& globalState.settings.topRightCornerCropCoordinateY ) {
+			setTopRightCornerCoordinate({
+				x: globalState.settings.topRightCornerCropCoordinateX as number,
+				y: globalState.settings.topRightCornerCropCoordinateY as number
+			});
+		}
+		if( globalState.settings.bottomRightCornerCropCoordinateX
+		&& globalState.settings.bottomRightCornerCropCoordinateY ) {
+			setBottomRightCornerCoordinate({
+				x: globalState.settings.bottomRightCornerCropCoordinateX as number,
+				y: globalState.settings.bottomRightCornerCropCoordinateY as number
+			});
+		}
+		if( globalState.settings.bottomLeftCornerCropCoordinateX 
+		&& globalState.settings.bottomLeftCornerCropCoordinateY) {
+			setBottomLeftCornerCoordinate({
+				x: globalState.settings.bottomLeftCornerCropCoordinateX as number,
+				y: globalState.settings.bottomLeftCornerCropCoordinateY as number
+			});
+			}
+		}
+	//	initializeCropCornerCoordinates();
+	//}, [
+		//topLeftCornerCropCoordinateXSetting, 
+		//topLeftCornerCropCoordinateYSetting,
+		//topRightCornerCropCoordinateXSetting, 
+		//topRightCornerCropCoordinateYSetting,
+		//bottomRightCornerCropCoordinateXSetting, 
+		//bottomRightCornerCropCoordinateYSetting,
+		//bottomLeftCornerCropCoordinateXSetting, 
+		//bottomLeftCornerCropCoordinateYSetting
+	//]);	
+
+	const updateCropCoordinatesInDb = () => {
+		window.clearTimeout(debounceUpdateCoordinatesInDbTimeout.current);
+		debounceUpdateCoordinatesInDbTimeout.current = window.setTimeout( async () => {
+			console.log('updating crop coordinate in DB...');
+			try {
+				let idsUpdated = [];
+				idsUpdated.push(await db.settings.put(
+					{ key: "topLeftCornerCropCoordinateX", value: topLeftCornerCoordinate.x }
+				));
+				idsUpdated.push(await db.settings.put(
+					{ key: "topLeftCornerCropCoordinateY", value: topLeftCornerCoordinate.y }
+				));
+				///
+				idsUpdated.push(await db.settings.put(
+					{ key: "topRightCornerCropCoordinateX", value: topRightCornerCoordinate.x }
+				));
+				idsUpdated.push(await db.settings.put(
+					{ key: "topRightCornerCropCoordinateY", value: topRightCornerCoordinate.y }
+				));
+				//
+				idsUpdated.push(await db.settings.put(
+					{ key: "bottomRightCornerCropCoordinateX", value: bottomRightCornerCoordinate.x }
+				));
+				idsUpdated.push(await db.settings.put(
+					{ key: "bottomRightCornerCropCoordinateY", value: bottomRightCornerCoordinate.y }
+				));
+				//
+				idsUpdated.push(await db.settings.put(
+					{ key: "bottomLeftCornerCropCoordinateX", value: bottomLeftCornerCoordinate.x }
+				));
+				idsUpdated.push(await db.settings.put(
+					{ key: "bottomLeftCornerCropCoordinateY", value: bottomLeftCornerCoordinate.y }
+				));
+				console.log(`ids updated = ${idsUpdated.join(', ')}`);
+			} catch(error) {
+				console.error(`failed to add db entry. ${error}`);
+			}
+		}, 250);
+	};
 	
 	useEffect( () => {
 		let handleMouseDown = (event: any) => {
@@ -322,6 +438,10 @@ function Adjust({
 	}, [topLeftCornerCoordinate, topRightCornerCoordinate, bottomRightCornerCoordinate, bottomLeftCornerCoordinate]);
 	
 	useEffect( () => {
+		updateCropCoordinatesInDb();
+	}, [topLeftCornerCoordinate, topRightCornerCoordinate, bottomRightCornerCoordinate, bottomLeftCornerCoordinate]);
+	
+	useEffect( () => {
 		if(scaleWidthSetting) {
 			setScaleWidth(scaleWidthSetting.value as string);
 		}
@@ -329,6 +449,7 @@ function Adjust({
 			setScaleHeight(scaleHeightSetting.value as string);
 		}
 	}, [scaleWidthSetting, scaleHeightSetting]);
+
 	useEffect( () => {
 		if(
 			chosenEntryIdForAdjustments
@@ -501,11 +622,22 @@ function Adjust({
 					className="cropImageContainer"
 					style={{
 						//background: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${currentEntry?.image})`, 
-						background: `url(${currentEntry?.image})`, 
-						backgroundSize: 'contain'
+	//					background: `url(${currentEntry?.image})`, 
+		//				backgroundSize: 'contain'
 //						background: `rgba(0,255,255,0.5)`
 					}}
 				>
+					<img 
+						src={currentEntry?.image} 
+						onLoad={resetCropCornerCoordinates}
+						style={{ 
+							maxWidth: '90vw', 
+							maxHeight: '90vh',
+							position: 'absolute',
+							opacity: 0.5,
+							left: 0,
+							top: 0
+						}}/>
 					<img 
 						ref={currentCropImageRef}
 						src={currentEntry?.image} 

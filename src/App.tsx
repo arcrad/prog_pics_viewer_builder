@@ -14,8 +14,16 @@ import Builder from './Builder';
 
 export type Settings = {
 	//[key: string]: string | number;
-	markLineWidthScalePercent: number,
-	markRadiusScalePercent: number
+	markLineWidthScalePercent: number;
+	markRadiusScalePercent: number;
+	topLeftCornerCropCoordinateX: number;
+	topLeftCornerCropCoordinateY: number;
+	topRightCornerCropCoordinateX: number; 
+	topRightCornerCropCoordinateY: number;
+	bottomRightCornerCropCoordinateX: number;
+	bottomRightCornerCropCoordinateY: number;
+	bottomLeftCornerCropCoordinateX: number;
+	bottomLeftCornerCropCoordinateY: number;
 };
 
 export type GlobalState = {
@@ -25,7 +33,15 @@ export type GlobalState = {
 
 const defaultSettings:Settings = {
 	markLineWidthScalePercent: 0.007,
-	markRadiusScalePercent: 0.015
+	markRadiusScalePercent: 0.015,
+	topLeftCornerCropCoordinateX: 0,
+	topLeftCornerCropCoordinateY: 0,
+	topRightCornerCropCoordinateX: 50,
+	topRightCornerCropCoordinateY: 0,
+	bottomRightCornerCropCoordinateX: 50,
+	bottomRightCornerCropCoordinateY: 50,
+	bottomLeftCornerCropCoordinateX: 0,
+	bottomLeftCornerCropCoordinateY: 50
 };
 function App() {
 	let [globalState, setGlobalState] = useState<GlobalState>({ 
@@ -39,13 +55,13 @@ function App() {
 	
 	const updateGlobalStateSettings = () => {	
 		console.log('update settings in globalState');
-		console.dir(currentSettings);
+		//console.dir(currentSettings);
 		setGlobalState( (cs):GlobalState => {
 			if(currentSettings) {
 				const settingsObject:Settings = currentSettings.reduce( (accumulator, currentSetting) => { 
 					return { ...accumulator, ...{ [currentSetting.key as string]: currentSetting.value } }
 				}, {} as Settings );
-				console.dir(settingsObject);
+				//console.dir(settingsObject);
 				const ns = { settings: settingsObject };
 				return { ...cs, ...ns };
 			}
