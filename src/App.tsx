@@ -44,6 +44,8 @@ const defaultSettings:Settings = {
 	bottomLeftCornerCropCoordinateY: 50
 };
 function App() {
+	
+
 	let [globalState, setGlobalState] = useState<GlobalState>({ 
 		currentEntryId: -1,
 		settings: defaultSettings
@@ -52,6 +54,7 @@ function App() {
 	/*const entries = useLiveQuery(
 		() => db.entries.toArray()
 	);*/
+	
 	
 	const updateGlobalStateSettings = () => {	
 		console.log('update settings in globalState');

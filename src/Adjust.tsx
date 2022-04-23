@@ -36,13 +36,25 @@ function Adjust({
 	let [scaleHeight, setScaleHeight] = useState('0');
 
 	let [topLeftCornerCoordinate, setTopLeftCornerCoordinate] 
-		= useState<Coordinate>({ x: 0, y:0});
+		= useState<Coordinate>({// x: 25, y: 25});
+				x: globalState.settings.topLeftCornerCropCoordinateX as number,
+				y: globalState.settings.topLeftCornerCropCoordinateY as number
+			});
 	let [topRightCornerCoordinate, setTopRightCornerCoordinate] 
-		= useState<Coordinate>({ x: 0, y:0});
+		= useState<Coordinate>({// x: 0, y:0});
+				x: globalState.settings.topRightCornerCropCoordinateX as number,
+				y: globalState.settings.topRightCornerCropCoordinateY as number
+			});
 	let [bottomRightCornerCoordinate, setBottomRightCornerCoordinate] 
-		= useState<Coordinate>({ x: 0, y:0});
+		= useState<Coordinate>({// x: 0, y:0});
+				x: globalState.settings.bottomRightCornerCropCoordinateX as number,
+				y: globalState.settings.bottomRightCornerCropCoordinateY as number
+			});
 	let [bottomLeftCornerCoordinate, setBottomLeftCornerCoordinate] 
-		= useState<Coordinate>({ x: 0, y:0});
+		= useState<Coordinate>({// x: 0, y:0});
+				x: globalState.settings.bottomLeftCornerCropCoordinateX as number,
+				y: globalState.settings.bottomLeftCornerCropCoordinateY as number
+			});
 
 	/*let [imageTopLeftCoordinate, setImageTopLeftCoordinate]
 		= useState<Coordinate>({ x: 0, y: 0});
@@ -130,7 +142,50 @@ function Adjust({
 			}
 		}
 	, [chosenEntryIdForAdjustments]);
-	
+
+
+/*////////////////////	
+	useEffect( () => {
+			Promise.all([
+				db.settings.get('topLeftCornerCropCoordinateX'),
+				db.settings.get('topLeftCornerCropCoordinateY'),
+				db.settings.get('topRightCornerCropCoordinateX'),
+				db.settings.get('topRightCornerCropCoordinateY'),
+				db.settings.get('bottomRightCornerCropCoordinateX'),
+				db.settings.get('bottomRightCornerCropCoordinateY'),
+				db.settings.get('bottomLeftCornerCropCoordinateX'),
+				db.settings.get('bottomLeftCornerCropCoordinateY')
+			]).then( (coordinates) => { 
+				console.log('got corner coords from db'); 
+				console.dir(coordinates)
+				if( coordinates[0]?.value && coordinates[1]?.value) {
+					setTopLeftCornerCoordinate({
+						x: coordinates[0].value as number,
+						y: coordinates[1].value as number
+					});
+				}
+				if( coordinates[2]?.value && coordinates[3]?.value) {
+					setTopRightCornerCoordinate({
+						x: coordinates[2].value as number,
+						y: coordinates[3].value as number
+					});
+				}
+				if( coordinates[4]?.value && coordinates[5]?.value) {
+					setBottomRightCornerCoordinate({
+						x: coordinates[4].value as number,
+						y: coordinates[5].value as number
+					});
+				}
+				if( coordinates[6]?.value && coordinates[7]?.value) {
+					setBottomLeftCornerCoordinate({
+						x: coordinates[6].value as number,
+						y: coordinates[7].value as number
+					});
+				}
+			});
+		//getAllCornerCoordinatesFromDb.then( (result) => { console.log('got corner coords from db'); console.dir(result)});
+	},[]);
+*/
 
 	useEffect( () => {
 		function updateResizeCanary() {
@@ -200,7 +255,44 @@ function Adjust({
 
 //	useEffect( () => {
 		function initializeCropCornerCoordinates() {
-		if(globalState.settings.topLeftCornerCropCoordinateX
+			Promise.all([
+				db.settings.get('topLeftCornerCropCoordinateX'),
+				db.settings.get('topLeftCornerCropCoordinateY'),
+				db.settings.get('topRightCornerCropCoordinateX'),
+				db.settings.get('topRightCornerCropCoordinateY'),
+				db.settings.get('bottomRightCornerCropCoordinateX'),
+				db.settings.get('bottomRightCornerCropCoordinateY'),
+				db.settings.get('bottomLeftCornerCropCoordinateX'),
+				db.settings.get('bottomLeftCornerCropCoordinateY')
+			]).then( (coordinates) => { 
+				console.log('got corner coords from db'); 
+				console.dir(coordinates)
+				if( coordinates[0]?.value && coordinates[1]?.value) {
+					setTopLeftCornerCoordinate({
+						x: coordinates[0].value as number,
+						y: coordinates[1].value as number
+					});
+				}
+				if( coordinates[2]?.value && coordinates[3]?.value) {
+					setTopRightCornerCoordinate({
+						x: coordinates[2].value as number,
+						y: coordinates[3].value as number
+					});
+				}
+				if( coordinates[4]?.value && coordinates[5]?.value) {
+					setBottomRightCornerCoordinate({
+						x: coordinates[4].value as number,
+						y: coordinates[5].value as number
+					});
+				}
+				if( coordinates[6]?.value && coordinates[7]?.value) {
+					setBottomLeftCornerCoordinate({
+						x: coordinates[6].value as number,
+						y: coordinates[7].value as number
+					});
+				}
+			});
+		/*if(globalState.settings.topLeftCornerCropCoordinateX
 		&& globalState.settings.topLeftCornerCropCoordinateY) {
 			setTopLeftCornerCoordinate({
 				x: globalState.settings.topLeftCornerCropCoordinateX as number,
@@ -227,7 +319,7 @@ function Adjust({
 				x: globalState.settings.bottomLeftCornerCropCoordinateX as number,
 				y: globalState.settings.bottomLeftCornerCropCoordinateY as number
 			});
-			}
+			}*/
 		}
 	//	initializeCropCornerCoordinates();
 	//}, [
@@ -387,6 +479,7 @@ function Adjust({
 						x: boundCoordinate.x,
 						y: cs.y
 					}));
+		updateCropCoordinatesInDb();
 				} else if(activeCornerControl.current === 'topRight') {
 					const boundCoordinate = getBoundTopRightCornerCoordinate(newCoordinate);
 					setTopRightCornerCoordinate(boundCoordinate);
@@ -398,6 +491,7 @@ function Adjust({
 						x: boundCoordinate.x,
 						y: cs.y
 					}));
+		updateCropCoordinatesInDb();
 				} else if(activeCornerControl.current === 'bottomRight') {
 					const boundCoordinate = getBoundBottomRightCornerCoordinate(newCoordinate);
 					setBottomRightCornerCoordinate(boundCoordinate);
@@ -409,6 +503,7 @@ function Adjust({
 						x: cs.x,
 						y: boundCoordinate.y
 					}));
+		updateCropCoordinatesInDb();
 				} else if(activeCornerControl.current === 'bottomLeft') {
 					const boundCoordinate = getBoundBottomLeftCornerCoordinate(newCoordinate);
 					setBottomLeftCornerCoordinate(boundCoordinate);
@@ -420,6 +515,7 @@ function Adjust({
 						x: cs.x,
 						y: boundCoordinate.y
 					}));
+		updateCropCoordinatesInDb();
 				}		
 			}
 		}
@@ -435,11 +531,12 @@ function Adjust({
 
 		});
 				
-	}, [topLeftCornerCoordinate, topRightCornerCoordinate, bottomRightCornerCoordinate, bottomLeftCornerCoordinate]);
+	});
+		//[topLeftCornerCoordinate, topRightCornerCoordinate, bottomRightCornerCoordinate, bottomLeftCornerCoordinate]);
 	
-	useEffect( () => {
+	/*useEffect( () => {
 		updateCropCoordinatesInDb();
-	}, [topLeftCornerCoordinate, topRightCornerCoordinate, bottomRightCornerCoordinate, bottomLeftCornerCoordinate]);
+	}, [topLeftCornerCoordinate, topRightCornerCoordinate, bottomRightCornerCoordinate, bottomLeftCornerCoordinate]);*/
 	
 	useEffect( () => {
 		if(scaleWidthSetting) {
