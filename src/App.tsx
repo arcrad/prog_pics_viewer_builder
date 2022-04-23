@@ -36,12 +36,12 @@ const defaultSettings:Settings = {
 	markRadiusScalePercent: 0.015,
 	topLeftCornerCropCoordinateX: 0,
 	topLeftCornerCropCoordinateY: 0,
-	topRightCornerCropCoordinateX: 50,
+	topRightCornerCropCoordinateX: 0,
 	topRightCornerCropCoordinateY: 0,
-	bottomRightCornerCropCoordinateX: 50,
-	bottomRightCornerCropCoordinateY: 50,
+	bottomRightCornerCropCoordinateX: 0,
+	bottomRightCornerCropCoordinateY: 0,
 	bottomLeftCornerCropCoordinateX: 0,
-	bottomLeftCornerCropCoordinateY: 50
+	bottomLeftCornerCropCoordinateY: 0
 };
 function App() {
 	

@@ -222,7 +222,7 @@ function Adjust({
 		}
 	};
 
-	const resetCropCornerCoordinates = () => {
+	const updateCropCornerCoordinates = () => {
 		//updateAdjustmentImageCornerCoordinates();
 		//setCropCoordinatesToImageCorners();
 		initializeCropCornerCoordinates();
@@ -256,13 +256,6 @@ function Adjust({
 
 //	useEffect( () => {
 		function initializeCropCornerCoordinates() {
-			let xScaleFactor = 1;
-			let yScaleFactor = 1;
-			if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
-				xScaleFactor = currentCropImageRef.current.naturalWidth / currentCropImageRef.current.clientWidth;
-				yScaleFactor = currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight;
-			}
-			console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
 			Promise.all([
 				db.settings.get('topLeftCornerCropCoordinateX'),
 				db.settings.get('topLeftCornerCropCoordinateY'),
@@ -273,31 +266,51 @@ function Adjust({
 				db.settings.get('bottomLeftCornerCropCoordinateX'),
 				db.settings.get('bottomLeftCornerCropCoordinateY')
 			]).then( (coordinates) => { 
+			let xScaleFactor = 1;
+			let yScaleFactor = 1;
+			if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
+				xScaleFactor = (currentCropImageRef.current.naturalWidth / currentCropImageRef.current.clientWidth) || 1;
+				yScaleFactor = (currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight) || 1;
+			}
+			console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
 				console.log('got corner coords from db'); 
 				console.dir(coordinates)
-				if( coordinates[0]?.value && coordinates[1]?.value) {
-					setTopLeftCornerCoordinate({
-						x: coordinates[0].value as number / xScaleFactor,
-						y: coordinates[1].value as number / yScaleFactor
-					});
+					/*
+					console.log(`top left coords updated to = x: ${coordinates[0]?.value as number / xScaleFactor}, y: ${coordinates[1]?.value as number / yScaleFactor}`);
+					console.log(`top right coords updated to = x: ${coordinates[2]?.value as number / xScaleFactor}, y: ${coordinates[3]?.value as number / yScaleFactor}`);
+					console.log(`bottom right coords updated to = x: ${coordinates[4]?.value as number / xScaleFactor}, y: ${coordinates[5]?.value as number / yScaleFactor}`);
+					console.log(`bottom left coords updated to = x: ${coordinates[6]?.value as number / xScaleFactor}, y: ${coordinates[7]?.value as number / yScaleFactor}`);*/
+				if( coordinates[0]?.value != null && coordinates[1]?.value != null) {
+					const newCoord = {
+						x: (coordinates[0].value as number / xScaleFactor) || 0,
+						y: (coordinates[1].value as number / yScaleFactor) || 0
+					};
+					console.log(`new top left coord = ${JSON.stringify(newCoord)}`);
+					setTopLeftCornerCoordinate(newCoord);
 				}
-				if( coordinates[2]?.value && coordinates[3]?.value) {
-					setTopRightCornerCoordinate({
-						x: coordinates[2].value as number / xScaleFactor,
-						y: coordinates[3].value as number / yScaleFactor
-					});
+				if( coordinates[2]?.value != null && coordinates[3]?.value != null) {
+					const newCoord ={
+						x: (coordinates[2].value as number / xScaleFactor) || 0,
+						y: (coordinates[3].value as number / yScaleFactor) || 0
+					};
+					console.log(`new top right coord = ${JSON.stringify(newCoord)}`);
+					setTopRightCornerCoordinate(newCoord);
 				}
-				if( coordinates[4]?.value && coordinates[5]?.value) {
-					setBottomRightCornerCoordinate({
-						x: coordinates[4].value as number / xScaleFactor,
-						y: coordinates[5].value as number / yScaleFactor 
-					});
+				if( coordinates[4]?.value != null && coordinates[5]?.value != null) {
+					const newCoord = {
+						x: (coordinates[4].value as number / xScaleFactor) || 0,
+						y: (coordinates[5].value as number / yScaleFactor) || 0 
+					};
+					console.log(`new bottom right coord = ${JSON.stringify(newCoord)}`);
+					setBottomRightCornerCoordinate(newCoord);
 				}
-				if( coordinates[6]?.value && coordinates[7]?.value) {
-					setBottomLeftCornerCoordinate({
-						x: coordinates[6].value as number / xScaleFactor,
-						y: coordinates[7].value as number / yScaleFactor
-					});
+				if( coordinates[6]?.value != null && coordinates[7]?.value != null) {
+					const newCoord = {
+						x: (coordinates[6].value as number / xScaleFactor) || 0,
+						y: (coordinates[7].value as number / yScaleFactor) || 0
+					};
+					console.log(`new bottom left coord = ${JSON.stringify(newCoord)}`);
+					setBottomLeftCornerCoordinate(newCoord);
 				}
 			});
 		/*if(globalState.settings.topLeftCornerCropCoordinateX
@@ -348,8 +361,8 @@ function Adjust({
 			let xScaleFactor = 1;
 			let yScaleFactor = 1;
 			if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
-				xScaleFactor = currentCropImageRef.current.naturalWidth / currentCropImageRef.current.clientWidth;
-				yScaleFactor = currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight;
+				xScaleFactor = currentCropImageRef.current.naturalWidth / currentCropImageRef.current.clientWidth || 1;
+				yScaleFactor = currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight || 1;
 			}
 			console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
 			try {
@@ -385,7 +398,7 @@ function Adjust({
 			} catch(error) {
 				console.error(`failed to add db entry. ${error}`);
 			}
-		}, 250);
+		}, 200);
 	};
 	
 	useEffect( () => {
@@ -604,6 +617,7 @@ function Adjust({
 					x: imageBottomLeftCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
 					y: imageBottomLeftCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
 				});
+				updateCropCoordinatesInDb();
 			}
 	};
 
@@ -741,7 +755,8 @@ function Adjust({
 				>
 					<img 
 						src={currentEntry?.image} 
-						onLoad={resetCropCornerCoordinates}
+						ref={currentCropImageRef}
+						onLoad={updateCropCornerCoordinates}
 						style={{ 
 							maxWidth: '90vw', 
 							maxHeight: '90vh',
@@ -751,9 +766,7 @@ function Adjust({
 							top: 0
 						}}/>
 					<img 
-						ref={currentCropImageRef}
 						src={currentEntry?.image} 
-						onLoad={resetCropCornerCoordinates}
 						style={{ 
 							maxWidth: '90vw', 
 							maxHeight: '90vh',
@@ -766,8 +779,8 @@ function Adjust({
 						onMouseDown={handleCornerControlMouseDown}
 						onMouseUp={handleCornerControlMouseUp}
 						style={{
-							left: topLeftCornerCoordinate.x,
-							top: topLeftCornerCoordinate.y,
+							left: topLeftCornerCoordinate.x || 0,
+							top: topLeftCornerCoordinate.y || 0,
 							background: 'red'
 						}}
 					>
@@ -779,8 +792,8 @@ function Adjust({
 						onMouseDown={handleCornerControlMouseDown}
 						onMouseUp={handleCornerControlMouseUp}
 						style={{
-							left: topRightCornerCoordinate.x,
-							top: topRightCornerCoordinate.y,
+							left: topRightCornerCoordinate.x || 0,
+							top: topRightCornerCoordinate.y || 0,
 							background: 'green'
 						}}
 					>
@@ -792,8 +805,8 @@ function Adjust({
 						onMouseDown={handleCornerControlMouseDown}
 						onMouseUp={handleCornerControlMouseUp}
 						style={{
-							left: bottomRightCornerCoordinate.x,
-							top: bottomRightCornerCoordinate.y,
+							left: bottomRightCornerCoordinate.x || 0,
+							top: bottomRightCornerCoordinate.y || 0,
 							background: 'blue'
 						}}
 					>
@@ -805,8 +818,8 @@ function Adjust({
 						onMouseDown={handleCornerControlMouseDown}
 						onMouseUp={handleCornerControlMouseUp}
 						style={{
-							left: bottomLeftCornerCoordinate.x,
-							top: bottomLeftCornerCoordinate.y,
+							left: bottomLeftCornerCoordinate.x || 0,
+							top: bottomLeftCornerCoordinate.y || 0,
 							background: 'purple'
 						}}
 					>

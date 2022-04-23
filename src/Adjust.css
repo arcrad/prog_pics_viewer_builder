@@ -1,9 +1,10 @@
 .cropImageContainer {
-	border: 1px solid orange;
+	/*border: 1px solid orange;*/
 	box-sizing: border-box;
 	display: inline-block;
 	margin: 0 auto;
 	position: relative;
+	overflow: visible;
 }
 
 .cropCornerControl {
