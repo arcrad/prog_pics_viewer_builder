@@ -367,6 +367,7 @@ function Adjust({
 			console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
 			try {
 				let idsUpdated = [];
+				console.log(`topLeftCornerCoordinate.x = ${topLeftCornerCoordinate.x} * ${xScaleFactor}`);
 				idsUpdated.push(await db.settings.put(
 					{ key: "topLeftCornerCropCoordinateX", value: topLeftCornerCoordinate.x * xScaleFactor }
 				));
@@ -644,18 +645,19 @@ function Adjust({
 				image.src = newEntry.image;
 				//console.dir(image);
 				image.onload = async () => {
-				console.log('image width = ',image.naturalWidth, 'image height = ', image.naturalHeight);
-				try {
-					const id = await db.settings.put(
-						{ key: "scaleWidth", value: image.naturalWidth }
-					);
-					const id2 = await db.settings.put(
-						{ key: "scaleHeight", value: image.naturalHeight }
-					);
-					console.log('new id1 =', id, 'new id2 = ', id2);
-				} catch(error) {
-					console.error(`failed to add db entry. ${error}`);
-				}
+					console.log('image width = ',image.naturalWidth, 'image height = ', image.naturalHeight);
+					try {
+						const id = await db.settings.put(
+							{ key: "scaleWidth", value: image.naturalWidth }
+						);
+						const id2 = await db.settings.put(
+							{ key: "scaleHeight", value: image.naturalHeight }
+						);
+						console.log('new id1 =', id, 'new id2 = ', id2);
+					} catch(error) {
+						console.error(`failed to add db entry. ${error}`);
+					}
+				updateAdjustmentImageCornerCoordinates();
 				setCropCoordinatesToImageCorners();
 				}
 			}
