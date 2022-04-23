@@ -248,6 +248,7 @@ function Adjust({
 		//handle resize
 		console.log('handle resize');
 		updateAdjustmentImageCornerCoordinates();
+		initializeCropCornerCoordinates();
 	}, [resizeCanary]);
 
 	const debounceUpdateCoordinatesInDbTimeout = useRef(0);
@@ -255,6 +256,13 @@ function Adjust({
 
 //	useEffect( () => {
 		function initializeCropCornerCoordinates() {
+			let xScaleFactor = 1;
+			let yScaleFactor = 1;
+			if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
+				xScaleFactor = currentCropImageRef.current.naturalWidth / currentCropImageRef.current.clientWidth;
+				yScaleFactor = currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight;
+			}
+			console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
 			Promise.all([
 				db.settings.get('topLeftCornerCropCoordinateX'),
 				db.settings.get('topLeftCornerCropCoordinateY'),
@@ -269,26 +277,26 @@ function Adjust({
 				console.dir(coordinates)
 				if( coordinates[0]?.value && coordinates[1]?.value) {
 					setTopLeftCornerCoordinate({
-						x: coordinates[0].value as number,
-						y: coordinates[1].value as number
+						x: coordinates[0].value as number / xScaleFactor,
+						y: coordinates[1].value as number / yScaleFactor
 					});
 				}
 				if( coordinates[2]?.value && coordinates[3]?.value) {
 					setTopRightCornerCoordinate({
-						x: coordinates[2].value as number,
-						y: coordinates[3].value as number
+						x: coordinates[2].value as number / xScaleFactor,
+						y: coordinates[3].value as number / yScaleFactor
 					});
 				}
 				if( coordinates[4]?.value && coordinates[5]?.value) {
 					setBottomRightCornerCoordinate({
-						x: coordinates[4].value as number,
-						y: coordinates[5].value as number
+						x: coordinates[4].value as number / xScaleFactor,
+						y: coordinates[5].value as number / yScaleFactor 
 					});
 				}
 				if( coordinates[6]?.value && coordinates[7]?.value) {
 					setBottomLeftCornerCoordinate({
-						x: coordinates[6].value as number,
-						y: coordinates[7].value as number
+						x: coordinates[6].value as number / xScaleFactor,
+						y: coordinates[7].value as number / yScaleFactor
 					});
 				}
 			});
@@ -337,34 +345,41 @@ function Adjust({
 		window.clearTimeout(debounceUpdateCoordinatesInDbTimeout.current);
 		debounceUpdateCoordinatesInDbTimeout.current = window.setTimeout( async () => {
 			console.log('updating crop coordinate in DB...');
+			let xScaleFactor = 1;
+			let yScaleFactor = 1;
+			if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
+				xScaleFactor = currentCropImageRef.current.naturalWidth / currentCropImageRef.current.clientWidth;
+				yScaleFactor = currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight;
+			}
+			console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
 			try {
 				let idsUpdated = [];
 				idsUpdated.push(await db.settings.put(
-					{ key: "topLeftCornerCropCoordinateX", value: topLeftCornerCoordinate.x }
+					{ key: "topLeftCornerCropCoordinateX", value: topLeftCornerCoordinate.x * xScaleFactor }
 				));
 				idsUpdated.push(await db.settings.put(
-					{ key: "topLeftCornerCropCoordinateY", value: topLeftCornerCoordinate.y }
+					{ key: "topLeftCornerCropCoordinateY", value: topLeftCornerCoordinate.y * yScaleFactor }
 				));
 				///
 				idsUpdated.push(await db.settings.put(
-					{ key: "topRightCornerCropCoordinateX", value: topRightCornerCoordinate.x }
+					{ key: "topRightCornerCropCoordinateX", value: topRightCornerCoordinate.x * xScaleFactor }
 				));
 				idsUpdated.push(await db.settings.put(
-					{ key: "topRightCornerCropCoordinateY", value: topRightCornerCoordinate.y }
-				));
-				//
-				idsUpdated.push(await db.settings.put(
-					{ key: "bottomRightCornerCropCoordinateX", value: bottomRightCornerCoordinate.x }
-				));
-				idsUpdated.push(await db.settings.put(
-					{ key: "bottomRightCornerCropCoordinateY", value: bottomRightCornerCoordinate.y }
+					{ key: "topRightCornerCropCoordinateY", value: topRightCornerCoordinate.y * yScaleFactor }
 				));
 				//
 				idsUpdated.push(await db.settings.put(
-					{ key: "bottomLeftCornerCropCoordinateX", value: bottomLeftCornerCoordinate.x }
+					{ key: "bottomRightCornerCropCoordinateX", value: bottomRightCornerCoordinate.x * xScaleFactor }
 				));
 				idsUpdated.push(await db.settings.put(
-					{ key: "bottomLeftCornerCropCoordinateY", value: bottomLeftCornerCoordinate.y }
+					{ key: "bottomRightCornerCropCoordinateY", value: bottomRightCornerCoordinate.y * yScaleFactor }
+				));
+				//
+				idsUpdated.push(await db.settings.put(
+					{ key: "bottomLeftCornerCropCoordinateX", value: bottomLeftCornerCoordinate.x * xScaleFactor }
+				));
+				idsUpdated.push(await db.settings.put(
+					{ key: "bottomLeftCornerCropCoordinateY", value: bottomLeftCornerCoordinate.y * yScaleFactor }
 				));
 				console.log(`ids updated = ${idsUpdated.join(', ')}`);
 			} catch(error) {
