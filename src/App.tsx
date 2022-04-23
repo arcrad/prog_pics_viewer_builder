@@ -34,14 +34,14 @@ export type GlobalState = {
 const defaultSettings:Settings = {
 	markLineWidthScalePercent: 0.007,
 	markRadiusScalePercent: 0.015,
-	topLeftCornerCropCoordinateX: 0,
-	topLeftCornerCropCoordinateY: 0,
-	topRightCornerCropCoordinateX: 0,
-	topRightCornerCropCoordinateY: 0,
-	bottomRightCornerCropCoordinateX: 0,
-	bottomRightCornerCropCoordinateY: 0,
-	bottomLeftCornerCropCoordinateX: 0,
-	bottomLeftCornerCropCoordinateY: 0
+	topLeftCornerCropCoordinateX: -1,
+	topLeftCornerCropCoordinateY: -1,
+	topRightCornerCropCoordinateX: -1,
+	topRightCornerCropCoordinateY: -1,
+	bottomRightCornerCropCoordinateX: -1,
+	bottomRightCornerCropCoordinateY: -1,
+	bottomLeftCornerCropCoordinateX: -1,
+	bottomLeftCornerCropCoordinateY: -1
 };
 function App() {
 	

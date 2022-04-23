@@ -34,6 +34,10 @@ function Adjust({
 	let [currentSelectValue, setCurrentSelectValue] = useState(-1);
 	let [scaleWidth, setScaleWidth] = useState('0');
 	let [scaleHeight, setScaleHeight] = useState('0');
+	let [resizeCanary, setResizeCanary] = useState(false);
+	let [cropCoordsUpdatedCanary, setCropCoordsUpdatedCanary] = useState(false);
+	let [cropCornerCoordinatesInitialized, setCropCornerCoordinatesInitialized] = useState(false);
+	let [originalCoordinatesFromDb, setOriginalCoordinatesFromDb] = useState<any[]>([]);
 
 	let [topLeftCornerCoordinate, setTopLeftCornerCoordinate] 
 		= useState<Coordinate>({// x: 25, y: 25});
@@ -75,7 +79,6 @@ function Adjust({
 	let imageBottomLeftCoordinateRef
 		= useRef<Coordinate>({ x: 0, y: 0});
 
-	let [resizeCanary, setResizeCanary] = useState(false);
 
 	//let [activeCornerControl, setActiveCornerControl] = useState("none");
 	const activeCornerControl = useRef('none');
@@ -244,11 +247,15 @@ function Adjust({
 		}
 	}, []);*/
 
+	const resizeDebounceTimeoutId = useRef(0);
 	useEffect( () => {
 		//handle resize
-		console.log('handle resize');
-		updateAdjustmentImageCornerCoordinates();
-		initializeCropCornerCoordinates();
+		clearTimeout(resizeDebounceTimeoutId.current);
+		resizeDebounceTimeoutId.current = window.setTimeout( () => {
+			console.log('handle resize');
+			updateAdjustmentImageCornerCoordinates();
+			initializeCropCornerCoordinates();
+		}, 250);
 	}, [resizeCanary]);
 
 	const debounceUpdateCoordinatesInDbTimeout = useRef(0);
@@ -256,6 +263,15 @@ function Adjust({
 
 //	useEffect( () => {
 		function initializeCropCornerCoordinates() {
+			console.log('initializeCropCornerCoordinates() called');
+		/*	if(
+				topLeftCornerCoordinate.x < 0 || topLeftCornerCoordinate.y < 0
+				|| topRightCornerCoordinate.x < 0 || topRightCornerCoordinate.y < 0
+				|| bottomRightCornerCoordinate.x < 0 || bottomRightCornerCoordinate.y < 0
+				|| bottomLeftCornerCoordinate.x < 0 || bottomLeftCornerCoordinate.y < 0
+			) {*/
+			//if(!cropCornerCoordinatesInitialized) {
+				//console.log('need to fetch coordinates from db');
 			Promise.all([
 				db.settings.get('topLeftCornerCropCoordinateX'),
 				db.settings.get('topLeftCornerCropCoordinateY'),
@@ -266,6 +282,9 @@ function Adjust({
 				db.settings.get('bottomLeftCornerCropCoordinateX'),
 				db.settings.get('bottomLeftCornerCropCoordinateY')
 			]).then( (coordinates) => { 
+				console.log('got corner coords from db'); 
+				console.dir(coordinates);
+			//	setOriginalCoordinatesFromDb(coordinates);
 			let xScaleFactor = 1;
 			let yScaleFactor = 1;
 			if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
@@ -273,8 +292,6 @@ function Adjust({
 				yScaleFactor = (currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight) || 1;
 			}
 			console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
-				console.log('got corner coords from db'); 
-				console.dir(coordinates)
 					/*
 					console.log(`top left coords updated to = x: ${coordinates[0]?.value as number / xScaleFactor}, y: ${coordinates[1]?.value as number / yScaleFactor}`);
 					console.log(`top right coords updated to = x: ${coordinates[2]?.value as number / xScaleFactor}, y: ${coordinates[3]?.value as number / yScaleFactor}`);
@@ -312,7 +329,47 @@ function Adjust({
 					console.log(`new bottom left coord = ${JSON.stringify(newCoord)}`);
 					setBottomLeftCornerCoordinate(newCoord);
 				}
+				setCropCornerCoordinatesInitialized(true);
 			});
+	/*	} else {
+			//console.log('coordinates have actual values, re-use them instead of fetching from db');
+			console.log('coordinates already intialized, re-use them instead of fetching from db');
+				let coordinates = originalCoordinatesFromDb;
+				if( coordinates[0]?.value != null && coordinates[1]?.value != null) {
+					const newCoord = {
+						x: (coordinates[0].value as number / xScaleFactor) || 0,
+						y: (coordinates[1].value as number / yScaleFactor) || 0
+					};
+					console.log(`new top left coord = ${JSON.stringify(newCoord)}`);
+					setTopLeftCornerCoordinate(newCoord);
+				}
+				if( coordinates[2]?.value != null && coordinates[3]?.value != null) {
+					const newCoord ={
+						x: (coordinates[2].value as number / xScaleFactor) || 0,
+						y: (coordinates[3].value as number / yScaleFactor) || 0
+					};
+					console.log(`new top right coord = ${JSON.stringify(newCoord)}`);
+					setTopRightCornerCoordinate(newCoord);
+				}
+				if( coordinates[4]?.value != null && coordinates[5]?.value != null) {
+					const newCoord = {
+						x: (coordinates[4].value as number / xScaleFactor) || 0,
+						y: (coordinates[5].value as number / yScaleFactor) || 0 
+					};
+					console.log(`new bottom right coord = ${JSON.stringify(newCoord)}`);
+					setBottomRightCornerCoordinate(newCoord);
+				}
+				if( coordinates[6]?.value != null && coordinates[7]?.value != null) {
+					const newCoord = {
+						x: (coordinates[6].value as number / xScaleFactor) || 0,
+						y: (coordinates[7].value as number / yScaleFactor) || 0
+					};
+					console.log(`new bottom left coord = ${JSON.stringify(newCoord)}`);
+					setBottomLeftCornerCoordinate(newCoord);
+				}
+		}
+		setCropCornerCoordinatesInitialized(true);*/
+
 		/*if(globalState.settings.topLeftCornerCropCoordinateX
 		&& globalState.settings.topLeftCornerCropCoordinateY) {
 			setTopLeftCornerCoordinate({
@@ -353,6 +410,22 @@ function Adjust({
 		//bottomLeftCornerCropCoordinateXSetting, 
 		//bottomLeftCornerCropCoordinateYSetting
 	//]);	
+
+	useEffect( () => {
+		console.log('useEffect handler called, trying to call updateCropCoordinatesinDb()');
+		if(cropCornerCoordinatesInitialized) {
+			console.log('cropCornerCoordinates are initialized, updating db');
+			updateCropCoordinatesInDb();
+		} else {
+			console.warn('cropCornerCoordinates not intialized yet');
+		}
+	}, [
+			//cropCoordsUpdatedCanary, 
+			topLeftCornerCoordinate,
+			topRightCornerCoordinate,
+			bottomRightCornerCoordinate,
+			bottomLeftCornerCoordinate
+		])
 
 	const updateCropCoordinatesInDb = () => {
 		window.clearTimeout(debounceUpdateCoordinatesInDbTimeout.current);
@@ -508,7 +581,9 @@ function Adjust({
 						x: boundCoordinate.x,
 						y: cs.y
 					}));
-		updateCropCoordinatesInDb();
+		//updateCropCoordinatesInDb();
+		//setCropCoordsUpdatedCanary( cs => !cs );
+		//setCropCornerCoordinatesInitialized(false);
 				} else if(activeCornerControl.current === 'topRight') {
 					const boundCoordinate = getBoundTopRightCornerCoordinate(newCoordinate);
 					setTopRightCornerCoordinate(boundCoordinate);
@@ -520,7 +595,9 @@ function Adjust({
 						x: boundCoordinate.x,
 						y: cs.y
 					}));
-		updateCropCoordinatesInDb();
+		//updateCropCoordinatesInDb();
+		//setCropCoordsUpdatedCanary( cs => !cs );
+		//setCropCornerCoordinatesInitialized(false);
 				} else if(activeCornerControl.current === 'bottomRight') {
 					const boundCoordinate = getBoundBottomRightCornerCoordinate(newCoordinate);
 					setBottomRightCornerCoordinate(boundCoordinate);
@@ -532,7 +609,9 @@ function Adjust({
 						x: cs.x,
 						y: boundCoordinate.y
 					}));
-		updateCropCoordinatesInDb();
+		//updateCropCoordinatesInDb();
+		//setCropCoordsUpdatedCanary( cs => !cs );
+		//setCropCornerCoordinatesInitialized(false);
 				} else if(activeCornerControl.current === 'bottomLeft') {
 					const boundCoordinate = getBoundBottomLeftCornerCoordinate(newCoordinate);
 					setBottomLeftCornerCoordinate(boundCoordinate);
@@ -544,7 +623,9 @@ function Adjust({
 						x: cs.x,
 						y: boundCoordinate.y
 					}));
-		updateCropCoordinatesInDb();
+		//updateCropCoordinatesInDb();
+		//setCropCoordsUpdatedCanary( cs => !cs );
+		//setCropCornerCoordinatesInitialized(false);
 				}		
 			}
 		}
@@ -618,7 +699,8 @@ function Adjust({
 					x: imageBottomLeftCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
 					y: imageBottomLeftCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
 				});
-				updateCropCoordinatesInDb();
+	 //updateCropCoordinatesInDb();
+		setCropCoordsUpdatedCanary( cs => !cs );
 			}
 	};
 
