@@ -37,7 +37,9 @@ function Adjust({
 	let [resizeCanary, setResizeCanary] = useState(false);
 	let [cropCoordsUpdatedCanary, setCropCoordsUpdatedCanary] = useState(false);
 	let [cropCornerCoordinatesInitialized, setCropCornerCoordinatesInitialized] = useState(false);
-	let [originalCoordinatesFromDb, setOriginalCoordinatesFromDb] = useState<any[]>([]);
+	//let [originalCoordinatesFromDb, setOriginalCoordinatesFromDb] = useState<any[]>([]);
+	
+	 const originalCoordinatesFromDb = useRef<any[]>([]);
 
 	let [topLeftCornerCoordinate, setTopLeftCornerCoordinate] 
 		= useState<Coordinate>({// x: 25, y: 25});
@@ -92,115 +94,53 @@ function Adjust({
 	const bottomLeftCornerControl = useRef<HTMLDivElement>(null);	
 	const imageSelectRef = useRef<HTMLSelectElement>(null);
 
-	const entries = useLiveQuery(
-		() => db.entries.orderBy('date').reverse().toArray()
-	);
-
-	let chosenEntryIdForAdjustments = useLiveQuery( () => {
-		return db.settings.get('chosenEntryIdForAdjustments')
-	});
-	
-	let scaleWidthSetting = useLiveQuery( () => {
-		return db.settings.get('scaleWidth')
-	});
-	
-	let scaleHeightSetting = useLiveQuery( () => {
-		return db.settings.get('scaleHeight')
-	});
-
-	/*let topLeftCornerCropCoordinateXSetting = useLiveQuery( () => {
-		return db.settings.get('topLeftCornerCropCoordinateX')
-	});
-	let topLeftCornerCropCoordinateYSetting = useLiveQuery( () => {
-		return db.settings.get('topLeftCornerCropCoordinateY')
-	});
-
-	let topRightCornerCropCoordinateXSetting = useLiveQuery( () => {
-		return db.settings.get('topRightCornerCropCoordinateX')
-	});
-	let topRightCornerCropCoordinateYSetting = useLiveQuery( () => {
-		return db.settings.get('topRightCornerCropCoordinateY')
-	});
-
-
-	let bottomRightCornerCropCoordinateXSetting = useLiveQuery( () => {
-		return db.settings.get('bottomRightCornerCropCoordinateX')
-	});
-	let bottomRightCornerCropCoordinateYSetting = useLiveQuery( () => {
-		return db.settings.get('bottomRightCornerCropCoordinateY')
-	});
-
-	let bottomLeftCornerCropCoordinateXSetting = useLiveQuery( () => {
-		return db.settings.get('bottomLeftCornerCropCoordinateX')
-	});
-	let bottomLeftCornerCropCoordinateYSetting = useLiveQuery( () => {
-		return db.settings.get('bottomLeftCornerCropCoordinateY')
-	});*/
-
-	let currentEntry = useLiveQuery(
-		() => {
-			if(chosenEntryIdForAdjustments) {
-				console.log('setting currentEntry');
-				return db.entries.get( parseInt(chosenEntryIdForAdjustments.value as string) );
-			}
+	const updateScaledCornerCropCoordinates = () => {
+		console.log('updateScaledCornerCropCoordinates() called');
+		let xScaleFactor = 1;
+		let yScaleFactor = 1;
+		if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
+			xScaleFactor = 
+				(currentCropImageRef.current.naturalWidth / currentCropImageRef.current.clientWidth) || 1;
+			yScaleFactor = 
+				(currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight) || 1;
 		}
-	, [chosenEntryIdForAdjustments]);
-
-
-/*////////////////////	
-	useEffect( () => {
-			Promise.all([
-				db.settings.get('topLeftCornerCropCoordinateX'),
-				db.settings.get('topLeftCornerCropCoordinateY'),
-				db.settings.get('topRightCornerCropCoordinateX'),
-				db.settings.get('topRightCornerCropCoordinateY'),
-				db.settings.get('bottomRightCornerCropCoordinateX'),
-				db.settings.get('bottomRightCornerCropCoordinateY'),
-				db.settings.get('bottomLeftCornerCropCoordinateX'),
-				db.settings.get('bottomLeftCornerCropCoordinateY')
-			]).then( (coordinates) => { 
-				console.log('got corner coords from db'); 
-				console.dir(coordinates)
-				if( coordinates[0]?.value && coordinates[1]?.value) {
-					setTopLeftCornerCoordinate({
-						x: coordinates[0].value as number,
-						y: coordinates[1].value as number
-					});
-				}
-				if( coordinates[2]?.value && coordinates[3]?.value) {
-					setTopRightCornerCoordinate({
-						x: coordinates[2].value as number,
-						y: coordinates[3].value as number
-					});
-				}
-				if( coordinates[4]?.value && coordinates[5]?.value) {
-					setBottomRightCornerCoordinate({
-						x: coordinates[4].value as number,
-						y: coordinates[5].value as number
-					});
-				}
-				if( coordinates[6]?.value && coordinates[7]?.value) {
-					setBottomLeftCornerCoordinate({
-						x: coordinates[6].value as number,
-						y: coordinates[7].value as number
-					});
-				}
-			});
-		//getAllCornerCoordinatesFromDb.then( (result) => { console.log('got corner coords from db'); console.dir(result)});
-	},[]);
-*/
-
-	useEffect( () => {
-		function updateResizeCanary() {
-			setResizeCanary( (cs) => !cs );
+		console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
+		const coordinates = originalCoordinatesFromDb.current;
+		if( coordinates[0]?.value != null && coordinates[1]?.value != null) {
+			const newCoord = {
+				x: (coordinates[0].value as number / xScaleFactor) || 0,
+				y: (coordinates[1].value as number / yScaleFactor) || 0
+			};
+			console.log(`new top left coord = ${JSON.stringify(newCoord)}`);
+			setTopLeftCornerCoordinate(newCoord);
 		}
-		window.addEventListener('resize', updateResizeCanary);
-		return( () => {
-			window.removeEventListener('resize', updateResizeCanary);
-		});
-
-	}, []);
-
+		if( coordinates[2]?.value != null && coordinates[3]?.value != null) {
+			const newCoord ={
+				x: (coordinates[2].value as number / xScaleFactor) || 0,
+				y: (coordinates[3].value as number / yScaleFactor) || 0
+			};
+			console.log(`new top right coord = ${JSON.stringify(newCoord)}`);
+			setTopRightCornerCoordinate(newCoord);
+		}
+		if( coordinates[4]?.value != null && coordinates[5]?.value != null) {
+			const newCoord = {
+				x: (coordinates[4].value as number / xScaleFactor) || 0,
+				y: (coordinates[5].value as number / yScaleFactor) || 0 
+			};
+			console.log(`new bottom right coord = ${JSON.stringify(newCoord)}`);
+			setBottomRightCornerCoordinate(newCoord);
+		}
+		if( coordinates[6]?.value != null && coordinates[7]?.value != null) {
+			const newCoord = {
+				x: (coordinates[6].value as number / xScaleFactor) || 0,
+				y: (coordinates[7].value as number / yScaleFactor) || 0
+			};
+			console.log(`new bottom left coord = ${JSON.stringify(newCoord)}`);
+			setBottomLeftCornerCoordinate(newCoord);
+		}
+		setCropCornerCoordinatesInitialized(true);
+	};
+	
 	const updateAdjustmentImageCornerCoordinates = () => {
 		if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
 			//console.log('currentCropImageContainerRef.current = ');
@@ -225,27 +165,59 @@ function Adjust({
 		}
 	};
 
-	const updateCropCornerCoordinates = () => {
-		//updateAdjustmentImageCornerCoordinates();
-		//setCropCoordinatesToImageCorners();
-		initializeCropCornerCoordinates();
-	}
+	const entries = useLiveQuery(
+		() => db.entries.orderBy('date').reverse().toArray()
+	);
 
-	/*useEffect( () => {
-		
-		const updateImageCornerCoordinatesOnImageLoad = () => {
-			console.log('adjust corner coordinates onload!');
-			updateAdjustmentImageCornerCoordinates();
-		};
-		if(currentCropImageRef.current) {
-			currentCropImageRef.current.addEventListener('load', updateImageCornerCoordinatesOnImageLoad);
-		}
-		return () => {
-			if(currentCropImageRef.current) {
-				currentCropImageRef.current.removeEventListener('load', updateImageCornerCoordinatesOnImageLoad);
+	let chosenEntryIdForAdjustments = useLiveQuery( () => {
+		return db.settings.get('chosenEntryIdForAdjustments')
+	});
+	
+	let scaleWidthSetting = useLiveQuery( () => {
+		return db.settings.get('scaleWidth')
+	});
+	
+	let scaleHeightSetting = useLiveQuery( () => {
+		return db.settings.get('scaleHeight')
+	});
+
+	let currentEntry = useLiveQuery(
+		() => {
+			if(chosenEntryIdForAdjustments) {
+				console.log('setting currentEntry');
+				return db.entries.get( parseInt(chosenEntryIdForAdjustments.value as string) );
 			}
 		}
-	}, []);*/
+	, [chosenEntryIdForAdjustments]);
+
+	useEffect( () => {
+		console.log('load original corner crop coordinates from db');
+		Promise.all([
+			db.settings.get('topLeftCornerCropCoordinateX'),
+			db.settings.get('topLeftCornerCropCoordinateY'),
+			db.settings.get('topRightCornerCropCoordinateX'),
+			db.settings.get('topRightCornerCropCoordinateY'),
+			db.settings.get('bottomRightCornerCropCoordinateX'),
+			db.settings.get('bottomRightCornerCropCoordinateY'),
+			db.settings.get('bottomLeftCornerCropCoordinateX'),
+			db.settings.get('bottomLeftCornerCropCoordinateY')
+		]).then( (coordinates) => { 
+			console.log('got corner coords from db'); 
+			console.dir(coordinates);
+			originalCoordinatesFromDb.current = coordinates;
+			updateScaledCornerCropCoordinates();
+		});
+	}, []);
+
+	useEffect( () => {
+		function updateResizeCanary() {
+			setResizeCanary( (cs) => !cs );
+		}
+		window.addEventListener('resize', updateResizeCanary);
+		return( () => {
+			window.removeEventListener('resize', updateResizeCanary);
+		});
+	}, []);
 
 	const resizeDebounceTimeoutId = useRef(0);
 	useEffect( () => {
@@ -254,179 +226,27 @@ function Adjust({
 		resizeDebounceTimeoutId.current = window.setTimeout( () => {
 			console.log('handle resize');
 			updateAdjustmentImageCornerCoordinates();
-			initializeCropCornerCoordinates();
+			updateScaledCornerCropCoordinates();
 		}, 250);
 	}, [resizeCanary]);
 
-	const debounceUpdateCoordinatesInDbTimeout = useRef(0);
-
-
-//	useEffect( () => {
-		function initializeCropCornerCoordinates() {
-			console.log('initializeCropCornerCoordinates() called');
-		/*	if(
-				topLeftCornerCoordinate.x < 0 || topLeftCornerCoordinate.y < 0
-				|| topRightCornerCoordinate.x < 0 || topRightCornerCoordinate.y < 0
-				|| bottomRightCornerCoordinate.x < 0 || bottomRightCornerCoordinate.y < 0
-				|| bottomLeftCornerCoordinate.x < 0 || bottomLeftCornerCoordinate.y < 0
-			) {*/
-			//if(!cropCornerCoordinatesInitialized) {
-				//console.log('need to fetch coordinates from db');
-			Promise.all([
-				db.settings.get('topLeftCornerCropCoordinateX'),
-				db.settings.get('topLeftCornerCropCoordinateY'),
-				db.settings.get('topRightCornerCropCoordinateX'),
-				db.settings.get('topRightCornerCropCoordinateY'),
-				db.settings.get('bottomRightCornerCropCoordinateX'),
-				db.settings.get('bottomRightCornerCropCoordinateY'),
-				db.settings.get('bottomLeftCornerCropCoordinateX'),
-				db.settings.get('bottomLeftCornerCropCoordinateY')
-			]).then( (coordinates) => { 
-				console.log('got corner coords from db'); 
-				console.dir(coordinates);
-			//	setOriginalCoordinatesFromDb(coordinates);
-			let xScaleFactor = 1;
-			let yScaleFactor = 1;
-			if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
-				xScaleFactor = (currentCropImageRef.current.naturalWidth / currentCropImageRef.current.clientWidth) || 1;
-				yScaleFactor = (currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight) || 1;
-			}
-			console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
-					/*
-					console.log(`top left coords updated to = x: ${coordinates[0]?.value as number / xScaleFactor}, y: ${coordinates[1]?.value as number / yScaleFactor}`);
-					console.log(`top right coords updated to = x: ${coordinates[2]?.value as number / xScaleFactor}, y: ${coordinates[3]?.value as number / yScaleFactor}`);
-					console.log(`bottom right coords updated to = x: ${coordinates[4]?.value as number / xScaleFactor}, y: ${coordinates[5]?.value as number / yScaleFactor}`);
-					console.log(`bottom left coords updated to = x: ${coordinates[6]?.value as number / xScaleFactor}, y: ${coordinates[7]?.value as number / yScaleFactor}`);*/
-				if( coordinates[0]?.value != null && coordinates[1]?.value != null) {
-					const newCoord = {
-						x: (coordinates[0].value as number / xScaleFactor) || 0,
-						y: (coordinates[1].value as number / yScaleFactor) || 0
-					};
-					console.log(`new top left coord = ${JSON.stringify(newCoord)}`);
-					setTopLeftCornerCoordinate(newCoord);
-				}
-				if( coordinates[2]?.value != null && coordinates[3]?.value != null) {
-					const newCoord ={
-						x: (coordinates[2].value as number / xScaleFactor) || 0,
-						y: (coordinates[3].value as number / yScaleFactor) || 0
-					};
-					console.log(`new top right coord = ${JSON.stringify(newCoord)}`);
-					setTopRightCornerCoordinate(newCoord);
-				}
-				if( coordinates[4]?.value != null && coordinates[5]?.value != null) {
-					const newCoord = {
-						x: (coordinates[4].value as number / xScaleFactor) || 0,
-						y: (coordinates[5].value as number / yScaleFactor) || 0 
-					};
-					console.log(`new bottom right coord = ${JSON.stringify(newCoord)}`);
-					setBottomRightCornerCoordinate(newCoord);
-				}
-				if( coordinates[6]?.value != null && coordinates[7]?.value != null) {
-					const newCoord = {
-						x: (coordinates[6].value as number / xScaleFactor) || 0,
-						y: (coordinates[7].value as number / yScaleFactor) || 0
-					};
-					console.log(`new bottom left coord = ${JSON.stringify(newCoord)}`);
-					setBottomLeftCornerCoordinate(newCoord);
-				}
-				setCropCornerCoordinatesInitialized(true);
-			});
-	/*	} else {
-			//console.log('coordinates have actual values, re-use them instead of fetching from db');
-			console.log('coordinates already intialized, re-use them instead of fetching from db');
-				let coordinates = originalCoordinatesFromDb;
-				if( coordinates[0]?.value != null && coordinates[1]?.value != null) {
-					const newCoord = {
-						x: (coordinates[0].value as number / xScaleFactor) || 0,
-						y: (coordinates[1].value as number / yScaleFactor) || 0
-					};
-					console.log(`new top left coord = ${JSON.stringify(newCoord)}`);
-					setTopLeftCornerCoordinate(newCoord);
-				}
-				if( coordinates[2]?.value != null && coordinates[3]?.value != null) {
-					const newCoord ={
-						x: (coordinates[2].value as number / xScaleFactor) || 0,
-						y: (coordinates[3].value as number / yScaleFactor) || 0
-					};
-					console.log(`new top right coord = ${JSON.stringify(newCoord)}`);
-					setTopRightCornerCoordinate(newCoord);
-				}
-				if( coordinates[4]?.value != null && coordinates[5]?.value != null) {
-					const newCoord = {
-						x: (coordinates[4].value as number / xScaleFactor) || 0,
-						y: (coordinates[5].value as number / yScaleFactor) || 0 
-					};
-					console.log(`new bottom right coord = ${JSON.stringify(newCoord)}`);
-					setBottomRightCornerCoordinate(newCoord);
-				}
-				if( coordinates[6]?.value != null && coordinates[7]?.value != null) {
-					const newCoord = {
-						x: (coordinates[6].value as number / xScaleFactor) || 0,
-						y: (coordinates[7].value as number / yScaleFactor) || 0
-					};
-					console.log(`new bottom left coord = ${JSON.stringify(newCoord)}`);
-					setBottomLeftCornerCoordinate(newCoord);
-				}
-		}
-		setCropCornerCoordinatesInitialized(true);*/
-
-		/*if(globalState.settings.topLeftCornerCropCoordinateX
-		&& globalState.settings.topLeftCornerCropCoordinateY) {
-			setTopLeftCornerCoordinate({
-				x: globalState.settings.topLeftCornerCropCoordinateX as number,
-				y: globalState.settings.topLeftCornerCropCoordinateY as number
-			});
-		}
-		if( globalState.settings.topRightCornerCropCoordinateX
-		&& globalState.settings.topRightCornerCropCoordinateY ) {
-			setTopRightCornerCoordinate({
-				x: globalState.settings.topRightCornerCropCoordinateX as number,
-				y: globalState.settings.topRightCornerCropCoordinateY as number
-			});
-		}
-		if( globalState.settings.bottomRightCornerCropCoordinateX
-		&& globalState.settings.bottomRightCornerCropCoordinateY ) {
-			setBottomRightCornerCoordinate({
-				x: globalState.settings.bottomRightCornerCropCoordinateX as number,
-				y: globalState.settings.bottomRightCornerCropCoordinateY as number
-			});
-		}
-		if( globalState.settings.bottomLeftCornerCropCoordinateX 
-		&& globalState.settings.bottomLeftCornerCropCoordinateY) {
-			setBottomLeftCornerCoordinate({
-				x: globalState.settings.bottomLeftCornerCropCoordinateX as number,
-				y: globalState.settings.bottomLeftCornerCropCoordinateY as number
-			});
-			}*/
-		}
-	//	initializeCropCornerCoordinates();
-	//}, [
-		//topLeftCornerCropCoordinateXSetting, 
-		//topLeftCornerCropCoordinateYSetting,
-		//topRightCornerCropCoordinateXSetting, 
-		//topRightCornerCropCoordinateYSetting,
-		//bottomRightCornerCropCoordinateXSetting, 
-		//bottomRightCornerCropCoordinateYSetting,
-		//bottomLeftCornerCropCoordinateXSetting, 
-		//bottomLeftCornerCropCoordinateYSetting
-	//]);	
 
 	useEffect( () => {
-		console.log('useEffect handler called, trying to call updateCropCoordinatesinDb()');
+		//console.log('useEffect handler called, trying to call updateCropCoordinatesinDb()');
 		if(cropCornerCoordinatesInitialized) {
-			console.log('cropCornerCoordinates are initialized, updating db');
+			//console.log('cropCornerCoordinates are initialized, updating db');
 			updateCropCoordinatesInDb();
 		} else {
 			console.warn('cropCornerCoordinates not intialized yet');
 		}
 	}, [
-			//cropCoordsUpdatedCanary, 
 			topLeftCornerCoordinate,
 			topRightCornerCoordinate,
 			bottomRightCornerCoordinate,
 			bottomLeftCornerCoordinate
 		])
 
+	const debounceUpdateCoordinatesInDbTimeout = useRef(0);	
 	const updateCropCoordinatesInDb = () => {
 		window.clearTimeout(debounceUpdateCoordinatesInDbTimeout.current);
 		debounceUpdateCoordinatesInDbTimeout.current = window.setTimeout( async () => {
@@ -434,40 +254,80 @@ function Adjust({
 			let xScaleFactor = 1;
 			let yScaleFactor = 1;
 			if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
-				xScaleFactor = currentCropImageRef.current.naturalWidth / currentCropImageRef.current.clientWidth || 1;
-				yScaleFactor = currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight || 1;
+				xScaleFactor = 
+					currentCropImageRef.current.naturalWidth / currentCropImageRef.current.clientWidth || 1;
+				yScaleFactor = 
+					currentCropImageRef.current.naturalHeight / currentCropImageRef.current.clientHeight || 1;
 			}
 			console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
 			try {
 				let idsUpdated = [];
 				console.log(`topLeftCornerCoordinate.x = ${topLeftCornerCoordinate.x} * ${xScaleFactor}`);
-				idsUpdated.push(await db.settings.put(
-					{ key: "topLeftCornerCropCoordinateX", value: topLeftCornerCoordinate.x * xScaleFactor }
-				));
-				idsUpdated.push(await db.settings.put(
-					{ key: "topLeftCornerCropCoordinateY", value: topLeftCornerCoordinate.y * yScaleFactor }
-				));
+				idsUpdated.push( await db.settings.bulkPut([
+					{ 
+						key: "topLeftCornerCropCoordinateX", 
+						value: topLeftCornerCoordinate.x * xScaleFactor 
+					},{ 
+						key: "topLeftCornerCropCoordinateY", 
+						value: topLeftCornerCoordinate.y * yScaleFactor 
+					},{ 
+						key: "topRightCornerCropCoordinateX", 
+						value: topRightCornerCoordinate.x * xScaleFactor 
+					},{ 
+						key: "topRightCornerCropCoordinateY", 
+						value: topRightCornerCoordinate.y * yScaleFactor 
+					},{ 
+						key: "bottomRightCornerCropCoordinateX", 
+						value: bottomRightCornerCoordinate.x * xScaleFactor 
+					},{ 
+						key: "bottomRightCornerCropCoordinateY", 
+						value: bottomRightCornerCoordinate.y * yScaleFactor 
+					},{ 
+						key: "bottomLeftCornerCropCoordinateX", 
+						value: bottomLeftCornerCoordinate.x * xScaleFactor 
+					},{ 
+						key: "bottomLeftCornerCropCoordinateY", 
+						value: bottomLeftCornerCoordinate.y * yScaleFactor
+					}
+				]));
+				//////////////////////
+				/*
+				idsUpdated.push(await db.settings.put({ 
+					key: "topLeftCornerCropCoordinateX", 
+					value: topLeftCornerCoordinate.x * xScaleFactor 
+				}));
+				idsUpdated.push(await db.settings.put({ 
+					key: "topLeftCornerCropCoordinateY", 
+					value: topLeftCornerCoordinate.y * yScaleFactor 
+				}));
 				///
-				idsUpdated.push(await db.settings.put(
-					{ key: "topRightCornerCropCoordinateX", value: topRightCornerCoordinate.x * xScaleFactor }
-				));
-				idsUpdated.push(await db.settings.put(
-					{ key: "topRightCornerCropCoordinateY", value: topRightCornerCoordinate.y * yScaleFactor }
-				));
+				idsUpdated.push(await db.settings.put({ 
+					key: "topRightCornerCropCoordinateX", 
+					value: topRightCornerCoordinate.x * xScaleFactor 
+				}));
+				idsUpdated.push(await db.settings.put({ 
+					key: "topRightCornerCropCoordinateY", 
+					value: topRightCornerCoordinate.y * yScaleFactor 
+				}));
 				//
-				idsUpdated.push(await db.settings.put(
-					{ key: "bottomRightCornerCropCoordinateX", value: bottomRightCornerCoordinate.x * xScaleFactor }
-				));
-				idsUpdated.push(await db.settings.put(
-					{ key: "bottomRightCornerCropCoordinateY", value: bottomRightCornerCoordinate.y * yScaleFactor }
-				));
-				//
-				idsUpdated.push(await db.settings.put(
-					{ key: "bottomLeftCornerCropCoordinateX", value: bottomLeftCornerCoordinate.x * xScaleFactor }
-				));
-				idsUpdated.push(await db.settings.put(
-					{ key: "bottomLeftCornerCropCoordinateY", value: bottomLeftCornerCoordinate.y * yScaleFactor }
-				));
+				idsUpdated.push(await db.settings.put({ 
+					key: "bottomRightCornerCropCoordinateX", 
+					value: bottomRightCornerCoordinate.x * xScaleFactor 
+				}));
+				idsUpdated.push(await db.settings.put({ 
+					key: "bottomRightCornerCropCoordinateY", 
+					value: bottomRightCornerCoordinate.y * yScaleFactor 
+				}));
+					//
+				idsUpdated.push(await db.settings.put({ 
+					key: "bottomLeftCornerCropCoordinateX", 
+					value: bottomLeftCornerCoordinate.x * xScaleFactor 
+				}));
+				idsUpdated.push(await db.settings.put({ 
+					key: "bottomLeftCornerCropCoordinateY", 
+					value: bottomLeftCornerCoordinate.y * yScaleFactor
+				}));
+			*/
 				console.log(`ids updated = ${idsUpdated.join(', ')}`);
 			} catch(error) {
 				console.error(`failed to add db entry. ${error}`);
@@ -480,18 +340,13 @@ function Adjust({
 			console.log('handleMouseDown() called');
 			//console.dir(event.target);
 			if(event.target.classList.contains('cropCornerControl')) {
-			event.preventDefault();
-				console.log('target is cropCornerControl');
-				console.log('controlId = ', event.target.dataset.controlId);
+				event.preventDefault();
+				//console.log('target is cropCornerControl');
+				//console.log('controlId = ', event.target.dataset.controlId);
 				activeCornerControl.current = event.target.dataset.controlId;
-				/*if(event.target.dataset.controlId === 'topLeft') {
-					
-				} else if(event.target.dataset.controlId === 'topRight') {
-				} else if(event.target.dataset.controlId === 'bottomRight') {
-				} else if(event.target.dataset.controlId === 'bottomLeft') {
-				}	*/
 			}
 		}
+		
 		let handleMouseUp = (event: any) => {
 			activeCornerControl.current = 'none';
 		}
@@ -581,9 +436,6 @@ function Adjust({
 						x: boundCoordinate.x,
 						y: cs.y
 					}));
-		//updateCropCoordinatesInDb();
-		//setCropCoordsUpdatedCanary( cs => !cs );
-		//setCropCornerCoordinatesInitialized(false);
 				} else if(activeCornerControl.current === 'topRight') {
 					const boundCoordinate = getBoundTopRightCornerCoordinate(newCoordinate);
 					setTopRightCornerCoordinate(boundCoordinate);
@@ -595,9 +447,6 @@ function Adjust({
 						x: boundCoordinate.x,
 						y: cs.y
 					}));
-		//updateCropCoordinatesInDb();
-		//setCropCoordsUpdatedCanary( cs => !cs );
-		//setCropCornerCoordinatesInitialized(false);
 				} else if(activeCornerControl.current === 'bottomRight') {
 					const boundCoordinate = getBoundBottomRightCornerCoordinate(newCoordinate);
 					setBottomRightCornerCoordinate(boundCoordinate);
@@ -609,9 +458,6 @@ function Adjust({
 						x: cs.x,
 						y: boundCoordinate.y
 					}));
-		//updateCropCoordinatesInDb();
-		//setCropCoordsUpdatedCanary( cs => !cs );
-		//setCropCornerCoordinatesInitialized(false);
 				} else if(activeCornerControl.current === 'bottomLeft') {
 					const boundCoordinate = getBoundBottomLeftCornerCoordinate(newCoordinate);
 					setBottomLeftCornerCoordinate(boundCoordinate);
@@ -623,9 +469,6 @@ function Adjust({
 						x: cs.x,
 						y: boundCoordinate.y
 					}));
-		//updateCropCoordinatesInDb();
-		//setCropCoordsUpdatedCanary( cs => !cs );
-		//setCropCornerCoordinatesInitialized(false);
 				}		
 			}
 		}
@@ -641,12 +484,12 @@ function Adjust({
 
 		});
 				
-	});
-		//[topLeftCornerCoordinate, topRightCornerCoordinate, bottomRightCornerCoordinate, bottomLeftCornerCoordinate]);
-	
-	/*useEffect( () => {
-		updateCropCoordinatesInDb();
-	}, [topLeftCornerCoordinate, topRightCornerCoordinate, bottomRightCornerCoordinate, bottomLeftCornerCoordinate]);*/
+	}, [
+		topLeftCornerCoordinate, 
+		topRightCornerCoordinate, 
+		bottomRightCornerCoordinate, 
+		bottomLeftCornerCoordinate
+	]);
 	
 	useEffect( () => {
 		if(scaleWidthSetting) {
@@ -774,7 +617,7 @@ function Adjust({
 					console.log('fire update db with new input', newValue, settingsKeyToModify);
 						try {
 							const id = await db.settings.put(
-								{ key: settingsKeyToModify, value: parseInt(newValue) }, 
+								{ key: settingsKeyToModify, value: newValue }, 
 							);
 							console.log('new id =', id);
 						} catch(error) {
@@ -821,10 +664,10 @@ function Adjust({
 				Adjust Cropping { cropAdjustActive ? 'Y' : 'N' }
 			</button>
 			<label>Width:
-				<input type="text" value={scaleWidth} data-settings-key-to-modify="scaleWidth" onChange={handleInputChange} />
+				<input type="number" value={scaleWidth} data-settings-key-to-modify="scaleWidth" onChange={handleInputChange} />
 			</label>
 			<label>Height:
-				<input type="text" value={scaleHeight} data-settings-key-to-modify="scaleHeight" onChange={handleInputChange} />
+				<input type="number" value={scaleHeight} data-settings-key-to-modify="scaleHeight" onChange={handleInputChange} />
 			</label>
 			<div>
 				<div 
@@ -840,7 +683,7 @@ function Adjust({
 					<img 
 						src={currentEntry?.image} 
 						ref={currentCropImageRef}
-						onLoad={updateCropCornerCoordinates}
+						onLoad={updateScaledCornerCropCoordinates}
 						style={{ 
 							maxWidth: '90vw', 
 							maxHeight: '90vh',
