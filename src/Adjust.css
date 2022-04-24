@@ -4,16 +4,15 @@
 	display: inline-block;
 	margin: 0 auto;
 	position: relative;
-	overflow: visible;
 }
 
 .cropCornerControl {
 	z-index: 9000;
 	width: 3vmin;
 	height: 3vmin;
-	border-radius: 3vmin;
-	border:1px solid red;
-	background:red;
+	/*border-radius: 3vmin;*/
+	border:0.5vmin solid #ddd;
+	background: #000;
 	position: absolute;
 	top: 0;
 	left: 0;

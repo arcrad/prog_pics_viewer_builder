@@ -694,6 +694,7 @@ function Adjust({
 							top: topLeftCornerCoordinateRef.current.y || 0,
 							display: cropAdjustActive ? 'block' : 'none',
 							background: 'red',
+							borderColor: 'darkred'
 						}}
 					>
 					</div>
@@ -707,7 +708,8 @@ function Adjust({
 							left: topRightCornerCoordinateRef.current.x || 0,
 							top: topRightCornerCoordinateRef.current.y || 0,
 							display: cropAdjustActive ? 'block' : 'none',
-							background: 'green'
+							background: 'green',
+							borderColor: 'darkgreen'
 						}}
 					>
 					</div>
@@ -721,7 +723,8 @@ function Adjust({
 							left: bottomRightCornerCoordinateRef.current.x || 0,
 							top: bottomRightCornerCoordinateRef.current.y || 0,
 							display: cropAdjustActive ? 'block' : 'none',
-							background: 'blue'
+							background: 'blue',
+							borderColor: 'darkblue'
 						}}
 					>
 					</div>
@@ -735,7 +738,8 @@ function Adjust({
 							left: bottomLeftCornerCoordinateRef.current.x || 0,
 							top: bottomLeftCornerCoordinateRef.current.y || 0,
 							display: cropAdjustActive ? 'block' : 'none',
-							background: 'purple'
+							background: 'mediumpurple',
+							borderColor: 'purple'
 						}}
 					>
 					</div>
