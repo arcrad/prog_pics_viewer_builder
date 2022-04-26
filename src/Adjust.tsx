@@ -13,7 +13,7 @@ from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import './Adjust.css';
-import { db, Entry } from './db';
+import { db, Entry, Setting } from './db';
 import { GlobalState  } from './App';
 
 type AdjustAttributes = {
@@ -37,7 +37,9 @@ function Adjust({
 	let [resizeCanary, setResizeCanary] = useState(false);
 	let [renderTrigger, setRenderTrigger] = useState(Date.now());
 	let [cropCornerCoordinatesInitialized, setCropCornerCoordinatesInitialized] = useState(false);
-	
+	//let [chosenImageData, setChosenImageData] = useState("");
+	let [scaledImageData, setScaledImageData] = useState("");
+	let [initialized, setInitialized] = useState(false);
 
 	let topLeftCornerCoordinateRef
 		= useRef<Coordinate>({// x: 25, y: 25});
@@ -69,6 +71,7 @@ function Adjust({
 	let imageBottomLeftCoordinateRef
 		= useRef<Coordinate>({ x: 0, y: 0});
 
+	const needToResetCornerCoordinatesRef = useRef<boolean>(false);
 
 	const originalCoordinatesFromDbRef = useRef<any[]>([]);
 	const activeCornerControlRef = useRef('none');
@@ -81,7 +84,24 @@ function Adjust({
 	const bottomRightCornerControl = useRef<HTMLDivElement>(null);	
 	const bottomLeftCornerControl = useRef<HTMLDivElement>(null);	
 	const imageSelectRef = useRef<HTMLSelectElement>(null);
+	///////
 
+
+
+
+
+	///////
+	/*
+	useEffect( () => {
+		if(needToResetCornerCoordinatesRef.current) {
+			console.warn('do reset corner coordinates');
+			activeCornerControlRef.current = 'all';
+			updateAdjustmentImageCornerCoordinates();
+			setCropCoordinatesToImageCorners();
+			needToResetCornerCoordinatesRef.current = false;
+		}	
+	});
+	*/
 	const updateScaledCornerCropCoordinates = () => {
 		console.log('updateScaledCornerCropCoordinates() called');
 		let xScaleFactor = 1;
@@ -177,6 +197,38 @@ function Adjust({
 		});
 	};
 	
+	const setCropCoordinatesToImageCornersInDb = (imageWidth:number, imageHeight:number) => {
+		console.log(`setCropCoordinatesToImageCornersInDb() called width=${imageWidth} height=${imageHeight}`);
+				return db.settings.bulkPut([
+					{ 
+						key: "topLeftCornerCropCoordinateX", 
+						value: 0 
+					},{ 
+						key: "topLeftCornerCropCoordinateY", 
+						value: 0
+					},{ 
+						key: "topRightCornerCropCoordinateX", 
+						value: imageWidth
+					},{ 
+						key: "topRightCornerCropCoordinateY", 
+						value: 0
+					},{ 
+						key: "bottomRightCornerCropCoordinateX", 
+						value: imageWidth
+					},{ 
+						key: "bottomRightCornerCropCoordinateY", 
+						value: imageHeight
+					},{ 
+						key: "bottomLeftCornerCropCoordinateX", 
+						value: 0
+					},{ 
+						key: "bottomLeftCornerCropCoordinateY", 
+						value: imageHeight
+					}
+				]);
+		
+	};
+
 	const debounceUpdateCoordinatesInDbTimeout = useRef(0);	
 	const updateCropCoordinatesInDb = () => {
 		window.clearTimeout(debounceUpdateCoordinatesInDbTimeout.current);
@@ -252,8 +304,10 @@ function Adjust({
 			//console.log('newEntry = ');
 			//console.dir(newEntry);
 			if(newEntry && newEntry.image) {
+				/*const chosenCropImageDataId = await db.settings.put(
+					{ key: "chosenCropImageData", value: newEntry.image }
+				);*/
 				let image = new Image();
-				image.src = newEntry.image;
 				//console.dir(image);
 				image.onload = async () => {
 					console.log('image width = ',image.naturalWidth, 'image height = ', image.naturalHeight);
@@ -265,14 +319,28 @@ function Adjust({
 							{ key: "scaleHeight", value: image.naturalHeight }
 						);
 						console.log('new id1 =', id, 'new id2 = ', id2);
+						//activeCornerControlRef.current = 'all';
+						//updateAdjustmentImageCornerCoordinates();
+						//setCropCoordinatesToImageCorners();
+						//setRenderTrigger(Date.now());
+
 					} catch(error) {
 						console.error(`failed to add db entry. ${error}`);
 					}
-				activeCornerControlRef.current = 'all';
-				updateAdjustmentImageCornerCoordinates();
-				setCropCoordinatesToImageCorners();
-				setRenderTrigger(Date.now());
+					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(image.naturalWidth, image.naturalHeight);
+					if(newEntry && newEntry.image) {
+						setScaledImageData(newEntry.image);
+					}
+					setInitialized(false);
+					/*
+ 					activeCornerControlRef.current = 'all';
+					updateAdjustmentImageCornerCoordinates();
+					setCropCoordinatesToImageCorners();
+					setRenderTrigger(Date.now());
+					needToResetCornerCoordinatesRef.current = true;
+					*/
 				}
+				image.src = newEntry.image;
 			}
 		}
 	};
@@ -350,9 +418,126 @@ function Adjust({
 	, [chosenEntryIdForAdjustments]);
 
 	useEffect( () => {
+		//fetch all initial data and then set intializedData flag 	
+		console.warn('INITIALIZER FIRED!!!!!!!!!!!!!!!!!!!');
+		if(initialized) {
+				console.log('already initialized, aborting');
+				return;
+		}
+		console.log('fetch all initial data and then set intializedData flag');
+				setInitialized(true);
+		db.settings.get('chosenEntryIdForAdjustments').then((_chosenEntryIdForAdjustments) => {
+			Promise.all([
+				db.settings.get('topLeftCornerCropCoordinateX'),
+				db.settings.get('topLeftCornerCropCoordinateY'),
+				db.settings.get('topRightCornerCropCoordinateX'),
+				db.settings.get('topRightCornerCropCoordinateY'),
+				db.settings.get('bottomRightCornerCropCoordinateX'),
+				db.settings.get('bottomRightCornerCropCoordinateY'),
+				db.settings.get('bottomLeftCornerCropCoordinateX'),
+				db.settings.get('bottomLeftCornerCropCoordinateY'),
+				db.entries.orderBy('date').reverse().toArray(),
+				db.settings.get('scaleWidth'),
+				db.settings.get('scaleHeight'),
+				db.entries.get( parseInt(_chosenEntryIdForAdjustments?.value as string) )
+			]).then(([
+				_topLeftCornerCropCoordinateX,
+				_topLeftCornerCropCoordinateY,
+				_topRightCornerCropCoordinateX,
+				_topRightCornerCropCoordinateY,
+				_bottomRightCornerCropCoordinateX,
+				_bottomRightCornerCropCoordinateY,
+				_bottomLeftCornerCropCoordinateX,
+				_bottomLeftCornerCropCoordinateY,
+				_entries,
+				_scaleWidthSetting,
+				_scaleHeightSetting,
+				_currentEntry
+			]) => {
+				console.group('got data from db'); 
+				//console.log('got data from db'); 
+				//console.dir(coordinates);
+				//	originalCoordinatesFromDbRef.current = coordinates;
+				originalCoordinatesFromDbRef.current = [
+					_topLeftCornerCropCoordinateX,
+					_topLeftCornerCropCoordinateY,
+					_topRightCornerCropCoordinateX,
+					_topRightCornerCropCoordinateY,
+					_bottomRightCornerCropCoordinateX,
+					_bottomRightCornerCropCoordinateY,
+					_bottomLeftCornerCropCoordinateX,
+					_bottomLeftCornerCropCoordinateY,
+				];
+				updateScaledCornerCropCoordinates();
+				/*
+				if(_topLeftCornerCropCoordinateX && _topLeftCornerCropCoordinateY) {
+					console.log('loaded topLeftCornerCropCoordinates');
+					topLeftCornerCoordinateRef.current = {
+						x: _topLeftCornerCropCoordinateX.value as number,
+						y: _topLeftCornerCropCoordinateY.value as number
+					};
+				}
+				if(_topRightCornerCropCoordinateX && _topRightCornerCropCoordinateY) {
+					console.log('loaded topRightCornerCropCoordinates');
+					topRightCornerCoordinateRef.current = {
+						x: _topRightCornerCropCoordinateX.value as number,
+						y: _topRightCornerCropCoordinateY.value as number
+					};
+				}
+				if(_bottomRightCornerCropCoordinateX && _bottomRightCornerCropCoordinateY) {
+					console.log('loaded bottomRightCornerCropCoordinates');
+					bottomRightCornerCoordinateRef.current = {
+						x: _bottomRightCornerCropCoordinateX.value as number,
+						y: _bottomRightCornerCropCoordinateY.value as number
+					};
+				}
+				if(_bottomLeftCornerCropCoordinateX && _bottomLeftCornerCropCoordinateY) {
+					console.log('loaded bottomLeftCornerCropCoordinates');
+					bottomLeftCornerCoordinateRef.current = {
+						x: _bottomLeftCornerCropCoordinateX.value as number,
+						y: _bottomLeftCornerCropCoordinateY.value as number
+					};
+				}*/
+				if(_scaleWidthSetting) {
+					setScaleWidth(_scaleWidthSetting.value as string);
+				}
+				if(_scaleHeightSetting) {
+					setScaleHeight(_scaleHeightSetting.value as string);
+				}
+				/*
+				entries = _entries;
+				chosenEntryIdForAdjustments = _chosenEntryIdForAdjustments;
+				scaleWidthSetting = _scaleWidthSetting;
+				scaleHeightSetting = _scaleHeightSetting;
+				currentEntry = _currentEntry;
+				*/
+				console.groupEnd();
+			});
+		});
+	});
+
+
+
+
+
+
+
+
+
+/*
+	useEffect( () => {
+			//initialize chosen crop image
+			db.settings.get('chosenCropImageData').then( (chosenCropImageDataSetting) => {
+				if(chosenCropImageDataSetting) {
+					setScaledImageData(chosenCropImageDataSetting.value as string);
+				}
+			});
+	}, []);
+*/
+/*	useEffect( () => {
 		console.log('load original corner crop coordinates from db');
 		loadCropCoordinatesFromDb();
-	}, [activeCornerControlRef]);
+	}, [activeCornerControlRef]);*/
 
 	useEffect( () => {
 		//console.log('useEffect handler called, trying to call updateCropCoordinatesinDb()');
@@ -544,13 +729,14 @@ function Adjust({
 			window.removeEventListener('mouseup', handleMouseUp);
 			window.removeEventListener('mousemove', handleMouseMove);
 		});
-	}, [
-		topLeftCornerCoordinateRef.current, 
-		topRightCornerCoordinateRef.current, 
-		bottomRightCornerCoordinateRef.current, 
-		bottomLeftCornerCoordinateRef.current
-	]);
-	
+	});
+/*, [
+		topLeftCornerCoordinateRef, 
+		topRightCornerCoordinateRef, 
+		bottomRightCornerCoordinateRef, 
+		bottomLeftCornerCoordinateRef
+	]);*/;
+/*	
 	useEffect( () => {
 		if(scaleWidthSetting) {
 			setScaleWidth(scaleWidthSetting.value as string);
@@ -559,6 +745,54 @@ function Adjust({
 			setScaleHeight(scaleHeightSetting.value as string);
 		}
 	}, [scaleWidthSetting, scaleHeightSetting]);
+	*/
+	const scaleChosenImage = async (scaleWidthSetting:Setting, scaleHeightSetting:Setting, chosenEntryIdForAdjustments:Setting) => {
+		console.log('scaledChosenImage() called');
+		if(scaleWidthSetting && parseFloat(scaleWidthSetting.value as string) > 0 && scaleHeightSetting && parseFloat(scaleHeightSetting.value as string) > 0 && chosenEntryIdForAdjustments) {
+			console.warn('update chosen image scaling...');
+			const _currentEntry = await db.entries.get( parseInt(chosenEntryIdForAdjustments.value as string));
+		console.log('after await db: chosenEntryIdForAdjustments = ',chosenEntryIdForAdjustments);
+		//console.log('current entry =', JSON.stringify(_currentEntry));
+			if(_currentEntry && _currentEntry.image) {
+				console.warn('_currentEntry Exists...');
+				const scaledImageWidth = parseFloat(scaleWidthSetting.value as string);
+				const scaledImageHeight = parseFloat(scaleHeightSetting.value as string);
+				
+				let image = new Image();
+				image.src = _currentEntry.image;
+
+				image.onload = async () => {
+					let scaledImageCanvas = document.createElement('canvas');
+					scaledImageCanvas.width = scaledImageWidth;
+					scaledImageCanvas.height = scaledImageHeight;
+					let scaledImageCanvasContext = scaledImageCanvas.getContext('2d');
+					if(scaledImageCanvasContext) {
+						scaledImageCanvasContext.drawImage(image, 0, 0, scaledImageWidth, scaledImageHeight); 
+					}
+					setScaledImageData(scaledImageCanvas.toDataURL());
+					
+					/*const chosenCropImageDataId = await db.settings.put(
+						{ key: "chosenCropImageData", value: scaledImageCanvas.toDataURL() }
+					);*/
+					/*if(needToResetCornerCoordinatesRef.current) {
+						console.log('fire update corner coordinates during scaling');
+						activeCornerControlRef.current = 'all';
+						updateAdjustmentImageCornerCoordinates();
+						setCropCoordinatesToImageCorners();
+						needToResetCornerCoordinatesRef.current = false;
+					}	*/
+					setRenderTrigger(Date.now());
+					console.warn('end update chosen image scaling...');
+				}
+			}
+		}
+		}
+	useEffect( () => {
+		console.log('useEffect: chosenEntryIdForAdjustments = ',chosenEntryIdForAdjustments);
+		if(scaleWidthSetting && scaleHeightSetting && chosenEntryIdForAdjustments) {
+			scaleChosenImage(scaleWidthSetting, scaleHeightSetting, chosenEntryIdForAdjustments);
+		}
+	}, [scaleWidthSetting, scaleHeightSetting, chosenEntryIdForAdjustments]);
 
 	useEffect( () => {
 		if(
@@ -568,6 +802,13 @@ function Adjust({
 			setCurrentSelectValue( parseInt(chosenEntryIdForAdjustments.value as string));
 		}
 	}, [chosenEntryIdForAdjustments]);
+
+	const handleSetCropToCorners = () => {
+		activeCornerControlRef.current = 'all';
+		updateAdjustmentImageCornerCoordinates();
+		setCropCoordinatesToImageCorners();
+		setRenderTrigger(Date.now());
+	};
 	
 	const handleSelectOnChange = (event:ChangeEvent<HTMLSelectElement>) => {
 		console.log('handleSelectOnChange() called');
@@ -581,7 +822,9 @@ function Adjust({
 	};
 
 	const setCropCoordinatesToImageCorners = () => {
+			console.warn('setCropCoordinatesToImageCorners() called');
 			if(currentCropImageContainerRef.current) {
+			console.warn('setCropCoordinatesToImageCorners first condition');
 				topLeftCornerCoordinateRef.current = {
 					x: imageTopLeftCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
 					y: imageTopLeftCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
@@ -654,6 +897,12 @@ function Adjust({
 					onChange={handleInputChange} 
 				/>
 			</label>
+			<button
+				type="button"
+				onClick={handleSetCropToCorners}
+			>
+				Reset Crop to Corners
+			</button>
 			<div>
 				<div 
 					ref={currentCropImageContainerRef}
@@ -663,7 +912,7 @@ function Adjust({
 					}}
 				>
 					<img 
-						src={currentEntry?.image} 
+						src={scaledImageData} 
 						ref={currentCropImageRef}
 						onLoad={updateScaledCornerCropCoordinates}
 						style={{ 
@@ -676,7 +925,7 @@ function Adjust({
 							filter: 'blur(3px)'
 						}}/>
 					<img 
-						src={currentEntry?.image} 
+						src={scaledImageData} 
 						data-render-trigger={renderTrigger}
 						style={{ 
 							maxWidth: '90vw', 
