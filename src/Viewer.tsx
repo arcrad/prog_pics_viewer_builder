@@ -16,6 +16,7 @@ function Viewer({
 	let [totalEntries, setTotalEntries] = useState(0);
 	let [entriesProcessed, setEntriesProcessed] = useState(0);
 	let [processingState, setProcessingState] = useState('unstarted');
+	let [entries, setEntries] = useState<Entry[]>([]);
 
 	const initializedRef = useRef(false);
 	const originalCoordinatesFromDbRef = useRef<any[]>([]);
@@ -141,17 +142,38 @@ function Viewer({
 	const processEntry = (entryToProcess:Entry):Promise<number> => {
 		console.log('processEntry() called');
 		return new Promise( (resolve, reject) => {
-			console.log('processing entry...');
-			console.log(entryToProcess.id);
-			window.setTimeout( () => {
-				console.log('processed entry! id=', entryToProcess.id);
-				setEntriesProcessed( cs => cs+1);
-				resolve(0);
-			}, Math.random()*5000);
+			if(!entryToProcess || !entryToProcess.image) {
+				reject();
+			}
+			console.log(`start processing entry with id = ${entryToProcess.id}`);
+			let baseImage = new Image();
+			baseImage.onload = () => {
+				let scaledImageCanvas = document.createElement('canvas');
+				scaledImageCanvas.width = scaleWidthSettingRef.current;
+				scaledImageCanvas.height = scaleHeightSettingRef.current; 
+				let scaledImageCanvasContext = scaledImageCanvas.getContext('2d');
+				if(scaledImageCanvasContext && entryToProcess.id) {
+					console.log(`scale image width=${scaleWidthSettingRef.current} height =${scaleHeightSettingRef.current}`);
+					scaledImageCanvasContext.drawImage(baseImage, 0, 0, scaleWidthSettingRef.current, scaleHeightSettingRef.current);
+					db.entries.update(entryToProcess.id, {
+						alignedImage: scaledImageCanvas.toDataURL()
+					}).then( () => {
+						console.log('processed entry! id=', entryToProcess.id);
+						setEntriesProcessed( cs => cs+1);
+						resolve(0);
+					});
+				}
+			};
+			if(entryToProcess.image) {
+				baseImage.src = entryToProcess.image;
+			}
 		});
 	};
 
   const handleProcessEntries = () => {
+		if(processingState !== 'unstarted') {
+			return;
+		}
 		setProcessingState('started');
 		let entriesToProcess:Promise<number>[] = [];
 		sortedEntriesRef.current.forEach( entry => {
@@ -161,6 +183,10 @@ function Viewer({
 		Promise.all(entriesToProcess).then( () => {
 			setProcessingState('complete');
 			console.log('all entries have been processed');
+			db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
+				//setEntries(sortedEntriesRef.current);
+				setEntries(_entries);
+			});
 		});
 
 		//setEntriesProcessed( cs => cs+1);
@@ -192,6 +218,19 @@ return (
 					Processing: {processingState}
 				</p>
 				<hr/>
+				<h2>Entries</h2>
+				<ol>
+				{
+					entries.map( entry =>
+						<li key={entry.id}>
+							<span>{entry.id}</span>
+							<img src={entry.image} style={{maxWidth: "6rem"}} />
+							{'==>'}
+							<img src={entry.alignedImage} style={{maxWidth: "6rem"}} />
+						</li>
+					)
+				}
+				</ol>
 			</div>
 			
 		</div>
