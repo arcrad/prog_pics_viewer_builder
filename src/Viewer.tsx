@@ -148,20 +148,56 @@ function Viewer({
 			console.log(`start processing entry with id = ${entryToProcess.id}`);
 			let baseImage = new Image();
 			baseImage.onload = () => {
+				//create cropped image
 				let scaledImageCanvas = document.createElement('canvas');
 				scaledImageCanvas.width = scaleWidthSettingRef.current;
 				scaledImageCanvas.height = scaleHeightSettingRef.current; 
 				let scaledImageCanvasContext = scaledImageCanvas.getContext('2d');
-				if(scaledImageCanvasContext && entryToProcess.id) {
+				if(scaledImageCanvasContext) {
 					console.log(`scale image width=${scaleWidthSettingRef.current} height =${scaleHeightSettingRef.current}`);
-					scaledImageCanvasContext.drawImage(baseImage, 0, 0, scaleWidthSettingRef.current, scaleHeightSettingRef.current);
-					db.entries.update(entryToProcess.id, {
-						alignedImage: scaledImageCanvas.toDataURL()
-					}).then( () => {
-						console.log('processed entry! id=', entryToProcess.id);
-						setEntriesProcessed( cs => cs+1);
-						resolve(0);
-					});
+					scaledImageCanvasContext.drawImage(
+						baseImage, 
+						0, 
+						0, 
+						scaleWidthSettingRef.current, 
+						scaleHeightSettingRef.current
+					);
+//					let scaledImage = new Image();
+//					scaledImage.onload = () => {
+//						console.log('scaled image loaded');
+						//calculate cropped image dimensions
+						const croppedImageWidth = originalCoordinatesFromDbRef.current[2].value - originalCoordinatesFromDbRef.current[0].value;
+						const croppedImageHeight = originalCoordinatesFromDbRef.current[7].value - originalCoordinatesFromDbRef.current[1].value;
+						////originalCoordinatesFromDbRef
+						//create cropped image
+						let croppedImageCanvas = document.createElement('canvas');
+						croppedImageCanvas.width = croppedImageWidth;
+						croppedImageCanvas.height = croppedImageHeight;
+						console.log(`croppedImageCanvas.width = ${croppedImageWidth}, croppedImageCanvas.height = ${croppedImageHeight}`);
+						let croppedImageCanvasContext = croppedImageCanvas.getContext('2d');
+						if(croppedImageCanvasContext && entryToProcess.id) {
+							console.log('drawImage to croppedImageCanvasContxt');
+							croppedImageCanvasContext.drawImage(
+								scaledImageCanvas,
+								originalCoordinatesFromDbRef.current[0].value,
+								originalCoordinatesFromDbRef.current[1].value,
+								croppedImageWidth,
+								croppedImageHeight,
+								0,
+								0,
+								croppedImageWidth,
+								croppedImageHeight
+							);
+							db.entries.update(entryToProcess.id, {
+								alignedImage: croppedImageCanvas.toDataURL()
+							}).then( () => {
+								console.log('processed entry! id=', entryToProcess.id);
+								setEntriesProcessed( cs => cs+1);
+								resolve(0);
+							});
+						}
+//					};
+//					scaledImage.src = scaledImageCanvas.toDataURL();
 				}
 			};
 			if(entryToProcess.image) {
@@ -195,15 +231,11 @@ function Viewer({
 return (
     <div>
     	<h2>Viewer ( id = {globalState.currentEntryId} )</h2>
-			<div style={{
-				display: loadedData ? 'none' : 'block'
-			}}>
+			{ !loadedData && <div>
 				<h1>LOADING...</h1>
-			</div>
+			</div> }
 			
-			<div style={{
-				display: loadedData ? 'block' : 'none'
-			}}>
+			{ loadedData && <div>
 				<h1>Process Entries</h1>
 				<button
 					type="button"
@@ -218,7 +250,8 @@ return (
 					Processing: {processingState}
 				</p>
 				<hr/>
-				<h2>Entries</h2>
+				<h2>Processed Entries</h2>
+				{ entries.length == 0 && <p>none yet</p> }
 				<ol>
 				{
 					entries.map( entry =>
@@ -231,7 +264,7 @@ return (
 					)
 				}
 				</ol>
-			</div>
+			</div>}
 			
 		</div>
   );

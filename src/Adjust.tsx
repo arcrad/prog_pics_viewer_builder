@@ -391,7 +391,22 @@ function Adjust({
 						} catch(error) {
 							console.error(`failed to add db entry. ${error}`);
 						}
+			//Promise.all([
+				let _scaleWidthSetting = await db.settings.get('scaleWidth');
+				let _scaleHeightSetting = await db.settings.get('scaleHeight');
+				let _chosenEntryIdForAdjustments = await db.settings.get('chosenEntryIdForAdjustments');
+			/*]).then(([
+				_scaleWidthSetting,
+				_scaleHeightSetting,
+				_chosenEntryIdForAdjustments
+			]) => {*/
+				if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments) {
+					await scaleChosenImage(_scaleWidthSetting, _scaleHeightSetting, _chosenEntryIdForAdjustments);
+					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(_scaleWidthSetting.value as number, _scaleHeightSetting.value as number);
+				}
+			//});
 			};
+
 
 			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);
 		}
@@ -446,6 +461,7 @@ function Adjust({
 				db.settings.get('scaleWidth'),
 				db.settings.get('scaleHeight'),
 				//db.entries.get( parseInt(_chosenEntryIdForAdjustments?.value as string) )
+				db.settings.get('chosenEntryIdForAdjustments')
 			]).then(([
 				_topLeftCornerCropCoordinateX,
 				_topLeftCornerCropCoordinateY,
@@ -459,6 +475,7 @@ function Adjust({
 				_scaleWidthSetting,
 				_scaleHeightSetting,
 				//_currentEntry
+				_chosenEntryIdForAdjustments
 			]) => {
 				console.group('got data from db'); 
 				//console.log('got data from db'); 
@@ -518,6 +535,9 @@ function Adjust({
 				currentEntry = _currentEntry;
 				*/
 				//setIsLoaded(true);
+		if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments) {
+			scaleChosenImage(_scaleWidthSetting, _scaleHeightSetting, _chosenEntryIdForAdjustments);
+		}
 				console.groupEnd();
 			});
 		//});
@@ -779,7 +799,7 @@ function Adjust({
 					}
 					setScaledImageData(scaledImageCanvas.toDataURL());
 					
-					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(scaledImageWidth, scaledImageHeight);
+/////					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(scaledImageWidth, scaledImageHeight);
 
 /*				loadCropCoordinatesFromDb().then( () => {
 					console.log('after loadCropCordinates resolves');
@@ -795,6 +815,7 @@ function Adjust({
 		console.groupEnd();
 	};
 
+/*
 	useEffect( () => {
 		console.group('useEffect: scaleChosenImage(): chosenEntryIdForAdjustments = ',chosenEntryIdForAdjustments);
 		if(scaleWidthSetting && scaleHeightSetting && chosenEntryIdForAdjustments) {
@@ -802,6 +823,7 @@ function Adjust({
 		}
 		console.groupEnd();
 	}, [scaleWidthSetting, scaleHeightSetting, chosenEntryIdForAdjustments]);
+*/
 
 	useEffect( () => {
 		if(
