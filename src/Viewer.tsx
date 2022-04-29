@@ -148,8 +148,28 @@ function Viewer({
 			}
 			console.log(`start processing entry with id = ${entryToProcess.id}`);
 			let baseImage = new Image();
-			baseImage.onload = () => {
-				//create cropped image
+			baseImage.onload = async () => {
+				//log marks
+				console.log('marks =', entryToProcess.marks);
+				console.log('mark A = ', entryToProcess.marks?.A);
+				console.log('dest marks = ', sortedEntriesRef.current[0].marks);
+				//create points
+				const sourcePoints = [
+					[entryToProcess.marks?.A.x || 0, entryToProcess.marks?.A.y || 0],
+					[entryToProcess.marks?.B.x || 0, entryToProcess.marks?.B.y || 0],
+					[entryToProcess.marks?.C.x || 0, entryToProcess.marks?.C.y || 0]
+				];
+				const destinationPoints = [
+					[sortedEntriesRef.current[0].marks?.A.x || 0, sortedEntriesRef.current[0].marks?.A.y || 0],
+					[sortedEntriesRef.current[0].marks?.B.x || 0, sortedEntriesRef.current[0].marks?.B.y || 0],
+					[sortedEntriesRef.current[0].marks?.C.x || 0, sortedEntriesRef.current[0].marks?.C.y || 0],
+				];
+				//do affine transformation
+				const imageHomography = new Homography("affine");
+				imageHomography.setReferencePoints(sourcePoints, destinationPoints);
+				const alignedImage:HTMLImageElement = await imageHomography.warp(baseImage, true);
+				//console.dir(alignedImage);
+				//create scaled image
 				let scaledImageCanvas = document.createElement('canvas');
 				scaledImageCanvas.width = scaleWidthSettingRef.current;
 				scaledImageCanvas.height = scaleHeightSettingRef.current; 
@@ -157,7 +177,7 @@ function Viewer({
 				if(scaledImageCanvasContext) {
 					console.log(`scale image width=${scaleWidthSettingRef.current} height =${scaleHeightSettingRef.current}`);
 					scaledImageCanvasContext.drawImage(
-						baseImage, 
+						alignedImage, 
 						0, 
 						0, 
 						scaleWidthSettingRef.current, 
