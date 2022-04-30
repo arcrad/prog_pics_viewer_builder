@@ -1,6 +1,7 @@
+/* global cv */
 import React, { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
-import { Homography } from 'homography';
-//import './Viewer.css';
+import  * as mathjs  from 'mathjs';
+//importi './Viewer.css';
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
 
@@ -18,12 +19,14 @@ function Viewer({
 	let [entriesProcessed, setEntriesProcessed] = useState(0);
 	let [processingState, setProcessingState] = useState('unstarted');
 	let [entries, setEntries] = useState<Entry[]>([]);
-
+	let [currentEntry, setCurrentEntry] = useState(0);
+	
 	const initializedRef = useRef(false);
 	const originalCoordinatesFromDbRef = useRef<any[]>([]);
 	const scaleWidthSettingRef = useRef(0);
 	const scaleHeightSettingRef = useRef(0);
 	const sortedEntriesRef = useRef<Entry[]>([]);
+
 
 	useEffect( () => {
 		//fetch all initial data and then set intializedData flag 	
@@ -81,35 +84,6 @@ function Viewer({
 					_bottomLeftCornerCropCoordinateY,
 				];
 				//updateScaledCornerCropCoordinates();
-				/*
-				if(_topLeftCornerCropCoordinateX && _topLeftCornerCropCoordinateY) {
-					console.log('loaded topLeftCornerCropCoordinates');
-					topLeftCornerCoordinateRef.current = {
-						x: _topLeftCornerCropCoordinateX.value as number,
-						y: _topLeftCornerCropCoordinateY.value as number
-					};
-				}
-				if(_topRightCornerCropCoordinateX && _topRightCornerCropCoordinateY) {
-					console.log('loaded topRightCornerCropCoordinates');
-					topRightCornerCoordinateRef.current = {
-						x: _topRightCornerCropCoordinateX.value as number,
-						y: _topRightCornerCropCoordinateY.value as number
-					};
-				}
-				if(_bottomRightCornerCropCoordinateX && _bottomRightCornerCropCoordinateY) {
-					console.log('loaded bottomRightCornerCropCoordinates');
-					bottomRightCornerCoordinateRef.current = {
-						x: _bottomRightCornerCropCoordinateX.value as number,
-						y: _bottomRightCornerCropCoordinateY.value as number
-					};
-				}
-				if(_bottomLeftCornerCropCoordinateX && _bottomLeftCornerCropCoordinateY) {
-					console.log('loaded bottomLeftCornerCropCoordinates');
-					bottomLeftCornerCoordinateRef.current = {
-						x: _bottomLeftCornerCropCoordinateX.value as number,
-						y: _bottomLeftCornerCropCoordinateY.value as number
-					};
-				}*/
 				if(_scaleWidthSetting) {
 					scaleWidthSettingRef.current = parseFloat(_scaleWidthSetting.value as string);
 				}
@@ -153,6 +127,7 @@ function Viewer({
 				console.log('marks =', entryToProcess.marks);
 				console.log('mark A = ', entryToProcess.marks?.A);
 				console.log('dest marks = ', sortedEntriesRef.current[0].marks);
+				//TODO: apply scaling first, then translate src and dest marks based on scaling, then do affine xform, then cropping
 				//create points
 				const sourcePoints = [
 					[entryToProcess.marks?.A.x || 0, entryToProcess.marks?.A.y || 0],
@@ -165,9 +140,33 @@ function Viewer({
 					[sortedEntriesRef.current[0].marks?.C.x || 0, sortedEntriesRef.current[0].marks?.C.y || 0],
 				];
 				//do affine transformation
-				const imageHomography = new Homography("affine");
-				imageHomography.setReferencePoints(sourcePoints, destinationPoints);
-				const alignedImage:HTMLImageElement = await imageHomography.warp(baseImage, true);
+				const invertedSourceMatrix = mathjs.inv([
+					[entryToProcess.marks?.A.x || 0, entryToProcess.marks?.B.x || 0, entryToProcess.marks?.C.x || 0],
+					[entryToProcess.marks?.A.y || 0, entryToProcess.marks?.B.y || 0, entryToProcess.marks?.C.y || 0],
+					[1, 1, 1]
+				]);
+				const destinationMatrix = [
+					[sortedEntriesRef.current[0].marks?.A.x || 0, sortedEntriesRef.current[0].marks?.B.x || 0, sortedEntriesRef.current[0].marks?.C.x || 0],
+					[sortedEntriesRef.current[0].marks?.A.y || 0, sortedEntriesRef.current[0].marks?.B.y || 0, sortedEntriesRef.current[0].marks?.C.y || 0]
+				];
+				const xformM = mathjs.multiply(destinationMatrix, invertedSourceMatrix);	
+				//console.dir(xformM);
+				console.dir([...xformM[0],...xformM[1]]);
+				let warpedImageCanvas = document.createElement('canvas');
+				warpedImageCanvas.width = scaleWidthSettingRef.current;
+				warpedImageCanvas.height = scaleHeightSettingRef.current; 
+				let warpedImageCanvasContext = warpedImageCanvas.getContext('2d');
+				if(warpedImageCanvasContext) {
+					warpedImageCanvasContext.setTransform(xformM[0][0],xformM[1][0],xformM[0][1],xformM[1][1],xformM[0][2],xformM[1][2])
+					warpedImageCanvasContext.drawImage(
+						baseImage, 
+						0, 
+						0, 
+						baseImage.naturalWidth, 
+						baseImage.naturalHeight
+					);
+				}
+				//const alignedImage = baseImage;
 				//console.dir(alignedImage);
 				//create scaled image
 				let scaledImageCanvas = document.createElement('canvas');
@@ -177,7 +176,7 @@ function Viewer({
 				if(scaledImageCanvasContext) {
 					console.log(`scale image width=${scaleWidthSettingRef.current} height =${scaleHeightSettingRef.current}`);
 					scaledImageCanvasContext.drawImage(
-						alignedImage, 
+						warpedImageCanvas, 
 						0, 
 						0, 
 						scaleWidthSettingRef.current, 
@@ -257,7 +256,7 @@ return (
 			</div> }
 			
 			{ loadedData && <div>
-				<h1>Process Entries</h1>
+				<h1>Process Entries?</h1>
 				<button
 					type="button"
 					onClick={handleProcessEntries}
@@ -273,6 +272,7 @@ return (
 				<hr/>
 				<h2>Processed Entries</h2>
 				{ entries.length == 0 && <p>none yet</p> }
+				{/*
 				<ol>
 				{
 					entries.map( entry =>
@@ -285,6 +285,14 @@ return (
 					)
 				}
 				</ol>
+				*/}
+				<img src={entries[currentEntry]?.alignedImage} style={{maxWidth: '50rem', maxHeight: '75vh'}}/>
+				<button type="button" onClick={ () => {
+					setCurrentEntry( (cs) => cs > 0 ? cs-1 : entries.length-1)
+				}}>Prev</button>
+				<button type="button" onClick={() => {
+					setCurrentEntry( (cs) => cs < entries.length-1 ? cs+1 : 0)
+				}}>Next</button>
 			</div>}
 			
 		</div>
