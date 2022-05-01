@@ -7,3 +7,30 @@
 +create POC for affine transformation based image alignment 
 
 +develop general outline of app 
+
++improve performance of mark component
+
++add auto-resize option when loading images 
+
++add initializer for default settings 
+
++add ratio lock option for adjust component image scaling
+
++improve layout/styling 
+
++add better/more load indicators
+
++add validations to viewer processing 
+
++load any already processed images on viewer component load
+
++improve options for processing/re-processing images in viewer component
+
++improve caching of images 
+
++test performance on various devices
+	+explore options for improving image performance
+
++store image natural dimensions in DB so they dont have to be re-calculated on the fly by loading image
+
+
