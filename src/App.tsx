@@ -13,8 +13,9 @@ import ImageStorePOC from './ImageStorePOC';
 import Builder from './Builder';
 
 export type Settings = {
-	//[key: string]: string | number;
-	markLineWidthScalePercent: number;
+	[key: string]: number;
+}
+/*	markLineWidthScalePercent: number;
 	markRadiusScalePercent: number;
 	topLeftCornerCropCoordinateX: number;
 	topLeftCornerCropCoordinateY: number;
@@ -24,7 +25,7 @@ export type Settings = {
 	bottomRightCornerCropCoordinateY: number;
 	bottomLeftCornerCropCoordinateX: number;
 	bottomLeftCornerCropCoordinateY: number;
-};
+};*/
 
 export type GlobalState = {
 	currentEntryId: number;
@@ -43,9 +44,8 @@ const defaultSettings:Settings = {
 	bottomLeftCornerCropCoordinateX: -1,
 	bottomLeftCornerCropCoordinateY: -1
 };
-function App() {
-	
 
+function App() {
 	let [globalState, setGlobalState] = useState<GlobalState>({ 
 		currentEntryId: -1,
 		settings: defaultSettings
@@ -62,7 +62,7 @@ function App() {
 		setGlobalState( (cs):GlobalState => {
 			if(currentSettings) {
 				const settingsObject:Settings = currentSettings.reduce( (accumulator, currentSetting) => { 
-					return { ...accumulator, ...{ [currentSetting.key as string]: currentSetting.value } }
+					return { ...accumulator, ...{ [currentSetting.key as string]: currentSetting.value as number} }
 				}, {} as Settings );
 				//console.dir(settingsObject);
 				const ns = { settings: settingsObject };
@@ -73,11 +73,35 @@ function App() {
 	}
 	
 	let currentSettings = useLiveQuery( () => {
-		return db.settings.toArray()
+		return db.settings.toArray();
 	});
 	
 	useEffect( () => {
-		console.log('app initialize settings from db');
+		console.log('initialize app settings');
+		db.settings.toArray().then( (settings) => {
+			let existingSettingsInDb = settings.reduce( (accumulator, currentSetting) => {
+				if(currentSetting.key) {
+					return [...accumulator, currentSetting.key];
+				}
+				return accumulator;
+			}, [] as string[]);
+			let settingsToSetDefaultFor = Object.keys(defaultSettings).filter( (setting) => {
+				return !existingSettingsInDb.includes(setting);
+			});
+			//console.log(`existingSettingsInDb = ${existingSettingsInDb}`);
+			//console.log(`settingsToSetDefaultFor = ${settingsToSetDefaultFor}`);
+			const settingsToUpdate = settingsToSetDefaultFor.reduce( (accumulator, settingKey) => {
+				return [...accumulator, {key: settingKey, value: defaultSettings[settingKey]} ];
+			}, [] as Setting[]);
+			//console.log(`settingsToUpdate = ${JSON.stringify(settingsToUpdate)}`);
+			db.settings.bulkPut(settingsToUpdate).then( () => {
+				console.log(`updated settings in db from defaults`);
+			});
+		});
+	}, []);
+
+	useEffect( () => {
+		console.log('app: update settings from db');
 		updateGlobalStateSettings();
 	}, [currentSettings]);
 

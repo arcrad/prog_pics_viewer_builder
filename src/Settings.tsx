@@ -31,7 +31,7 @@ function SettingsComponent({
 		setGlobalState( (cs):GlobalState => {
 			if(currentSettings) {
 				const settingsObject:Settings = currentSettings.reduce( (accumulator, currentSetting) => { 
-					return { ...accumulator, ...{ [currentSetting.key as string]: currentSetting.value } }
+					return { ...accumulator, ...{ [currentSetting.key as string]: currentSetting.value as number} }
 				}, {} as Settings );
 				console.dir(settingsObject);
 				const ns = { settings: settingsObject };
