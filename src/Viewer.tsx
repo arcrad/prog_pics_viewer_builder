@@ -26,7 +26,8 @@ function Viewer({
 	const scaleWidthSettingRef = useRef(0);
 	const scaleHeightSettingRef = useRef(0);
 	const sortedEntriesRef = useRef<Entry[]>([]);
-
+	const chosenEntryIdForAdjustmentsSettingRef = useRef<Setting | null>(null);
+	const chosenEntryRef = useRef<Entry | null>(null);
 
 	useEffect( () => {
 		//fetch all initial data and then set intializedData flag 	
@@ -37,7 +38,7 @@ function Viewer({
 		}
 		console.log('fetch all initial data and then set loadedData flag');
 		initializedRef.current = true;
-		//db.settings.get('chosenEntryIdForAdjustments').then((_chosenEntryIdForAdjustments) => {
+		db.settings.get('chosenEntryIdForAdjustments').then((_chosenEntryIdForAdjustments) => {
 			Promise.all([
 				db.settings.get('topLeftCornerCropCoordinateX'),
 				db.settings.get('topLeftCornerCropCoordinateY'),
@@ -50,7 +51,7 @@ function Viewer({
 				db.entries.orderBy('date').reverse().toArray(),
 				db.settings.get('scaleWidth'),
 				db.settings.get('scaleHeight'),
-				//db.entries.get( parseInt(_chosenEntryIdForAdjustments?.value as string) )
+				db.entries.get( parseInt(_chosenEntryIdForAdjustments?.value as string) )
 			]).then(([
 				_topLeftCornerCropCoordinateX,
 				_topLeftCornerCropCoordinateY,
@@ -63,7 +64,7 @@ function Viewer({
 				_sortedEntries,
 				_scaleWidthSetting,
 				_scaleHeightSetting,
-				//_currentEntry
+				_chosenEntry
 			]) => {
 				console.group('got data from db'); 
 				//console.log('got data from db'); 
@@ -90,6 +91,12 @@ function Viewer({
 				if(_scaleHeightSetting) {
 					scaleHeightSettingRef.current = parseFloat(_scaleHeightSetting.value as string);
 				}
+				if(_chosenEntryIdForAdjustments) {
+					chosenEntryIdForAdjustmentsSettingRef.current = _chosenEntryIdForAdjustments;
+				}
+				if(_chosenEntry) {
+					chosenEntryRef.current = _chosenEntry;
+				}
 				/*
 				entries = _entries;
 				chosenEntryIdForAdjustments = _chosenEntryIdForAdjustments;
@@ -111,10 +118,10 @@ function Viewer({
 				setTotalEntries(sortedEntriesRef.current.length);
 				setLoadedData(true);
 			});
-		//});
+		});
 	}, []);
 
-	const processEntry = (entryToProcess:Entry):Promise<number> => {
+	const processEntry = (entryToProcess:Entry, chosenEntryImageNaturalWidth:number, chosenEntryImageNaturalHeight:number):Promise<number> => {
 		console.log('processEntry() called');
 		return new Promise( (resolve, reject) => {
 			if(!entryToProcess || !entryToProcess.image) {
@@ -124,40 +131,56 @@ function Viewer({
 			let baseImage = new Image();
 			baseImage.onload = async () => {
 				//log marks
-				console.log('marks =', entryToProcess.marks);
-				console.log('mark A = ', entryToProcess.marks?.A);
-				console.log('dest marks = ', sortedEntriesRef.current[0].marks);
-				//TODO: apply scaling first, then translate src and dest marks based on scaling, then do affine xform, then cropping
-				//create points
-				const sourcePoints = [
-					[entryToProcess.marks?.A.x || 0, entryToProcess.marks?.A.y || 0],
-					[entryToProcess.marks?.B.x || 0, entryToProcess.marks?.B.y || 0],
-					[entryToProcess.marks?.C.x || 0, entryToProcess.marks?.C.y || 0]
-				];
-				const destinationPoints = [
-					[sortedEntriesRef.current[0].marks?.A.x || 0, sortedEntriesRef.current[0].marks?.A.y || 0],
-					[sortedEntriesRef.current[0].marks?.B.x || 0, sortedEntriesRef.current[0].marks?.B.y || 0],
-					[sortedEntriesRef.current[0].marks?.C.x || 0, sortedEntriesRef.current[0].marks?.C.y || 0],
-				];
+				//console.log('marks =', entryToProcess.marks);
+				//console.log('mark A = ', entryToProcess.marks?.A);
+				//console.log('dest marks = ', sortedEntriesRef.current[0].marks);
+				//create reference point matrices
 				//do affine transformation
 				const invertedSourceMatrix = mathjs.inv([
-					[entryToProcess.marks?.A.x || 0, entryToProcess.marks?.B.x || 0, entryToProcess.marks?.C.x || 0],
-					[entryToProcess.marks?.A.y || 0, entryToProcess.marks?.B.y || 0, entryToProcess.marks?.C.y || 0],
-					[1, 1, 1]
+					[
+						entryToProcess.marks?.A.x || 0, 
+						entryToProcess.marks?.B.x || 0, 
+						entryToProcess.marks?.C.x || 0
+					],
+					[
+						entryToProcess.marks?.A.y || 0, 
+						entryToProcess.marks?.B.y || 0, 
+						entryToProcess.marks?.C.y || 0
+					],
+					[
+						1, 
+						1, 
+						1
+					]
 				]);
 				const destinationMatrix = [
-					[sortedEntriesRef.current[0].marks?.A.x || 0, sortedEntriesRef.current[0].marks?.B.x || 0, sortedEntriesRef.current[0].marks?.C.x || 0],
-					[sortedEntriesRef.current[0].marks?.A.y || 0, sortedEntriesRef.current[0].marks?.B.y || 0, sortedEntriesRef.current[0].marks?.C.y || 0]
+					[
+						chosenEntryRef.current?.marks?.A.x || 0, 
+						chosenEntryRef.current?.marks?.B.x || 0, 
+						chosenEntryRef.current?.marks?.C.x || 0
+					],
+					[
+						chosenEntryRef.current?.marks?.A.y || 0, 
+						chosenEntryRef.current?.marks?.B.y || 0, 
+						chosenEntryRef.current?.marks?.C.y || 0
+					]
 				];
-				const xformM = mathjs.multiply(destinationMatrix, invertedSourceMatrix);	
-				//console.dir(xformM);
-				console.dir([...xformM[0],...xformM[1]]);
+				const xformMatrix = mathjs.multiply(destinationMatrix, invertedSourceMatrix);	
+				//console.dir(xformMatrix);
+				//console.dir([...xformMatrix[0],...xformMatrix[1]]);
 				let warpedImageCanvas = document.createElement('canvas');
-				warpedImageCanvas.width = scaleWidthSettingRef.current;
-				warpedImageCanvas.height = scaleHeightSettingRef.current; 
+				warpedImageCanvas.width = chosenEntryImageNaturalWidth;
+				warpedImageCanvas.height = chosenEntryImageNaturalHeight;
 				let warpedImageCanvasContext = warpedImageCanvas.getContext('2d');
 				if(warpedImageCanvasContext) {
-					warpedImageCanvasContext.setTransform(xformM[0][0],xformM[1][0],xformM[0][1],xformM[1][1],xformM[0][2],xformM[1][2])
+					warpedImageCanvasContext.setTransform(
+						xformMatrix[0][0],
+						xformMatrix[1][0],
+						xformMatrix[0][1],
+						xformMatrix[1][1],
+						xformMatrix[0][2],
+						xformMatrix[1][2]
+					);
 					warpedImageCanvasContext.drawImage(
 						baseImage, 
 						0, 
@@ -166,9 +189,7 @@ function Viewer({
 						baseImage.naturalHeight
 					);
 				}
-				//const alignedImage = baseImage;
-				//console.dir(alignedImage);
-				//create scaled image
+				//scale baseImage
 				let scaledImageCanvas = document.createElement('canvas');
 				scaledImageCanvas.width = scaleWidthSettingRef.current;
 				scaledImageCanvas.height = scaleHeightSettingRef.current; 
@@ -182,42 +203,38 @@ function Viewer({
 						scaleWidthSettingRef.current, 
 						scaleHeightSettingRef.current
 					);
-//					let scaledImage = new Image();
-//					scaledImage.onload = () => {
-//						console.log('scaled image loaded');
-						//calculate cropped image dimensions
-						const croppedImageWidth = originalCoordinatesFromDbRef.current[2].value - originalCoordinatesFromDbRef.current[0].value;
-						const croppedImageHeight = originalCoordinatesFromDbRef.current[7].value - originalCoordinatesFromDbRef.current[1].value;
-						////originalCoordinatesFromDbRef
-						//create cropped image
-						let croppedImageCanvas = document.createElement('canvas');
-						croppedImageCanvas.width = croppedImageWidth;
-						croppedImageCanvas.height = croppedImageHeight;
-						console.log(`croppedImageCanvas.width = ${croppedImageWidth}, croppedImageCanvas.height = ${croppedImageHeight}`);
-						let croppedImageCanvasContext = croppedImageCanvas.getContext('2d');
-						if(croppedImageCanvasContext && entryToProcess.id) {
-							console.log('drawImage to croppedImageCanvasContxt');
-							croppedImageCanvasContext.drawImage(
-								scaledImageCanvas,
-								originalCoordinatesFromDbRef.current[0].value,
-								originalCoordinatesFromDbRef.current[1].value,
-								croppedImageWidth,
-								croppedImageHeight,
-								0,
-								0,
-								croppedImageWidth,
-								croppedImageHeight
-							);
-							db.entries.update(entryToProcess.id, {
-								alignedImage: croppedImageCanvas.toDataURL()
-							}).then( () => {
-								console.log('processed entry! id=', entryToProcess.id);
-								setEntriesProcessed( cs => cs+1);
-								resolve(0);
-							});
-						}
-//					};
-//					scaledImage.src = scaledImageCanvas.toDataURL();
+				}
+				//calculate cropped image dimensions
+				const croppedImageWidth = originalCoordinatesFromDbRef.current[2].value - originalCoordinatesFromDbRef.current[0].value;
+				const croppedImageHeight = originalCoordinatesFromDbRef.current[7].value - originalCoordinatesFromDbRef.current[1].value;
+				//create cropped image
+				let croppedImageCanvas = document.createElement('canvas');
+				croppedImageCanvas.width = croppedImageWidth;
+				croppedImageCanvas.height = croppedImageHeight;
+				console.log(`croppedImageCanvas.width = ${croppedImageWidth}, croppedImageCanvas.height = ${croppedImageHeight}`);
+				let croppedImageCanvasContext = croppedImageCanvas.getContext('2d');
+				if(croppedImageCanvasContext) {
+					console.log('drawImage to croppedImageCanvasContxt');
+					croppedImageCanvasContext.drawImage(
+						scaledImageCanvas,
+						originalCoordinatesFromDbRef.current[0].value,
+						originalCoordinatesFromDbRef.current[1].value,
+						croppedImageWidth,
+						croppedImageHeight,
+						0,
+						0,
+						croppedImageWidth,
+						croppedImageHeight
+					);
+				}
+				if(entryToProcess.id) {
+					db.entries.update(entryToProcess.id, {
+						alignedImage: croppedImageCanvas.toDataURL()
+					}).then( () => {
+						console.log('processed entry! id=', entryToProcess.id);
+						setEntriesProcessed( cs => cs+1);
+						resolve(0);
+					});
 				}
 			};
 			if(entryToProcess.image) {
@@ -231,20 +248,27 @@ function Viewer({
 			return;
 		}
 		setProcessingState('started');
-		let entriesToProcess:Promise<number>[] = [];
-		sortedEntriesRef.current.forEach( entry => {
-			entriesToProcess.push(processEntry(entry));
-		});
-
-		Promise.all(entriesToProcess).then( () => {
-			setProcessingState('complete');
-			console.log('all entries have been processed');
-			db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
-				//setEntries(sortedEntriesRef.current);
-				setEntries(_entries);
+		let chosenEntryImage = new Image();
+		chosenEntryImage.onload = () => {
+			let entriesToProcess:Promise<number>[] = [];
+			sortedEntriesRef.current.forEach( entry => {
+				entriesToProcess.push(processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight));
+				//entriesToProcess.push(processEntry(entry));
 			});
-		});
-
+	
+			Promise.all(entriesToProcess).then( () => {
+				setProcessingState('complete');
+				console.log('all entries have been processed');
+				db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
+					//setEntries(sortedEntriesRef.current);
+					setEntries(_entries);
+				});
+			});
+		}
+		
+		if(chosenEntryRef.current && chosenEntryRef.current.image) {
+			chosenEntryImage.src = chosenEntryRef.current.image;
+		}
 		//setEntriesProcessed( cs => cs+1);
 	};
 
@@ -287,12 +311,14 @@ return (
 				</ol>
 				*/}
 				<img src={entries[currentEntry]?.alignedImage} style={{maxWidth: '50rem', maxHeight: '75vh'}}/>
-				<button type="button" onClick={ () => {
-					setCurrentEntry( (cs) => cs > 0 ? cs-1 : entries.length-1)
-				}}>Prev</button>
-				<button type="button" onClick={() => {
-					setCurrentEntry( (cs) => cs < entries.length-1 ? cs+1 : 0)
-				}}>Next</button>
+				<div>
+					<button type="button" onClick={ () => {
+						setCurrentEntry( (cs) => cs > 0 ? cs-1 : entries.length-1)
+					}}>Prev</button>
+					<button type="button" onClick={() => {
+						setCurrentEntry( (cs) => cs < entries.length-1 ? cs+1 : 0)
+					}}>Next</button>
+				</div>
 			</div>}
 			
 		</div>
