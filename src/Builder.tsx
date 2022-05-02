@@ -1,11 +1,42 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Outlet, Link } from 'react-router-dom';
 
 import { db, Entry } from './db';
+import { GlobalState } from './App';
+import SetupModal from './SetupModal';
 
+type BuilderAttributes= {
+	globalState: GlobalState;
+	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
+};
 
-function Builder() {
+function Builder({
+	globalState,
+	setGlobalState
+} : BuilderAttributes) {
+	let [setupModalIsVisible, setSetupModalIsVisible] = useState(false);
+
+	const initializedRef = useRef(false);
+
+	useEffect( () => {
+		if(initializedRef.current) {
+			return;
+		}
+		initializedRef.current = true;
+		Promise.all([
+			db.settings.get('workingDirectoryHandle')
+		]).then( ([
+			_workingDirectoryHandle
+		]) => {
+			if(_workingDirectoryHandle) {
+			} else {
+				setSetupModalIsVisible(true);
+			}
+			//setLoadedData(true);
+		});
+	}, []);
+
 	return (
 		<div>
 			<h1>Builder</h1>
@@ -24,6 +55,12 @@ function Builder() {
 				<Link to="/settings">Settings</Link>
 			</nav>
 			<Outlet />
+			<SetupModal 
+					globalState={globalState} 
+					setGlobalState={setGlobalState} 
+					isModalVisible={setupModalIsVisible}
+					setIsModalVisible={setSetupModalIsVisible}
+				/>
 		</div>
 	);
 }

@@ -124,7 +124,7 @@ function Viewer({
 	const processEntry = (entryToProcess:Entry, chosenEntryImageNaturalWidth:number, chosenEntryImageNaturalHeight:number):Promise<number> => {
 		console.log('processEntry() called');
 		return new Promise( (resolve, reject) => {
-			if(!entryToProcess || !entryToProcess.image) {
+			if(!entryToProcess || !entryToProcess.imageBlob) {
 				reject();
 			}
 			console.log(`start processing entry with id = ${entryToProcess.id}`);
@@ -227,18 +227,21 @@ function Viewer({
 						croppedImageHeight
 					);
 				}
-				if(entryToProcess.id) {
-					db.entries.update(entryToProcess.id, {
-						alignedImage: croppedImageCanvas.toDataURL()
-					}).then( () => {
-						console.log('processed entry! id=', entryToProcess.id);
-						setEntriesProcessed( cs => cs+1);
-						resolve(0);
-					});
-				}
+				croppedImageCanvas.toBlob( (blob) => {
+					if(entryToProcess.id) {
+						db.entries.update(entryToProcess.id, {
+							alignedImageBlob: blob
+						}).then( () => {
+							console.log('processed entry! id=', entryToProcess.id);
+							setEntriesProcessed( cs => cs+1);
+							resolve(0);
+						});
+					}
+				});
 			};
-			if(entryToProcess.image) {
-				baseImage.src = entryToProcess.image;
+			if(entryToProcess.imageBlob) {
+				//baseImage.src = entryToProcess.image;
+				baseImage.src = URL.createObjectURL(entryToProcess.imageBlob);
 			}
 		});
 	};
@@ -266,13 +269,22 @@ function Viewer({
 			});
 		}
 		
-		if(chosenEntryRef.current && chosenEntryRef.current.image) {
-			chosenEntryImage.src = chosenEntryRef.current.image;
+		if(chosenEntryRef.current && chosenEntryRef.current.imageBlob) {
+			//chosenEntryImage.src = chosenEntryRef.current.image;
+			chosenEntryImage.src = URL.createObjectURL(chosenEntryRef.current.imageBlob);
 		}
 		//setEntriesProcessed( cs => cs+1);
 	};
 
-return (
+	let currentImage = '';
+//	if(entries && entries[currentEntry] && entries[currentEntry].alignedImageBlob) {
+		const blob = entries[currentEntry]?.alignedImageBlob;
+		if(blob) {
+		currentImage = URL.createObjectURL(blob);
+		}
+//	}
+
+	return (
     <div>
     	<h2>Viewer ( id = {globalState.currentEntryId} )</h2>
 			{ !loadedData && <div>
@@ -310,7 +322,7 @@ return (
 				}
 				</ol>
 				*/}
-				<img src={entries[currentEntry]?.alignedImage} style={{maxWidth: '50rem', maxHeight: '75vh'}}/>
+				<img src={currentImage} style={{maxWidth: '50rem', maxHeight: '75vh'}}/>
 				<div>
 					<button type="button" onClick={ () => {
 						setCurrentEntry( (cs) => cs > 0 ? cs-1 : entries.length-1)

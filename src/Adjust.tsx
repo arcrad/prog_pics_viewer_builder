@@ -38,7 +38,8 @@ function Adjust({
 	let [renderTrigger, setRenderTrigger] = useState(Date.now());
 	let [cropCornerCoordinatesInitialized, setCropCornerCoordinatesInitialized] = useState(false);
 	//let [chosenImageData, setChosenImageData] = useState("");
-	let [scaledImageData, setScaledImageData] = useState("");
+	let [scaledImageData, setScaledImageData] = useState<Blob | null>(null);
+	let [scaledImageDataUrl, setScaledImageDataUrl] = useState<string>('');
 	//let [initialized, setInitialized] = useState(false);
 	let [isLoaded, setIsLoaded] = useState(false);
 
@@ -315,7 +316,7 @@ function Adjust({
 			const newEntry = await db.entries.get( parseInt(imageSelectRef.current.value) );
 			//console.log('newEntry = ');
 			//console.dir(newEntry);
-			if(newEntry && newEntry.image) {
+			if(newEntry && newEntry.imageBlob) {
 				//setIsLoaded(false);
 				/*const chosenCropImageDataId = await db.settings.put(
 					{ key: "chosenCropImageData", value: newEntry.image }
@@ -341,8 +342,10 @@ function Adjust({
 						console.error(`failed to add db entry. ${error}`);
 					}
 					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(image.naturalWidth, image.naturalHeight);
-					if(newEntry && newEntry.image) {
-						setScaledImageData(newEntry.image);
+					if(newEntry && newEntry.imageBlob) {
+						//setScaledImageData(newEntry.image);
+						setScaledImageData(newEntry.imageBlob);
+						setScaledImageDataUrl(newEntry.imageBlob ? URL.createObjectURL(newEntry.imageBlob) : '');
 					}
 					initialized.current = false;
 					/*
@@ -353,7 +356,8 @@ function Adjust({
 					needToResetCornerCoordinatesRef.current = true;
 					*/
 				}
-				image.src = newEntry.image;
+				//image.src = newEntry.image;
+				image.src = URL.createObjectURL(newEntry.imageBlob);
 			}
 		}
 		console.groupEnd();
@@ -782,7 +786,7 @@ function Adjust({
 			const _currentEntry = await db.entries.get( parseInt(chosenEntryIdForAdjustments.value as string));
 			console.log('after await db: chosenEntryIdForAdjustments = ',chosenEntryIdForAdjustments);
 			//console.log('current entry =', JSON.stringify(_currentEntry));
-			if(_currentEntry && _currentEntry.image) {
+			if(_currentEntry && _currentEntry.imageBlob) {
 				console.warn('_currentEntry exists...');
 				const scaledImageWidth = parseFloat(scaleWidthSetting.value as string);
 				const scaledImageHeight = parseFloat(scaleHeightSetting.value as string);
@@ -797,7 +801,13 @@ function Adjust({
 					if(scaledImageCanvasContext) {
 						scaledImageCanvasContext.drawImage(image, 0, 0, scaledImageWidth, scaledImageHeight); 
 					}
-					setScaledImageData(scaledImageCanvas.toDataURL());
+					//setScaledImageData(scaledImageCanvas.toDataURL());
+					scaledImageCanvas.toBlob( (blob) => {
+						if(blob) {
+							setScaledImageData(blob);
+							setScaledImageDataUrl(blob ? URL.createObjectURL(blob) : '');
+						}
+					});
 					
 /////					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(scaledImageWidth, scaledImageHeight);
 
@@ -808,7 +818,8 @@ function Adjust({
 				});*/
 					console.warn('end update chosen image scaling...');
 				}
-				image.src = _currentEntry.image;
+				//image.src = _currentEntry.image;
+				image.src = URL.createObjectURL(_currentEntry.imageBlob);
 					setRenderTrigger(Date.now());
 			}
 		}
@@ -953,7 +964,7 @@ function Adjust({
 					}}
 				>
 					<img 
-						src={scaledImageData} 
+						src={ scaledImageDataUrl }
 						ref={currentCropImageRef}
 						onLoad={ () => {
 							console.log('img onload fired!');
@@ -979,7 +990,7 @@ function Adjust({
 							filter: 'blur(3px)'
 						}}/>
 					<img 
-						src={scaledImageData} 
+						src={ scaledImageDataUrl }
 						data-render-trigger={renderTrigger}
 						style={{ 
 							maxWidth: '90vw', 

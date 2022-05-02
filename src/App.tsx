@@ -27,6 +27,13 @@ export type Settings = {
 	bottomLeftCornerCropCoordinateY: number;
 };*/
 
+declare global {
+	interface Window {
+		showDirectoryPicker: any;
+		showOpenFilePicker: any;
+	}
+};
+
 export type GlobalState = {
 	currentEntryId: number;
 	settings: Settings;
@@ -125,7 +132,15 @@ function App() {
     <div className="App">
 		<BrowserRouter>
 			<Routes>
-    		<Route path="/" element={<Builder />}>
+    		<Route 
+					path="/" 
+					element={
+						<Builder 
+							globalState={globalState} 
+							setGlobalState={setGlobalState}
+						/>
+					}
+				>
 					<Route 
 						path="entry" 
 						element={

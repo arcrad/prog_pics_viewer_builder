@@ -254,18 +254,62 @@ function EntryComponent({
 	};
 
 	//<input ref={imageUploadRef} type="file" id="image_upload" name="image_upload"></input>
-	
+	//generate blob urls 
+/*	const entriesImageUrls = useRef<{[key: string]: string}>({});
+
+async function verifyPermission(fileHandle: any, readWrite: boolean) {
+  const options: {mode?: string} = {};
+  if (readWrite) {
+    options.mode = 'readwrite';
+  }
+  // Check if permission was already granted. If so, return true.
+  if ((await fileHandle.queryPermission(options)) === 'granted') {
+    return true;
+  }
+  // Request permission. If the user grants permission, return true.
+  if ((await fileHandle.requestPermission(options)) === 'granted') {
+    return true;
+  }
+  // The user didn't grant permission, so return false.
+  return false;
+}	
+*/
+	//useEffect( () => {
+/*	const handleListRefresh = () => {
+		console.log('update entriesImageUrls');
+		if( entries ) {
+			entries.forEach( async (entry) => {
+				if( await verifyPermission(entry.imageFileHandle, false) ) {
+					entriesImageUrls.current[String(entry.id)] = URL.createObjectURL( await entry.imageFileHandle.getFile());
+				}
+			});
+	/*		Promise.all(fileHandlePermissionValidations).then( (results
+			let getFileRequests = entries.map( (entry) => {
+				return entry.imageFileHandle.getFile();
+			});
+			Promise.all(getFileRequests).then( (fileBlobs) => {
+				entriesImageUrls.current = fileBlobs.reduce( (accumulator, fileBlob, index) => {
+					return {...accumulator, ...{ [String(entries[index].id)]: URL.createObjectURL(fileBlob) } };
+				}, {});
+			});*/
+
+//			console.dir(entriesImageUrls.current);
+//		}
+//	};
+	//}, [entries]);
+
 	return (
     <div>
 			<div>
 				<h2>Entries ( id = {globalState.currentEntryId} )</h2>
 				<button ref={addEntryRef} type="button" onClick={handleAddEntry}>Add Entry</button>
 				<hr/>
+				{/*<button type="button" onClick={handleListRefresh}> Refresh List</button>*/}
 				<ol>
 				{
 					entries?.map( entry =>
 						<li key={entry.id}>
-							<img src={entry.image} style={{maxWidth: "6rem"}} />
+							{ entry.imageBlob && <img src={URL.createObjectURL(entry.imageBlob)} style={{maxWidth: "6rem"}} /> }
 							{ ( entryIdBeingEdited === entry.id ) ? 
 								<div>
 									Weight: 

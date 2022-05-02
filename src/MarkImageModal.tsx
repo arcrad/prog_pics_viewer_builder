@@ -65,6 +65,7 @@ function MarkImageModal({
 	let [fullResImageData, setFullResImageData] = useState('');
 	let [resizeCanary, setResizeCanary] = useState(false);
 	let [isLoaded, setIsLoaded] = useState(false);
+	let [renderTrigger, setRenderTrigger] = useState(Date.now());
 
 	const modalOverlayRef = useRef<HTMLDivElement>(null);
 	const imageUploadRef = useRef<HTMLInputElement>(null);
@@ -99,16 +100,19 @@ function MarkImageModal({
 				console.log('modal is not visible, aborting render...');
 				return;
 		}
+		const image = new Image();
+		//image.src = currentEntry.image;
+		image.onload = () => {
 		if(
 			fullResImageCanvasRef.current 
 			&& currentEntry 
-			&& currentEntry.image
+			&& currentEntry.imageBlob
 		) {
+			console.log('render full-res entry image: onload');
 			const context = fullResImageCanvasRef.current.getContext('2d');
-			const image = new Image();
-			image.src = currentEntry.image;
 			fullResImageCanvasRef.current.width = image.naturalWidth;
 			fullResImageCanvasRef.current.height = image.naturalHeight;
+			console.log(`width = ${image.naturalWidth} and height = ${image.naturalHeight}`);
 			if(context) {
 				context.clearRect(0, 0, image.naturalWidth, image.naturalHeight);
 				context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
@@ -122,10 +126,6 @@ function MarkImageModal({
 								currentEntry
 								&& currentEntry.marks
 								&& fullResImageCanvasRef.current
-								//&& currentEntry.marks[key]
-								//&& currentEntry.marks[key].style 
-								//&& currentEntry.marks[key].x
-								//&& currentEntry.marks[key].y
 							) {
 								console.log(
 									'draw mark, mark key = ', key, 
@@ -149,7 +149,23 @@ function MarkImageModal({
 					}
 				}
 			}
-			setFullResImageData(fullResImageCanvasRef.current?.toDataURL());
+			//setFullResImageData(fullResImageCanvasRef.current?.toDataURL());
+			if(fullResImageCanvasRef.current) {
+				fullResImageCanvasRef.current.toBlob( (blob) => {
+					if(blob) {
+						console.log('update setFullResImageData');
+						setFullResImageData(URL.createObjectURL(blob));
+					}
+				});
+			}
+		}
+		};
+			//
+		if(
+			currentEntry 
+			&& currentEntry.imageBlob
+		) {
+			image.src = URL.createObjectURL(currentEntry.imageBlob);
 		}
 		
 	}, [currentEntry]);
@@ -166,7 +182,7 @@ function MarkImageModal({
 		if(
 			imageCanvasRef.current 
 			&& currentEntry 
-			&& currentEntry.image
+			&& currentEntry.imageBlob
 			&& imageContainerRef.current
 			&& imageContainerRef.current.clientWidth
 			&& imageContainerRef.current.clientHeight
@@ -216,10 +232,13 @@ function MarkImageModal({
 			if(context) {	
 				context.clearRect(0, 0, imageCanvasRef.current.width, imageCanvasRef.current.height);
 				context.drawImage(fullResImageCanvasRef.current, 0, 0, scaledImageWidth, scaledImageHeight);
+				if(!isLoaded) {
+					setRenderTrigger(Date.now());
+				}
 				setIsLoaded(true);
 			}
 		}
-	}, [currentEntry, resizeCanary]);
+	}, [currentEntry, renderTrigger, resizeCanary]);
 
 	let handleImageHover = (event:MouseEvent<HTMLCanvasElement>) => {
 		//console.dir(event);
@@ -237,11 +256,12 @@ function MarkImageModal({
 			&& event.clientX
 			&& event.clientY
 			&& currentEntry
-			&& currentEntry.image
+			&& currentEntry.imageBlob
 		)	{
 			//console.log(`target.clientWidth = ${target.clientWidth}, target.clientHeight = ${target.clientHeight}`);
 			let image = new Image();
-			image.src = currentEntry.image;
+			//image.src = currentEntry.image;
+			image.onload = () => {
 			let widthRatio = image.naturalWidth / target.clientWidth;
 			let heightRatio = image.naturalHeight / target.clientHeight;
 			let xHoverCoord = event.clientX - target.offsetLeft;
@@ -256,6 +276,9 @@ function MarkImageModal({
 			//setOffsetRight(target.offsetRight);	
 			//setOffsetTop(target.offsetTop);	
 			//setOffsetBottom(target.offsetBottom);	
+			}
+
+			image.src = URL.createObjectURL(currentEntry.imageBlob)
 		}
 	};
 
@@ -309,6 +332,8 @@ function MarkImageModal({
 			//let updatedMarks = {...currentEntry.marks, ...newMark};
 			db.entries.update(globalState.currentEntryId, {
 				['marks.'+activeMark]: newMarkData
+			}).then( () => {
+				setRenderTrigger(Date.now());
 			});
 			//console.log('marks = ');
 			//console.dir(currentEntry.marks);
@@ -352,6 +377,7 @@ function MarkImageModal({
 					<canvas
 							ref={imageCanvasRef}
 							className="entryImage"
+							data-rt={renderTrigger}
 							style={{display: (isLoaded ? 'block' : 'none')}}
 							onMouseMove={handleImageHover}
 							onMouseOver={handleImageMouseOver}

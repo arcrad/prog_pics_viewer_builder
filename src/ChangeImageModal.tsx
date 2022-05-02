@@ -33,7 +33,8 @@ function ChangeImageModal({
 	let modalOverlayRef = useRef<HTMLDivElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
   let loadImageButtonRef = useRef<HTMLButtonElement>(null);
-
+	let selectImageButtonRef = useRef<HTMLButtonElement>(null);
+	let fileHandleRef = useRef<any>(null);
 
 	/*useEffect( () => {
 		const addDbEntry = async (imageData:string) => {
@@ -52,14 +53,21 @@ function ChangeImageModal({
 			}
 		};*/
 
+	
 	const loadImageHandler = async (event:MouseEvent<HTMLButtonElement>) => {
 		//console.dir(imageUploadRef.current);
 		console.log("handle load image..");
 		let selectedFile;
 		if(imageUploadRef.current && imageUploadRef.current.files) {
 			selectedFile = imageUploadRef.current.files[0];
+			db.entries.update(globalState.currentEntryId, {
+				imageBlob: selectedFile
+			});
+					setIsModalVisible(false);
+			//console.log('selected file objectURL=');
+			//console.dir(URL.createObjectURL(selectedFile));
 		}
-		const reader = new FileReader();
+		/*const reader = new FileReader();
 		reader.onload = (event) => {
 			if(event.target && event.target.result) {
 				console.log("result=", event.target.result);
@@ -76,6 +84,30 @@ function ChangeImageModal({
 			//reader.readAsText(selectedFile);
 			reader.readAsDataURL(selectedFile);
 		}
+		*/
+	};
+	
+
+	/*
+ 	//file api approach
+	const loadImageHandler = async (event:MouseEvent<HTMLButtonElement>) => {
+		//console.dir(imageUploadRef.current);
+		console.log("handle load image..");
+		if(fileHandleRef.current) {
+			db.entries.update(globalState.currentEntryId, {
+				imageFileHandle: fileHandleRef.current
+			});
+		};
+		setIsModalVisible(false);
+		//console.dir(URL.createObjectURL(selectedFile));
+	};
+	*/
+
+	const selectImageHandler = async (event:MouseEvent<HTMLButtonElement>) => {
+		  const [fileHandle] = await window.showOpenFilePicker();
+			console.log('fileHandle = ');
+			console.dir(fileHandle);
+			fileHandleRef.current = fileHandle;
 	};
 
 	useEffect( () => {
@@ -93,6 +125,9 @@ function ChangeImageModal({
 			<div className="controlsContainer">
 				<h1>Change Image</h1>
 				<p>Updating entry with id = { globalState.currentEntryId }.</p>
+				{/*<button ref={selectImageButtonRef} type="button" onClick={selectImageHandler}>
+					Select Image
+				</button>*/}
 				<input ref={imageUploadRef} type="file"></input>
 				<button ref={loadImageButtonRef} type="button" onClick={loadImageHandler}>
 					Load Image

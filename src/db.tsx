@@ -16,13 +16,19 @@ export type Entry = {
 	weight?: number;
 	notes?: string;
 	image?: string;
+	imageFileHandle?: any; //should be some form of FileHandle type 
+	imageBlob?: File; 
+	imageNaturalWidth?: number;
+	imageNaturalHeight?: number;
 	alignedImage?: string;
+	alignedImageBlob?: Blob;
 	marks?: MarkCollection;
 };
 
 export type Setting = {
 	key?: string;
-	value: string | number;
+	value: any;
+	visible?: boolean;
 };
 export class TypedDexie extends Dexie {
 	entries!: Table<Entry>;
@@ -30,7 +36,7 @@ export class TypedDexie extends Dexie {
 
 	constructor() {
 		super('db');
-		this.version(16).stores({
+		this.version(23).stores({
 			entries: '++id, date, weight, notes, marks',
 			settings: 'key, value'
 		});

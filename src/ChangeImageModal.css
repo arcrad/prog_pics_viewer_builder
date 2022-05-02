@@ -12,7 +12,7 @@
 }
 
 .modalVisible {
-	display: block;
+	display: visible;
 }
 
 .controlsContainer {
