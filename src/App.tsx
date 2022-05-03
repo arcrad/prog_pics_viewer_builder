@@ -31,6 +31,7 @@ declare global {
 	interface Window {
 		showDirectoryPicker: any;
 		showOpenFilePicker: any;
+		VideoFrame: any;
 	}
 };
 
@@ -172,6 +173,8 @@ function App() {
 						path="export" 
 						element={
 							<Export 
+								globalState={globalState} 
+								setGlobalState={setGlobalState}
 							/>
 						} 
 					/>

@@ -1,4 +1,3 @@
-/* global cv */
 import React, { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import  * as mathjs  from 'mathjs';
 //importi './Viewer.css';
