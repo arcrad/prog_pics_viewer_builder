@@ -155,6 +155,8 @@ function MarkImageModal({
 					if(blob) {
 						console.log('update setFullResImageData');
 						setFullResImageData(URL.createObjectURL(blob));
+						renderScaledCanvas();
+						setIsLoaded(true);
 					}
 				});
 			}
@@ -170,8 +172,7 @@ function MarkImageModal({
 		
 	}, [currentEntry]);
 
-
-	useEffect( () => {
+	const renderScaledCanvas = () => {
 		//render scaled canvas
 		console.log('render scaled canvas, current entry id = ', currentEntry?.id);
 		if(!isModalVisible) {
@@ -235,9 +236,13 @@ function MarkImageModal({
 				if(!isLoaded) {
 					setRenderTrigger(Date.now());
 				}
-				setIsLoaded(true);
+				//setIsLoaded(true);
 			}
 		}
+	}
+
+	useEffect( () => {
+		renderScaledCanvas();
 	}, [currentEntry, renderTrigger, resizeCanary]);
 
 	let handleImageHover = (event:MouseEvent<HTMLCanvasElement>) => {
@@ -360,6 +365,7 @@ function MarkImageModal({
 			<div className="contentContainer">
 				<div className="header">
 					<h2>Mark Image</h2>	
+					<p>isLoaded = {isLoaded ? 'true' : 'false'}</p>
 					{/*
 					<div className="debugInfo">
 						<p>

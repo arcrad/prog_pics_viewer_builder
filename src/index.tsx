@@ -10,13 +10,16 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
+
 root.render(
   <React.StrictMode>
 		<App />
   </React.StrictMode>
 );
 
+
 //React.StrictMode causes double-rendering of components in certain cases, so removed below
+
 /*
 root.render(
 	<App />

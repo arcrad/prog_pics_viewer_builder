@@ -119,7 +119,7 @@ function App() {
 			setGlobalState( (cs):GlobalState => {
 				console.log(JSON.stringify(cs));
 				if(entries) {
-					let ns = { currentEntryId: entries[0].id || 0 };
+					let ns = { currentEntryId: entries[0]?.id || 0 };
 					return {...cs, ...ns};
 				}
 				return cs;
