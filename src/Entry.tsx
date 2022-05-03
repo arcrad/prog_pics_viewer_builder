@@ -309,7 +309,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 				{
 					entries?.map( entry =>
 						<li key={entry.id}>
-							{ entry.imageBlob && <img src={URL.createObjectURL(entry.imageBlob)} style={{maxWidth: "6rem"}} /> }
+							{ entry.thumbImageBlob && <img src={URL.createObjectURL(entry.thumbImageBlob)} style={{maxWidth: "6rem"}} /> }
 							{ ( entryIdBeingEdited === entry.id ) ? 
 								<div>
 									Weight: 

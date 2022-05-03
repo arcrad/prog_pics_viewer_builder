@@ -20,6 +20,7 @@ export type Entry = {
 	imageBlob?: File; 
 	imageNaturalWidth?: number;
 	imageNaturalHeight?: number;
+	thumbImageBlob?: Blob;
 	alignedImage?: string;
 	alignedImageBlob?: Blob;
 	marks?: MarkCollection;
