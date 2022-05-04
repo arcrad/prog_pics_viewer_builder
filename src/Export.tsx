@@ -82,11 +82,15 @@ function Export({
 			videoFramesArray.forEach ( (frame, index) => {
 				trackWriter.ready
 					.then( () => {
-						return trackWriter.write(frame);
+						let writeFrame = () => { 
+							trackWriter.write(frame);
+							setStatusMessages( cs => [...cs, `wrote frame ${index} to trackWriter`]);
+						};
+						return setTimeout( writeFrame, 5000*index)
 					})
 					.then( () => {
 						//frame written
-						setStatusMessages( cs => [...cs, `wrote frame ${index} to trackWriter`]);
+						//setStatusMessages( cs => [...cs, `wrote frame ${index} to trackWriter`]);
 	/*					if(index == videoFramesArray.length - 1) {
 							setStatusMessages( cs => [...cs, `wrote final frame to trackWriter`]);
 							resolve(1);
