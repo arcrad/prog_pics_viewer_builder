@@ -32,6 +32,7 @@ declare global {
 		showDirectoryPicker: any;
 		showOpenFilePicker: any;
 		VideoFrame: any;
+		MediaStreamTrackGenerator: any;
 	}
 };
 
