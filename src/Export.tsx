@@ -35,152 +35,135 @@ function Export({
 		console.log('handleExportVideo() called');
 		setStatusMessages(["begin generating video for export"]);
 		//let entries = await db.entries.orderBy('date').reverse().toArray();
-		let rawEntries = await db.entries.orderBy('date').toArray();
-		rawEntries = [ rawEntries[0], ...rawEntries, rawEntries[rawEntries.length-1]];
-		//entries = [ entries[0], ...entries, ...entries, ...entries,...entries, ...entries, ...entries, ...entries, ...entries, ...entries, entries[entries.length-1]];
-		let entries:Entry[] = [];
-		rawEntries.forEach( entry => {
-			for(let i=0; i < 30; i++) {
-				entries.push(entry);
-			}
-		});
+		let entries = await db.entries.orderBy('date').toArray();
 		setStatusMessages( cs => [...cs, "loaded entries from db"]);
 		console.log('entries = ');
 		console.dir(entries);
 		//setup constants
-		const frameDurationMillis = 15;
-		const frameDuration = frameDurationMillis;//*1000;
+		const frameDurationMillis = 75;
+		//const frameDuration = frameDurationMillis;//*1000;
+		const frameDuration = 5000*1000;
 		//generate images from blobs
 		let imagePromisesArray = entries.map( (entry) => {
 			if(entry.alignedImageBlob) {
 				return loadImageFromBlob(entry.alignedImageBlob);
 			}
 		});
-		Promise.all(imagePromisesArray).then( (alignedImages) => {
-			const videoFramesArray = alignedImages.map( (image, index) => {
-				//if(image) {
-					setStatusMessages( cs => [...cs, `generating frame: ${index}`]);
-					const newFrame = new window.VideoFrame(
-						image,
+		//setup media objects
+		const trackGenerator = new window.MediaStreamTrackGenerator({kind: 'video'});	
+		const trackWriter = trackGenerator.writable.getWriter();
+		setStatusMessages( cs => [...cs, "created MediaStreamTrackGenerator and trackWriter"]);
+		//const mediaStream = new window.MediaStream([trackGenerator]);
+		const videoCanvas = document.createElement('canvas');
+	 	setStatusMessages( cs => [...cs, 'created MediaStream']);
+		const canvasStream = videoCanvas.captureStream(60);
+		const mediaRecorder = new window.MediaRecorder(canvasStream, {
+			mimeType: 'video/webm;',
+			videoBitsPerSecond: 5000000
+		});
+		let recorderData:any[] = [];
+	 	setStatusMessages( cs => [...cs, 'created MediaRecorder']);
+
+		mediaRecorder.ondataavailable = (event) => {
+			setStatusMessages( cs => [...cs, `pushed data from mediaRecorder`]);
+			console.dir(event)
+			recorderData.push(event.data);
+		};
+		
+		let recorderStopped = new Promise( (resolve, reject) => {
+			mediaRecorder.onstop = resolve;
+		});
+		
+		recorderStopped.then( () => {
+			setStatusMessages( cs => [...cs, `mediaRecorder stopped`]);
+			console.dir(recorderData);
+			let recordedBlob = new Blob(recorderData, {type: "video/webm"});
+			if(videoElementRef.current) {
+				videoElementRef.current.src = URL.createObjectURL(recordedBlob);
+			}
+		});
+		
+		const subFrames = 25;
+
+		const delay = (ms:number) => new Promise( (resolve) => setTimeout(resolve, ms) );
+
+		//trackWriter.ready.then( async () => {
+			//mediaRecorder.onstart = async () => {
+		const doRecording = async () => {
+				mediaRecorder.start();
+			setStatusMessages( cs => [...cs, `started mediaRecorder state = ${mediaRecorder.state}`]);
+			const rawAlignedImages:any[] = await Promise.all(imagePromisesArray)
+			//const alignedImages = rawAlignedImages;
+			//const alignedImages = [rawAlignedImages[0], ...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
+			const alignedImages = [...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
+			const canvasWidth = rawAlignedImages[0].naturalWidth;
+			const canvasHeight = rawAlignedImages[0].naturalHeight;
+			videoCanvas.width = canvasWidth;
+			videoCanvas.height = canvasHeight;
+			const videoCanvasContext = videoCanvas.getContext('2d');
+			if(videoCanvasContext) {
+				for(let c = 0, max = alignedImages.length; c < max; c++) {
+					//	setStatusMessages( cs => [...cs, `generating frame: ${c}`]);
+						videoCanvasContext.clearRect( 0, 0, canvasWidth, canvasHeight);
+						videoCanvasContext.drawImage(alignedImages[c], 0, 0, canvasWidth, canvasHeight);
+						await delay(frameDurationMillis+75);
+						(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+				/*		(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+						await delay(frameDurationMillis);
+						videoCanvasContext.clearRect( 0, 0, canvasWidth, canvasHeight);
+						await delay(frameDurationMillis);
+						await delay(frameDurationMillis+500);
+						(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();*/
+				}
+			}
+						await delay(frameDurationMillis+200);
+			mediaRecorder.stop();
+		}
+		doRecording();
+			/*const alignedImages = [rawAlignedImages[0], ...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
+			for(let c = 0, max = alignedImages.length; c < max; c++) {
+				//alignedImages.forEach( (image, c) => {
+					//const max = alignedImages.length-1;
+					console.log(`c = ${c}, max = ${max}`);
+					//for( let i = 1; i < subFrames; i++) {
+					const baseFrame = new window.VideoFrame(
+						alignedImages[c],
 						{
-							duration: frameDuration,
-					//		timestamp: frameDuration*index
+							duration: 0//frameDuration,
+							//timestamp: frameDuration*index
 						}
 					);
-					console.dir(newFrame);
-					return newFrame;
-				//}
-			});
-			setStatusMessages( cs => [...cs, "finished generating frames"]);
-			console.log('frames = ');
-			console.dir(videoFramesArray);
-			const trackGenerator = new window.MediaStreamTrackGenerator({kind: 'video'});	
-			const trackWriter = trackGenerator.writable.getWriter();
-			setStatusMessages( cs => [...cs, "created window.MediaStreamTrackGenerator and trackWriter"]);
-
-
-	 				setStatusMessages( cs => [...cs, 'create MediaStream']);
-					const mediaStream = new window.MediaStream([trackGenerator]);
-					/*console.log('mediaStream = ');
-					console.dir(mediaStream);
-					if(videoElementRef.current) {
-						setStatusMessages( cs => [...cs, 'set video to mediaStream']);
-						videoElementRef.current.srcObject = mediaStream;
-					}*/
-			let mediaRecorder = new window.MediaRecorder(mediaStream, {
-				mimeType: 'video/webm;',
-				videoBitsPerSecond: 100000000
-			});
-			let recorderData:any[] = [];
-
-			mediaRecorder.ondataavailable = (event) => {
-				setStatusMessages( cs => [...cs, `pushed data from mediaRecorder`]);
-				console.dir(event)
-				recorderData.push(event.data);
-			};
-
-
-			let recorderStopped = new Promise( (resolve, reject) => {
-				mediaRecorder.onstop = resolve;
-			});
-
-			recorderStopped.then( () => {
-				setStatusMessages( cs => [...cs, `mediaRecorder stopped`]);
-				console.dir(recorderData);
-				let recordedBlob = new Blob(recorderData, {type: "video/webm"});
-				
-				if(videoElementRef.current) {
-					videoElementRef.current.src = URL.createObjectURL(recordedBlob);
-				}
-			});
-			trackWriter.ready.then( () => {
-				mediaRecorder.start();
-				setStatusMessages( cs => [...cs, `started mediaRecorder state = ${mediaRecorder.state}`]);
-			});
-		//	(new Promise( (resolve, reject) => {
-			videoFramesArray.forEach ( (frame, index) => {
-				trackWriter.ready
-					.then( () => {
-					let writeFrame = () => { 
-							trackWriter.write(frame);
-							setStatusMessages( cs => [...cs, `wrote frame ${index} to trackWriter`]);
+						//	trackWriter.write(baseFrame);
+					//		setStatusMessages( cs => [...cs, `wrote frame ${c} to trackWriter`]);
+				//			mediaRecorder.requestData();
+						//await delay(frameDurationMillis+5050);
+					//Array.from({length: subFrames}, (x, i) => i+1).forEach( (i) => {
+					for(let i = 1; i < subFrames; i++) {
+					setStatusMessages( cs => [...cs, `generating frame: ${(c*subFrames)+i}`]);
+						const newFrame = baseFrame.clone();
+							trackWriter.write(newFrame);
+							newFrame.close();
+							setStatusMessages( cs => [...cs, `wrote frame ${(c*subFrames)+i} to trackWriter`]);
 							mediaRecorder.requestData();
-						if(index == videoFramesArray.length - 1) {
-							//resolve(1);
-							setTimeout( () => {
-								setStatusMessages( cs => [...cs, `wrote final frame to trackWriter`]);
-								//mediaRecorder.stop();
-								trackWriter.close();
-								setStatusMessages( cs => [...cs, `stopped, mediaRecorder state = ${mediaRecorder.state}`]);
-							}, frameDurationMillis)
-						}
-						};
-						return setTimeout( writeFrame, frameDurationMillis*(index+1))
-					})
-					.then( () => {
-						//frame written
-						//setStatusMessages( cs => [...cs, `wrote frame ${index} to trackWriter`]);
-					/*	if(index == videoFramesArray.length - 1) {
-							//resolve(1);
-							setTimeout( () => {
-								setStatusMessages( cs => [...cs, `wrote final frame to trackWriter`]);
-								mediaRecorder.stop();
-							}, 5000)
-						}*/
-					});
-			});
-		//	})).then( () => {
-			trackWriter.ready
-				.then( () => {
-				//	trackWriter.close();
-				})
-				.then( () => {
-					//setStatusMessages( cs => [...cs, `all frames written. closed trackWriter`]);
-					console.log('trackGenerator = ');
-					console.dir(trackGenerator);
-//					trackGenerator.stop();
-				})
-				.then( () => {
-					
-/*	
-	 				setStatusMessages( cs => [...cs, 'create MediaStream']);
-					trackGenerator.enabled = true;
-					//const mediaStream = new window.MediaStream([trackGenerator]);
-					const mediaStream = new window.MediaStream();
-					console.log('mediaStream = ');
-					console.dir(mediaStream);
-					if(videoElementRef.current) {
-						setStatusMessages( cs => [...cs, 'set video to mediaStream']);
-						videoElementRef.current.srcObject = mediaStream;
-					}
-					//mediaStream.addTrack(trackGenerator);
-					console.log('mediaStream.getVideoTracks() = ');
-					console.dir(mediaStream.getVideoTracks());
-	*/				
+						await delay(frameDurationMillis);
+						console.log(`delay = ${10000+(frameDurationMillis*((c*subFrames)+i))}`);
+					};
+					baseFrame.close();
+				}
+						await delay(frameDurationMillis);
+									trackWriter.close();
+/*
+				initialPromise = initialPromise.then( () => {
+									setStatusMessages( cs => [...cs, `wrote final frame to trackWriter. closing trackWriter`]);
+									trackWriter.close();
+									setStatusMessages( cs => [...cs, `mediaRecorder state = ${mediaRecorder.state}`]);
 				});
-			
-	//	});
-		});
+*/
+				//setStatusMessages( cs => [...cs, "finished generating frames"]);
+				//console.log('frames = ');
+				//console.dir(videoFramesArray);
+				//};
+			//});
 	};
 
 	 return (
