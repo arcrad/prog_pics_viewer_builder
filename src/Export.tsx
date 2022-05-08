@@ -74,9 +74,10 @@ function Export({
 		//const mediaStream = new window.MediaStream([trackGenerator]);
 		const videoCanvas = document.createElement('canvas');
 	 	setStatusMessages( cs => [...cs, 'created MediaStream']);
-		const canvasStream = videoCanvas.captureStream(60);
-		//const mediaRecorder = new window.MediaRecorder(canvasStream, {
-		const mediaRecorder = new window.MediaRecorder(PIXIApp.view.captureStream(120), {
+		const canvasStream = videoCanvas.captureStream(0);
+		const PIXICanvasStream = PIXIApp.view.captureStream(0);
+		const mediaRecorder = new window.MediaRecorder(canvasStream, {
+		//const mediaRecorder = new window.MediaRecorder(PIXICanvasStream, {
 			mimeType: 'video/webm;',
 			videoBitsPerSecond: 5000000
 		});
@@ -112,17 +113,31 @@ function Export({
 		const doRecording = async () => {
 			//await delay(500);
 			const rawAlignedImages:any[] = await Promise.all(imagePromisesArray)
-			const alignedImages = rawAlignedImages.slice(0);
+			//const alignedImages = rawAlignedImages.slice(0);
 			//const alignedImages = [rawAlignedImages[0], ...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
+			const alignedImages = [...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
 			const imageSprites:any[] = alignedImages.map( (image) => {
 				setStatusMessages( cs => [...cs, `generated sprite from image`]);
 				return PIXI.Sprite.from(image);
 			});
-			//const alignedImages = [...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
-			const canvasWidth = rawAlignedImages[0].naturalWidth;
-			const canvasHeight = rawAlignedImages[0].naturalHeight;
-			videoCanvas.width = canvasWidth;
-			videoCanvas.height = canvasHeight;
+			//landscape
+			//let canvasWidth = 1280;
+			//let canvasHeight = 720;
+				//portrait or square
+				const imageRatio = rawAlignedImages[0].naturalHeight/1280;
+				let scaledImageWidth = rawAlignedImages[0].naturalWidth/imageRatio;
+				console.log(`scaledImageWidth = ${rawAlignedImages[0].naturalWidth}/${imageRatio}`);
+				let scaledImageHeight = 1280;
+			if(rawAlignedImages[0].naturalWidth > rawAlignedImages[0].naturalHeight) {
+				//landscape
+				console.log('landscape');
+				const imageRatio = rawAlignedImages[0].naturalWidth/1280;
+				scaledImageWidth = 1280;
+				scaledImageHeight = rawAlignedImages[0].naturalHeight/imageRatio;
+			}
+			console.log(`videoCanvas.width = ${scaledImageWidth} videoCanvas.height = ${scaledImageHeight}`);
+			videoCanvas.width = scaledImageWidth;
+			videoCanvas.height = scaledImageHeight;
 			
 			//PIXIApp.width = canvasWidth;
 			//PIXIApp.height = canvasHeight;
@@ -133,7 +148,19 @@ function Export({
 				PIXIApp.stage.addChild(sprite);
 				console.dir(sprite);
 			});
+			
 				
+			let scaledImageCanvases:HTMLCanvasElement[] = alignedImages.map( (image) => {
+					const scaledCanvas = document.createElement('canvas');
+					scaledCanvas.width = scaledImageWidth;
+					scaledCanvas.height = scaledImageHeight;
+					const scaledCanvasContext = scaledCanvas.getContext('2d');
+					if(scaledCanvasContext) {
+						scaledCanvasContext.drawImage(image, 0, 0, rawAlignedImages[0].naturalWidth, rawAlignedImages[0].naturalHeight, 0, 0, scaledImageWidth, scaledImageHeight);
+					}
+					return scaledCanvas;
+			});
+
 			const videoCanvasContext = videoCanvas.getContext('2d');
 			if(videoCanvasContext) {
 				videoCanvasContext.fillStyle = 'red';
@@ -144,31 +171,59 @@ function Export({
 				mediaRecorder.start();
 				//PIXIApp.ticker.stop();
 			setStatusMessages( cs => [...cs, `started mediaRecorder state = ${mediaRecorder.state}`]);
-				let prevTime = window.performance.now();
+				let prevTime = Date.now();
+				let initialTime = Date.now();
+				for(let c = 0, max = scaledImageCanvases.length; c < max; c++) {
 				//for(let c = 0, max = alignedImages.length; c < max; c++) {
-				for(let c = 0, max = imageSprites.length; c < max; c++) {
-						const now = window.performance.now();
+				//for(let c = 0, max = imageSprites.length; c < max; c++) {
+						const now = Date.now();
 					//	setStatusMessages( cs => [...cs, `generating frame: ${c}`]);
-						setStatusMessages( cs => [...cs, `start draw frame = ${c}`]);
-						console.log(`start draw frame = ${c}`);
-						//videoCanvasContext.cleiarRect( 0, 0, canvasWidth, canvasHeight);
-						//videoCanvasContext.drawImage(alignedImages[c], 0, 0, canvasWidth, canvasHeight);
+						//setStatusMessages( cs => [...cs, `start draw frame = ${c}`]);
+						//console.log(`start draw frame = ${c}`);
+						let renderFrame = () => {
+							console.log(`renderFrame() time = ${Date.now()-initialTime}`);
+							console.log(`start draw frame = ${c}`);
+							videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+							videoCanvasContext.drawImage(scaledImageCanvases[c], 0, 0);
+						};
+						let captureFrame = () => {
+							console.log(`capture frame = ${c}`);
+							(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+						};
+						let stopRecording = () => {
+							if(c == max-1) {
+							setTimeout( () => {
+							console.log('STOP');
+							mediaRecorder.stop();
+							}, 2000);
+							}
+						}
+
+						//videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+						//videoCanvasContext.drawImage(scaledImageCanvases[c], 0, 0);
+						//videoCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
+						//videoCanvasContext.fillText(`TIME: ${now}`, 10, 100);
+						//videoCanvasContext.fillText(`DELTA: ${now-prevTime}`, 10, 150);
+						//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
 						//if( c > 0) {
 						//imageSprites[c-1].x = -canvasWidth;
 						//imageSprites[c-1].y = -canvasHeight;
 						//}
 						//imageSprites[c].x = 0;
 						//imageSprites[c].y = 0;
-						imageSprites[c].visible = true;
+						////////////////////////////////////////////imageSprites[c].visible = true;
 					//PIXIApp.ticker.update();
-						mediaRecorder.requestData();
+						//mediaRecorder.requestData();
 						//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
 						//mediaRecorder.requestData();
-						await delay(frameDurationMs);
+						//await delay(frameDurationMs);
+						setTimeout( renderFrame, 1000+(frameDurationMs*(c+1)));
+						setTimeout( captureFrame, 1000+(frameDurationMs*(c+1)));
+						setTimeout( stopRecording, 1000+(frameDurationMs*(c+1)));
+						//(PIXICanvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+						//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
 						console.log(`TIME: ${now} DELTA: ${now-prevTime}`);
 						//videoCanvasContext.clearRect( 0, 0, canvasWidth, canvasHeight);
-						//videoCanvasContext.fillText(`TIME: ${now}`, 10, 50);
-						//videoCanvasContext.fillText(`DELTA: ${now-prevTime}`, 10, 100);
 					//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
 					//	mediaRecorder.requestData();
 						
@@ -183,9 +238,13 @@ function Export({
 						(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();*/
 				}
 			}
-						mediaRecorder.requestData();
-						await delay(250);
+						//mediaRecorder.requestData();
+						//await delay(250);
+		/*	setTimeout( () => {
+		//		console.log('STOP');
 			mediaRecorder.stop();
+			}, 1000);
+*/
 			PIXIApp.destroy();
 		}
 		doRecording();
