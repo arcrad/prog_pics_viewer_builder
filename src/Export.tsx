@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
+import React, { useState, useRef, useEffect, Dispatch, SetStateAction, ChangeEvent } from 'react';
 import  * as mathjs  from 'mathjs';
 import * as PIXI from 'pixi.js';
 
@@ -17,10 +17,31 @@ function Export({
 	setGlobalState
 }: ExportAttributes) { 
 	let [statusMessages, setStatusMessages] = useState<string[]>([]);
+	let [frameDuration, setFrameDuration] = useState<number>(150);
 
+	const initializedRef = useRef<boolean>(false);
 	const videoElementRef = useRef<HTMLVideoElement|null>(null);
 	const videoSourceElementRef = useRef<HTMLSourceElement|null>(null);
 	const frameDurationInputRef = useRef<HTMLInputElement|null>(null);
+
+	useEffect( () => {
+		if(initializedRef.current) {
+			return;
+		}
+		console.log('intialize settings from DB started');
+		initializedRef.current = true;
+		Promise.all([
+			db.settings.get('exportFrameDuration')
+		]).then( ([
+			_exportFrameDurationSetting
+		]) => {
+			console.log('intialize settings from DB finished');
+			if(_exportFrameDurationSetting) {
+				console.log(`set frameDuration to ${_exportFrameDurationSetting.value}`);
+				setFrameDuration(_exportFrameDurationSetting.value);
+			}
+		});
+	}, []);
 
 	function loadImageFromBlob(blob:Blob):Promise<HTMLImageElement> {
 			return new Promise( (resolve, reject) => {
@@ -51,7 +72,13 @@ function Export({
 		if(frameDurationInputRef.current) {
 			const frameDurationInputRefValue = parseInt(frameDurationInputRef.current.value as string);
 			if(frameDurationInputRefValue) {
-				frameDurationMs = frameDurationInputRefValue < 5 ? 5 : frameDurationInputRefValue > 2500 ? 2500 : frameDurationInputRefValue;
+				frameDurationMs = frameDurationInputRefValue < 50 ? 
+					50 
+					: 
+					frameDurationInputRefValue > 2500 ? 
+						2500 
+						: 
+						frameDurationInputRefValue;
 			}
 		}
 	 	setStatusMessages( cs => [...cs, `frameDurationMs = ${frameDurationMs}`]);
@@ -66,18 +93,10 @@ function Export({
 		if(!(entries[0] && entries[0].alignedImageBlob)) {
 			return;
 		}
-		let firstImage:HTMLImageElement = await loadImageFromBlob(entries[0].alignedImageBlob);
-		const PIXIApp = new PIXI.Application({width: firstImage.naturalWidth, height: firstImage.naturalHeight});
-		const trackGenerator = new window.MediaStreamTrackGenerator({kind: 'video'});	
-		const trackWriter = trackGenerator.writable.getWriter();
-		setStatusMessages( cs => [...cs, "created MediaStreamTrackGenerator and trackWriter"]);
-		//const mediaStream = new window.MediaStream([trackGenerator]);
 		const videoCanvas = document.createElement('canvas');
 	 	setStatusMessages( cs => [...cs, 'created MediaStream']);
 		const canvasStream = videoCanvas.captureStream(0);
-		const PIXICanvasStream = PIXIApp.view.captureStream(0);
 		const mediaRecorder = new window.MediaRecorder(canvasStream, {
-		//const mediaRecorder = new window.MediaRecorder(PIXICanvasStream, {
 			mimeType: 'video/webm;',
 			videoBitsPerSecond: 5000000
 		});
@@ -108,29 +127,19 @@ function Export({
 		const delay = (ms:number) => new Promise( (resolve) => setTimeout(resolve, ms) );
 		
 
-		//trackWriter.ready.then( async () => {
-			//mediaRecorder.onstart = async () => {
 		const doRecording = async () => {
-			//await delay(500);
 			const rawAlignedImages:any[] = await Promise.all(imagePromisesArray)
 			//const alignedImages = rawAlignedImages.slice(0);
 			//const alignedImages = [rawAlignedImages[0], ...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
 			const alignedImages = [...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
-			const imageSprites:any[] = alignedImages.map( (image) => {
-				setStatusMessages( cs => [...cs, `generated sprite from image`]);
-				return PIXI.Sprite.from(image);
-			});
-			//landscape
-			//let canvasWidth = 1280;
-			//let canvasHeight = 720;
-				//portrait or square
-				const imageRatio = rawAlignedImages[0].naturalHeight/1280;
-				let scaledImageWidth = rawAlignedImages[0].naturalWidth/imageRatio;
-				console.log(`scaledImageWidth = ${rawAlignedImages[0].naturalWidth}/${imageRatio}`);
-				let scaledImageHeight = 1280;
+			//scale images and contrain to 720p dimensions
+			//portrait or square
+			const imageRatio = rawAlignedImages[0].naturalHeight/1280;
+			let scaledImageWidth = rawAlignedImages[0].naturalWidth/imageRatio;
+			console.log(`scaledImageWidth = ${rawAlignedImages[0].naturalWidth}/${imageRatio}`);
+			let scaledImageHeight = 1280;
 			if(rawAlignedImages[0].naturalWidth > rawAlignedImages[0].naturalHeight) {
 				//landscape
-				console.log('landscape');
 				const imageRatio = rawAlignedImages[0].naturalWidth/1280;
 				scaledImageWidth = 1280;
 				scaledImageHeight = rawAlignedImages[0].naturalHeight/imageRatio;
@@ -139,164 +148,104 @@ function Export({
 			videoCanvas.width = scaledImageWidth;
 			videoCanvas.height = scaledImageHeight;
 			
-			//PIXIApp.width = canvasWidth;
-			//PIXIApp.height = canvasHeight;
-			imageSprites.forEach( (sprite) => {
-				//sprite.x = -canvasWidth;
-				//sprite.y = -canvasHeight;
-				sprite.visible = false;
-				PIXIApp.stage.addChild(sprite);
-				console.dir(sprite);
-			});
-			
-				
 			let scaledImageCanvases:HTMLCanvasElement[] = alignedImages.map( (image) => {
-					const scaledCanvas = document.createElement('canvas');
-					scaledCanvas.width = scaledImageWidth;
-					scaledCanvas.height = scaledImageHeight;
-					const scaledCanvasContext = scaledCanvas.getContext('2d');
-					if(scaledCanvasContext) {
-						scaledCanvasContext.drawImage(image, 0, 0, rawAlignedImages[0].naturalWidth, rawAlignedImages[0].naturalHeight, 0, 0, scaledImageWidth, scaledImageHeight);
-					}
-					return scaledCanvas;
+				const scaledCanvas = document.createElement('canvas');
+				scaledCanvas.width = scaledImageWidth;
+				scaledCanvas.height = scaledImageHeight;
+				const scaledCanvasContext = scaledCanvas.getContext('2d');
+				if(scaledCanvasContext) {
+					scaledCanvasContext.drawImage(
+						image, 
+						0, 
+						0, 
+						rawAlignedImages[0].naturalWidth, 
+						rawAlignedImages[0].naturalHeight, 
+						0, 
+						0, 
+						scaledImageWidth, 
+						scaledImageHeight
+					);
+				}
+				return scaledCanvas;
 			});
 
 			const videoCanvasContext = videoCanvas.getContext('2d');
 			if(videoCanvasContext) {
 				videoCanvasContext.fillStyle = 'red';
 				videoCanvasContext.font = '42px serif';
-				//videoCanvasContext.drawImage(rawAlignedImages[0], 0, 0, canvasWidth, canvasHeight);
 				//await delay();
 				setStatusMessages( cs => [...cs, `start draw loop`]);
+				setStatusMessages( cs => [...cs, `started mediaRecorder state = ${mediaRecorder.state}`]);
+				//draw initial filler frame
+				videoCanvasContext.fillRect(0, 0, scaledImageWidth, scaledImageHeight);
+				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+				await delay(frameDurationMs);
+				videoCanvasContext.fillRect(0, 0, scaledImageWidth, scaledImageHeight);
+				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+				await delay(frameDurationMs);
 				mediaRecorder.start();
-				//PIXIApp.ticker.stop();
-			setStatusMessages( cs => [...cs, `started mediaRecorder state = ${mediaRecorder.state}`]);
 				let prevTime = Date.now();
-				let initialTime = Date.now();
 				for(let c = 0, max = scaledImageCanvases.length; c < max; c++) {
-				//for(let c = 0, max = alignedImages.length; c < max; c++) {
-				//for(let c = 0, max = imageSprites.length; c < max; c++) {
-						const now = Date.now();
-					//	setStatusMessages( cs => [...cs, `generating frame: ${c}`]);
-						//setStatusMessages( cs => [...cs, `start draw frame = ${c}`]);
-						//console.log(`start draw frame = ${c}`);
-						let renderFrame = () => {
-							console.log(`renderFrame() time = ${Date.now()-initialTime}`);
-							console.log(`start draw frame = ${c}`);
-							videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
-							videoCanvasContext.drawImage(scaledImageCanvases[c], 0, 0);
-						};
-						let captureFrame = () => {
-							console.log(`capture frame = ${c}`);
-							(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-						};
-						let stopRecording = () => {
-							if(c == max-1) {
-							setTimeout( () => {
-							console.log('STOP');
-							mediaRecorder.stop();
-							}, 2000);
-							}
-						}
-
-						//videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
-						//videoCanvasContext.drawImage(scaledImageCanvases[c], 0, 0);
-						//videoCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
-						//videoCanvasContext.fillText(`TIME: ${now}`, 10, 100);
-						//videoCanvasContext.fillText(`DELTA: ${now-prevTime}`, 10, 150);
-						//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-						//if( c > 0) {
-						//imageSprites[c-1].x = -canvasWidth;
-						//imageSprites[c-1].y = -canvasHeight;
-						//}
-						//imageSprites[c].x = 0;
-						//imageSprites[c].y = 0;
-						////////////////////////////////////////////imageSprites[c].visible = true;
-					//PIXIApp.ticker.update();
-						//mediaRecorder.requestData();
-						//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-						//mediaRecorder.requestData();
-						//await delay(frameDurationMs);
-						setTimeout( renderFrame, 1000+(frameDurationMs*(c+1)));
-						setTimeout( captureFrame, 1000+(frameDurationMs*(c+1)));
-						setTimeout( stopRecording, 1000+(frameDurationMs*(c+1)));
-						//(PIXICanvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-						//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-						console.log(`TIME: ${now} DELTA: ${now-prevTime}`);
-						//videoCanvasContext.clearRect( 0, 0, canvasWidth, canvasHeight);
+					const now = Date.now();
+					setStatusMessages( cs => [...cs, `generating frame: ${c}`]);
+					console.log(`renderFrame() time = ${now-prevTime}`);
+					console.log(`start draw frame = ${c}`);
+					videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+					videoCanvasContext.drawImage(scaledImageCanvases[c], 0, 0);
+					(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+					//videoCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
+					//videoCanvasContext.fillText(`TIME: ${now}`, 10, 100);
+					//videoCanvasContext.fillText(`DELTA: ${now-prevTime}`, 10, 150);
+					//mediaRecorder.requestData();
+					await delay(frameDurationMs);
 					//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-					//	mediaRecorder.requestData();
-						
-						//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-						//setStatusMessages( cs => [...cs, `end draw frame = ${c}`]);
-						prevTime = now;
-				/*		(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-						await delay(frameDurationMillis);
-						videoCanvasContext.clearRect( 0, 0, canvasWidth, canvasHeight);
-						await delay(frameDurationMillis);
-						await delay(frameDurationMillis+500);
-						(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();*/
-				}
+					console.log(`TIME: ${now} DELTA: ${now-prevTime}`);
+					prevTime = now;
+				}		
 			}
-						//mediaRecorder.requestData();
-						//await delay(250);
-		/*	setTimeout( () => {
-		//		console.log('STOP');
+			await delay(250);
 			mediaRecorder.stop();
-			}, 1000);
-*/
-			PIXIApp.destroy();
 		}
 		doRecording();
-			/*const alignedImages = [rawAlignedImages[0], ...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
-			for(let c = 0, max = alignedImages.length; c < max; c++) {
-				//alignedImages.forEach( (image, c) => {
-					//const max = alignedImages.length-1;
-					console.log(`c = ${c}, max = ${max}`);
-					//for( let i = 1; i < subFrames; i++) {
-					const baseFrame = new window.VideoFrame(
-						alignedImages[c],
-						{
-							duration: 0//frameDuration,
-							//timestamp: frameDuration*index
-						}
-					);
-						//	trackWriter.write(baseFrame);
-					//		setStatusMessages( cs => [...cs, `wrote frame ${c} to trackWriter`]);
-				//			mediaRecorder.requestData();
-						//await delay(frameDurationMillis+5050);
-					//Array.from({length: subFrames}, (x, i) => i+1).forEach( (i) => {
-					for(let i = 1; i < subFrames; i++) {
-					setStatusMessages( cs => [...cs, `generating frame: ${(c*subFrames)+i}`]);
-						const newFrame = baseFrame.clone();
-							trackWriter.write(newFrame);
-							newFrame.close();
-							setStatusMessages( cs => [...cs, `wrote frame ${(c*subFrames)+i} to trackWriter`]);
-							mediaRecorder.requestData();
-						await delay(frameDurationMillis);
-						console.log(`delay = ${10000+(frameDurationMillis*((c*subFrames)+i))}`);
-					};
-					baseFrame.close();
-				}
-						await delay(frameDurationMillis);
-									trackWriter.close();
-/*
-				initialPromise = initialPromise.then( () => {
-									setStatusMessages( cs => [...cs, `wrote final frame to trackWriter. closing trackWriter`]);
-									trackWriter.close();
-									setStatusMessages( cs => [...cs, `mediaRecorder state = ${mediaRecorder.state}`]);
-				});
-*/
-				//setStatusMessages( cs => [...cs, "finished generating frames"]);
-				//console.log('frames = ');
-				//console.dir(videoFramesArray);
-				//};
-			//});
 	};
+
+	let debounceInputTimeout = useRef(0);
+	const handleInputChange = async (event:ChangeEvent<HTMLInputElement>) => {
+		console.group('handleInputChange() called');
+		if(
+			event.target
+			&& event.target instanceof HTMLInputElement
+			&& event.target.dataset.settingsKeyToModify
+		) {
+			let settingsKeyToModify = event.target.dataset.settingsKeyToModify;
+			let newValue = parseInt(event.target.value as string);
+			console.log('settingsKeyToModify = ', settingsKeyToModify);
+			console.log('value = ', newValue);
+			if(event.target.dataset.settingsKeyToModify === 'exportFrameDuration') {
+				setFrameDuration(newValue);
+			}
+			clearTimeout(debounceInputTimeout.current);
+			let modifyDbValueHandler = async () => {
+					console.log('fire update db with new input', newValue, settingsKeyToModify);
+						try {
+							const id = await db.settings.put(
+								{ key: settingsKeyToModify, value: newValue }, 
+							);
+							console.log('new id =', id);
+						} catch(error) {
+							console.error(`failed to add db entry. ${error}`);
+						}
+			};
+			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);
+		}
+		console.groupEnd();
+	};
+
 
 	 return (
     <div>
-    	<h2>Export</h2>
+    	<h2>Export Video Locally (Experimental)</h2>
+			<p>Exports video of progress pictures completely in-browser and local to your device. Currently not very consistent at low frame durations (faster timelapse). Export occurs in real-time.</p>
 			<button
 				type="button"
 				onClick={handleExportVideo}
@@ -306,20 +255,30 @@ function Export({
 			<input
 				ref={frameDurationInputRef}
 				type="number"
+				value={frameDuration}
+				onChange={handleInputChange}
+				data-settings-key-to-modify="exportFrameDuration" 
 				max="2000"
 				min="100"
 			/>
 			<p>Status:</p>
-			<ul>
-			{
-				statusMessages?.map( (message, index) => {
-					return <li key={index}>{message}</li>
-				})
-			}
-			</ul>
+			<div style={{
+				border: '1px solid black',
+				padding: '0rem',
+				height: '5rem',
+				overflow: 'auto scroll'
+			}}>
+				<ul>
+				{
+					statusMessages?.map( (message, index) => {
+						return <li key={index}>{message}</li>
+					})
+				}
+				</ul>
+			</div>
 			<hr/>
 			<h2>Output Video</h2>
-			<video ref={videoElementRef} controls autoPlay width="350">
+			<video ref={videoElementRef} controls width="350">
 			</video>
 		</div>
   );
