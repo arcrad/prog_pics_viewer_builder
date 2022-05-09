@@ -138,6 +138,12 @@ function Viewer({
 		});
 	}, []);
 
+	
+	let baseImage:HTMLImageElement|null = null;
+	let warpedImageCanvas:HTMLCanvasElement|null = null;
+	let scaledImageCanvas:HTMLCanvasElement|null = null;
+	let croppedImageCanvas:HTMLCanvasElement|null = null;
+
 	const processEntry = (entryToProcess:Entry, chosenEntryImageNaturalWidth:number, chosenEntryImageNaturalHeight:number):Promise<number> => {
 		console.log('processEntry() called');
 		return new Promise( (resolve, reject) => {
@@ -145,8 +151,12 @@ function Viewer({
 				reject();
 			}
 			console.log(`start processing entry with id = ${entryToProcess.id}`);
-			let baseImage = new Image();
+			//let baseImage:HTMLImageElement|null = new Image();
+			baseImage = new Image();
 			baseImage.onload = async () => {
+				if(!baseImage) {
+					return;
+				}
 				//log marks
 				//console.log('marks =', entryToProcess.marks);
 				//console.log('mark A = ', entryToProcess.marks?.A);
@@ -185,7 +195,8 @@ function Viewer({
 				const xformMatrix = mathjs.multiply(destinationMatrix, invertedSourceMatrix);	
 				//console.dir(xformMatrix);
 				//console.dir([...xformMatrix[0],...xformMatrix[1]]);
-				let warpedImageCanvas = document.createElement('canvas');
+				//let warpedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
+				warpedImageCanvas = document.createElement('canvas');
 				warpedImageCanvas.width = chosenEntryImageNaturalWidth;
 				warpedImageCanvas.height = chosenEntryImageNaturalHeight;
 				let warpedImageCanvasContext = warpedImageCanvas.getContext('2d');
@@ -207,7 +218,8 @@ function Viewer({
 					);
 				}
 				//scale baseImage
-				let scaledImageCanvas = document.createElement('canvas');
+				//let scaledImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
+				scaledImageCanvas = document.createElement('canvas');
 				scaledImageCanvas.width = scaleWidthSettingRef.current;
 				scaledImageCanvas.height = scaleHeightSettingRef.current; 
 				let scaledImageCanvasContext = scaledImageCanvas.getContext('2d');
@@ -225,7 +237,8 @@ function Viewer({
 				const croppedImageWidth = originalCoordinatesFromDbRef.current[2].value - originalCoordinatesFromDbRef.current[0].value;
 				const croppedImageHeight = originalCoordinatesFromDbRef.current[7].value - originalCoordinatesFromDbRef.current[1].value;
 				//create cropped image
-				let croppedImageCanvas = document.createElement('canvas');
+				//let croppedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
+				croppedImageCanvas = document.createElement('canvas');
 				croppedImageCanvas.width = croppedImageWidth;
 				croppedImageCanvas.height = croppedImageHeight;
 				console.log(`croppedImageCanvas.width = ${croppedImageWidth}, croppedImageCanvas.height = ${croppedImageHeight}`);
@@ -250,6 +263,12 @@ function Viewer({
 							alignedImageBlob: blob
 						}).then( () => {
 							console.log('processed entry! id=', entryToProcess.id);
+							//attempt to guide garbage collector to free the resources
+							baseImage = null;
+							warpedImageCanvas = null;
+							scaledImageCanvas = null;
+							croppedImageCanvas = null;
+							blob = null;
 							setEntriesProcessed( cs => cs+1);
 							resolve(0);
 						});
@@ -271,7 +290,7 @@ function Viewer({
 		let chosenEntryImage = new Image();
 		chosenEntryImage.onload = () => {
 			let entriesToProcess:Promise<number>[] = [];
-			sortedEntriesRef.current.forEach( entry => {
+			/*sortedEntriesRef.current.forEach( entry => {
 				entriesToProcess.push(processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight));
 				//entriesToProcess.push(processEntry(entry));
 			});
@@ -286,6 +305,24 @@ function Viewer({
 					setEntries(_entries);
 				});
 			});
+			*/
+			sortedEntriesRef.current.forEach( async (entry, index) => {
+				/*await (new Promise( (resolve, reject) => {
+					processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
+				});*/
+				setTimeout( async () => {
+					await processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
+				}, 1000);
+				//await processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
+			});
+			setProcessingState('complete');
+			console.log('all entries have been processed');
+			db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
+				let _allEntriesHaveAlignedImage = checkAllEntriesHaveAlignedImage(_entries);
+				setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage);
+				//setEntries(sortedEntriesRef.current);
+				setEntries(_entries);
+			});	
 		}
 		
 		if(chosenEntryRef.current && chosenEntryRef.current.imageBlob) {
