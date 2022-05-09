@@ -33,4 +33,7 @@
 
 +store image natural dimensions in DB so they dont have to be re-calculated on the fly by loading image
 
++add check for viewer that adjustment image (image selected for adjustment) exists
 
++improve overall data/state validation and warning display
+	+potentially modularize and make global

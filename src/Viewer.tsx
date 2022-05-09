@@ -19,6 +19,7 @@ function Viewer({
 	let [processingState, setProcessingState] = useState('unstarted');
 	let [entries, setEntries] = useState<Entry[]>([]);
 	let [currentEntry, setCurrentEntry] = useState(0);
+	let [allEntriesHaveAlignedImage, setAllEntriesHaveAlignedImage] = useState(false);
 	
 	const initializedRef = useRef(false);
 	const originalCoordinatesFromDbRef = useRef<any[]>([]);
@@ -27,6 +28,17 @@ function Viewer({
 	const sortedEntriesRef = useRef<Entry[]>([]);
 	const chosenEntryIdForAdjustmentsSettingRef = useRef<Setting | null>(null);
 	const chosenEntryRef = useRef<Entry | null>(null);
+
+	const checkAllEntriesHaveAlignedImage = (_entries:Entry[]) => {
+		return _entries.reduce( (accumulator, entry) => {
+			console.log('checking entries for alignedimage');
+			if(!entry.alignedImageBlob) {
+				console.log('entry doesnt have aligned image');
+				accumulator = false;
+			} 
+			return accumulator;
+		}, true);
+	};
 
 	useEffect( () => {
 		//fetch all initial data and then set intializedData flag 	
@@ -71,6 +83,12 @@ function Viewer({
 				//	originalCoordinatesFromDbRef.current = coordinates;
 				if(_sortedEntries) {
 					sortedEntriesRef.current = _sortedEntries;
+					let _allEntriesHaveAlignedImage = checkAllEntriesHaveAlignedImage(_sortedEntries);
+					setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage);
+					if(_allEntriesHaveAlignedImage) {
+						console.log(`_allEntriesHaveAlignedImage = ${_allEntriesHaveAlignedImage}`);
+						setEntries(_sortedEntries);
+					}
 				}
 
 				originalCoordinatesFromDbRef.current = [
@@ -262,6 +280,8 @@ function Viewer({
 				setProcessingState('complete');
 				console.log('all entries have been processed');
 				db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
+					let _allEntriesHaveAlignedImage = checkAllEntriesHaveAlignedImage(_entries);
+					setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage);
 					//setEntries(sortedEntriesRef.current);
 					setEntries(_entries);
 				});
@@ -306,7 +326,11 @@ function Viewer({
 				</p>
 				<hr/>
 				<h2>Processed Entries</h2>
-				{ entries.length == 0 && <p>none yet</p> }
+				<p>
+					Do all entries have an aligned image?  
+					{allEntriesHaveAlignedImage ? ' Yes' : <> No (Click <b>Process Entries</b> button)</>}
+				</p>
+				{ entries.length == 0 && <p>Currently no processed images...</p> }
 				{/*
 				<ol>
 				{
