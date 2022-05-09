@@ -168,6 +168,39 @@ function EntryComponent({
 		}
 	};
 
+	const handleDuplicateEntry = async (event:MouseEvent<HTMLButtonElement>) => {
+		//console.dir(imageUploadRef.current);
+		console.log("handle duplicate entry..");
+		if(event.target && event.target instanceof HTMLButtonElement && event.target.dataset.entryId) {
+			console.log(`entryId to duplicate = ${event.target.dataset.entryId}`);
+			const date = ((new Date()).toISOString()).substring(0, 16);
+			let entryToDuplicate = await db.entries.get(parseInt(event.target.dataset.entryId as string));
+			//datetime needs to be more robust
+			if(entryToDuplicate) {
+				try {
+					const id = await db.entries.add({
+						date: date,//entryToDuplicate.date,
+						weight: entryToDuplicate.weight,
+						notes: entryToDuplicate.notes,
+						imageBlob: entryToDuplicate.imageBlob,
+						imageNaturalWidth: entryToDuplicate.imageNaturalWidth,
+						imageNaturalHeight: entryToDuplicate.imageNaturalHeight,
+						thumbImageBlob: entryToDuplicate.thumbImageBlob,
+						marks: entryToDuplicate.marks
+					});
+					console.log( 'new id =', id);
+					setGlobalState( (cs):GlobalState => {
+						console.log('inner id=',id);
+						let ns = { currentEntryId: id as number};
+						return { ...cs, ...ns };
+					});
+				} catch(error) {
+					console.error(`failed to duplicate db entry. ${error}`);
+				}
+			}
+		}
+	};
+
 	const handleEditEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log('handleEditEntry');
 		if(
@@ -366,6 +399,13 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 									onClick={handleDeleteEntry}
 								>
 									Delete
+								</button>
+								<button 
+									type="button" 
+									data-entry-id={entry.id} 
+									onClick={handleDuplicateEntry}
+								>
+									Duplicate
 								</button>
 							</div>
 						</li>
