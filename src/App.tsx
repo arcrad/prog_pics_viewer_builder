@@ -51,7 +51,8 @@ const defaultSettings:Settings = {
 	bottomRightCornerCropCoordinateX: -1,
 	bottomRightCornerCropCoordinateY: -1,
 	bottomLeftCornerCropCoordinateX: -1,
-	bottomLeftCornerCropCoordinateY: -1
+	bottomLeftCornerCropCoordinateY: -1,
+	exportFrameDuration: 500,
 };
 
 function App() {
