@@ -12,6 +12,9 @@ type ExportAttributes = {
 }
 //import './Export.css';
 
+const MIN_FRAME_DURATION_MS = 50;
+const MAX_FRAME_DURATION_MS = 5000;
+
 function Export({
 	globalState,
 	setGlobalState
@@ -72,11 +75,11 @@ function Export({
 		if(frameDurationInputRef.current) {
 			const frameDurationInputRefValue = parseInt(frameDurationInputRef.current.value as string);
 			if(frameDurationInputRefValue) {
-				frameDurationMs = frameDurationInputRefValue < 50 ? 
-					50 
+				frameDurationMs = frameDurationInputRefValue < MIN_FRAME_DURATION_MS ? 
+					MIN_FRAME_DURATION_MS 
 					: 
-					frameDurationInputRefValue > 2500 ? 
-						2500 
+					frameDurationInputRefValue > MAX_FRAME_DURATION_MS ? 
+						MAX_FRAME_DURATION_MS
 						: 
 						frameDurationInputRefValue;
 			}
@@ -122,10 +125,7 @@ function Export({
 			}
 		});
 		
-		const subFrames = 25;
-
 		const delay = (ms:number) => new Promise( (resolve) => setTimeout(resolve, ms) );
-		
 
 		const doRecording = async () => {
 			const rawAlignedImages:any[] = await Promise.all(imagePromisesArray)
@@ -258,8 +258,8 @@ function Export({
 				value={frameDuration}
 				onChange={handleInputChange}
 				data-settings-key-to-modify="exportFrameDuration" 
-				max="2000"
-				min="100"
+				max={MAX_FRAME_DURATION_MS}
+				min={MIN_FRAME_DURATION_MS}
 			/>
 			<p>Status:</p>
 			<div style={{
