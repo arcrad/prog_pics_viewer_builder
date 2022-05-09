@@ -270,7 +270,7 @@ function Export({
 			}}>
 				<ul>
 				{
-					statusMessages?.map( (message, index) => {
+					statusMessages?.slice(0).reverse().map( (message, index) => {
 						return <li key={index}>{message}</li>
 					})
 				}
