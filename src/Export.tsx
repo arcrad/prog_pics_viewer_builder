@@ -62,7 +62,7 @@ function Export({
 		console.log('handleExportVideo() called');
 		setStatusMessages(["begin generating video for export"]);
 		//let entries = await db.entries.orderBy('date').reverse().toArray();
-		let entries = await db.entries.orderBy('date').toArray();
+		let entries:Entry[] = await db.entries.orderBy('date').toArray();
 		setStatusMessages( cs => [...cs, "loaded entries from db"]);
 		console.log('entries = ');
 		console.dir(entries);
@@ -86,11 +86,23 @@ function Export({
 		}
 	 	setStatusMessages( cs => [...cs, `frameDurationMs = ${frameDurationMs}`]);
 		//generate images from blobs
+		/*
 		let imagePromisesArray = entries.map( (entry) => {
 			if(entry.alignedImageBlob) {
 				return loadImageFromBlob(entry.alignedImageBlob);
 			}
 		});
+		*/
+		//let imagePromisesArray:Promise<HTMLImageElement>[] = [];
+		let imagesArray:HTMLImageElement[] = [];
+		for(let c = 0, max = entries.length; c < max; c++) {
+			let currentBlob = entries[c].alignedImageBlob;
+			if(currentBlob) {
+				console.log(`start loading image ${c}`);
+				imagesArray.push( await loadImageFromBlob(currentBlob));
+				console.log(`done loading image ${c}`);
+			}
+		}
 		
 		//setup media objects
 		if(!(entries[0] && entries[0].alignedImageBlob)) {
@@ -128,7 +140,7 @@ function Export({
 		const delay = (ms:number) => new Promise( (resolve) => setTimeout(resolve, ms) );
 
 		const doRecording = async () => {
-			const rawAlignedImages:any[] = await Promise.all(imagePromisesArray)
+			const rawAlignedImages:any[] = imagesArray;//await Promise.all(imagePromisesArray)
 			//const alignedImages = rawAlignedImages.slice(0);
 			//const alignedImages = [rawAlignedImages[0], ...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
 			const alignedImages = [...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
@@ -148,7 +160,7 @@ function Export({
 			videoCanvas.width = scaledImageWidth;
 			videoCanvas.height = scaledImageHeight;
 			
-			let scaledImageCanvases:HTMLCanvasElement[] = alignedImages.map( (image) => {
+			let scaledImageCanvases:HTMLCanvasElement[] = alignedImages.map( (image, index) => {
 				const scaledCanvas = document.createElement('canvas');
 				scaledCanvas.width = scaledImageWidth;
 				scaledCanvas.height = scaledImageHeight;
@@ -166,25 +178,34 @@ function Export({
 						scaledImageHeight
 					);
 				}
+				console.log(`generated scaledCanvas ${index}`);
 				return scaledCanvas;
 			});
 
+				console.log(`after generating scaled canvases`);
 			const videoCanvasContext = videoCanvas.getContext('2d');
+				console.log(`geto video canvas context`);
 			if(videoCanvasContext) {
+				console.log(`videoCanvasContext exists`);
 				videoCanvasContext.fillStyle = 'red';
 				videoCanvasContext.font = '42px serif';
+				console.log(`1`);
 				//await delay();
 				setStatusMessages( cs => [...cs, `start draw loop`]);
 				setStatusMessages( cs => [...cs, `started mediaRecorder state = ${mediaRecorder.state}`]);
+				console.log(`2`);
 				//draw initial filler frame
 				videoCanvasContext.fillRect(0, 0, scaledImageWidth, scaledImageHeight);
 				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
 				await delay(frameDurationMs);
+				console.log(`3`);
 				videoCanvasContext.fillRect(0, 0, scaledImageWidth, scaledImageHeight);
 				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
 				await delay(frameDurationMs);
+				console.log(`4`);
 				mediaRecorder.start();
 				let prevTime = Date.now();
+				console.log(`about to start drawing video frames`);
 				for(let c = 0, max = scaledImageCanvases.length; c < max; c++) {
 					const now = Date.now();
 					setStatusMessages( cs => [...cs, `generating frame: ${c}`]);

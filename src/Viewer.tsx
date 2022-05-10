@@ -139,11 +139,12 @@ function Viewer({
 	}, []);
 
 	
-	let baseImage:HTMLImageElement|null = null;
+	/*
+  let baseImage:HTMLImageElement|null = null;
 	let warpedImageCanvas:HTMLCanvasElement|null = null;
 	let scaledImageCanvas:HTMLCanvasElement|null = null;
 	let croppedImageCanvas:HTMLCanvasElement|null = null;
-
+*/
 	const processEntry = (entryToProcess:Entry, chosenEntryImageNaturalWidth:number, chosenEntryImageNaturalHeight:number):Promise<number> => {
 		console.log('processEntry() called');
 		return new Promise( (resolve, reject) => {
@@ -151,11 +152,12 @@ function Viewer({
 				reject();
 			}
 			console.log(`start processing entry with id = ${entryToProcess.id}`);
-			//let baseImage:HTMLImageElement|null = new Image();
-			baseImage = new Image();
+			let baseImage:HTMLImageElement|null = new Image();
+			//baseImage = new Image();
 			baseImage.onload = async () => {
 				if(!baseImage) {
-					return;
+					reject(0);
+					return; //to satisfy typescript
 				}
 				//log marks
 				//console.log('marks =', entryToProcess.marks);
@@ -195,8 +197,8 @@ function Viewer({
 				const xformMatrix = mathjs.multiply(destinationMatrix, invertedSourceMatrix);	
 				//console.dir(xformMatrix);
 				//console.dir([...xformMatrix[0],...xformMatrix[1]]);
-				//let warpedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
-				warpedImageCanvas = document.createElement('canvas');
+				let warpedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
+				//warpedImageCanvas = document.createElement('canvas');
 				warpedImageCanvas.width = chosenEntryImageNaturalWidth;
 				warpedImageCanvas.height = chosenEntryImageNaturalHeight;
 				let warpedImageCanvasContext = warpedImageCanvas.getContext('2d');
@@ -218,8 +220,8 @@ function Viewer({
 					);
 				}
 				//scale baseImage
-				//let scaledImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
-				scaledImageCanvas = document.createElement('canvas');
+				let scaledImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
+				//scaledImageCanvas = document.createElement('canvas');
 				scaledImageCanvas.width = scaleWidthSettingRef.current;
 				scaledImageCanvas.height = scaleHeightSettingRef.current; 
 				let scaledImageCanvasContext = scaledImageCanvas.getContext('2d');
@@ -237,8 +239,8 @@ function Viewer({
 				const croppedImageWidth = originalCoordinatesFromDbRef.current[2].value - originalCoordinatesFromDbRef.current[0].value;
 				const croppedImageHeight = originalCoordinatesFromDbRef.current[7].value - originalCoordinatesFromDbRef.current[1].value;
 				//create cropped image
-				//let croppedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
-				croppedImageCanvas = document.createElement('canvas');
+				let croppedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
+				//croppedImageCanvas = document.createElement('canvas');
 				croppedImageCanvas.width = croppedImageWidth;
 				croppedImageCanvas.height = croppedImageHeight;
 				console.log(`croppedImageCanvas.width = ${croppedImageWidth}, croppedImageCanvas.height = ${croppedImageHeight}`);
@@ -288,7 +290,7 @@ function Viewer({
 		}
 		setProcessingState('started');
 		let chosenEntryImage = new Image();
-		chosenEntryImage.onload = () => {
+		chosenEntryImage.onload = async () => {
 			let entriesToProcess:Promise<number>[] = [];
 			/*sortedEntriesRef.current.forEach( entry => {
 				entriesToProcess.push(processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight));
@@ -306,15 +308,17 @@ function Viewer({
 				});
 			});
 			*/
-			sortedEntriesRef.current.forEach( async (entry, index) => {
+			//sortedEntriesRef.current.forEach( async (entry, index) => {
+			for(let c = 0, max = sortedEntriesRef.current.length; c < max; c++) {
 				/*await (new Promise( (resolve, reject) => {
 					processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
 				});*/
-				setTimeout( async () => {
-					await processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
-				}, 1000);
+				//setTimeout( async () => {
+					await processEntry(sortedEntriesRef.current[c], chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
+				//}, 1000);
 				//await processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
-			});
+			//});
+			}
 			setProcessingState('complete');
 			console.log('all entries have been processed');
 			db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
