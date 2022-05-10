@@ -94,6 +94,7 @@ function Export({
 		});
 		*/
 		//let imagePromisesArray:Promise<HTMLImageElement>[] = [];
+		/*
 		let imagesArray:HTMLImageElement[] = [];
 		for(let c = 0, max = entries.length; c < max; c++) {
 			let currentBlob = entries[c].alignedImageBlob;
@@ -103,7 +104,7 @@ function Export({
 				console.log(`done loading image ${c}`);
 			}
 		}
-		
+		*/
 		//setup media objects
 		if(!(entries[0] && entries[0].alignedImageBlob)) {
 			return;
@@ -139,46 +140,85 @@ function Export({
 		
 		const delay = (ms:number) => new Promise( (resolve) => setTimeout(resolve, ms) );
 
-		const doRecording = async () => {
-			const rawAlignedImages:any[] = imagesArray;//await Promise.all(imagePromisesArray)
-			//const alignedImages = rawAlignedImages.slice(0);
-			//const alignedImages = [rawAlignedImages[0], ...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
-			const alignedImages = [...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
-			//scale images and contrain to 720p dimensions
-			//portrait or square
-			const imageRatio = rawAlignedImages[0].naturalHeight/1280;
-			let scaledImageWidth = rawAlignedImages[0].naturalWidth/imageRatio;
-			console.log(`scaledImageWidth = ${rawAlignedImages[0].naturalWidth}/${imageRatio}`);
-			let scaledImageHeight = 1280;
-			if(rawAlignedImages[0].naturalWidth > rawAlignedImages[0].naturalHeight) {
+		let scaledImageWidth = 720;
+		let scaledImageHeight = 1280;
+		let firstBlob = entries[0].alignedImageBlob;
+		if(firstBlob) {
+			let firstImage = await loadImageFromBlob(firstBlob);
+			const imageRatio = firstImage.naturalHeight/1280;
+			scaledImageWidth = firstImage.naturalWidth/imageRatio;
+			scaledImageHeight = 1280;
+			console.log(`scaledImageWidth = ${firstImage.naturalWidth}/${imageRatio}`);
+			if(firstImage.naturalWidth > firstImage.naturalHeight) {
 				//landscape
-				const imageRatio = rawAlignedImages[0].naturalWidth/1280;
+				const imageRatio = firstImage.naturalWidth/1280;
 				scaledImageWidth = 1280;
-				scaledImageHeight = rawAlignedImages[0].naturalHeight/imageRatio;
+				scaledImageHeight = firstImage.naturalHeight/imageRatio;
 			}
 			console.log(`videoCanvas.width = ${scaledImageWidth} videoCanvas.height = ${scaledImageHeight}`);
 			videoCanvas.width = scaledImageWidth;
 			videoCanvas.height = scaledImageHeight;
-			
-			let scaledImageCanvases:HTMLCanvasElement[] = alignedImages.map( (image, index) => {
-				const scaledCanvas = document.createElement('canvas');
-				scaledCanvas.width = scaledImageWidth;
-				scaledCanvas.height = scaledImageHeight;
-				const scaledCanvasContext = scaledCanvas.getContext('2d');
-				if(scaledCanvasContext) {
-					scaledCanvasContext.drawImage(
-						image, 
-						0, 
-						0, 
-						rawAlignedImages[0].naturalWidth, 
-						rawAlignedImages[0].naturalHeight, 
-						0, 
-						0, 
-						scaledImageWidth, 
-						scaledImageHeight
-					);
+		}
+
+		const doRecording = async () => {
+			const videoCanvasContext = videoCanvas.getContext('2d');
+			console.log(`got video canvas context`);
+			if(!videoCanvasContext) {
+				return;
+			}
+			videoCanvasContext.fillStyle = 'red';
+			videoCanvasContext.font = '42px serif';
+			mediaRecorder.start();
+			for(let c = 0, max = entries.length; c < max; c++) {
+				mediaRecorder.pause();
+				let currentBlob = entries[c].alignedImageBlob;
+				//load image
+				if(currentBlob) {
+					console.log(`load image ${c}`);
+					const currentImage = await loadImageFromBlob(currentBlob);
+					//generate scaled version in canvas
+					const scaledCanvas = document.createElement('canvas');
+					scaledCanvas.width = scaledImageWidth;
+					scaledCanvas.height = scaledImageHeight;
+					const scaledCanvasContext = scaledCanvas.getContext('2d');
+					if(scaledCanvasContext) {
+						scaledCanvasContext.drawImage(
+							currentImage, 
+							0, 
+							0, 
+							currentImage.naturalWidth, 
+							currentImage.naturalHeight, 
+							0, 
+							0, 
+							scaledImageWidth, 
+							scaledImageHeight
+						);
+					}
+					console.log(`generated scaledCanvas ${c}`);
+					console.log('started recording');
+					console.log(`start draw frame = ${c}`);
+					videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+					videoCanvasContext.drawImage(scaledCanvas, 0, 0);
+					videoCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
+					mediaRecorder.resume();
+					const startTime = Date.now();
+					(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+					await delay(frameDurationMs);
+					(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+					mediaRecorder.pause();
+					console.log(`done drawing frame, time to draw = ${Date.now() - startTime}`);
 				}
-				console.log(`generated scaledCanvas ${index}`);
+			}
+			await delay(250);
+			mediaRecorder.stop();
+			/////const rawAlignedImages:any[] = imagesArray;//await Promise.all(imagePromisesArray)
+			//const alignedImages = rawAlignedImages.slice(0);
+			//const alignedImages = [rawAlignedImages[0], ...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
+			/////const alignedImages = [...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
+			//scale images and contrain to 720p dimensions
+			//portrait or square
+			/*
+			let scaledImageCanvases:HTMLCanvasElement[] = alignedImages.map( (image, index) => {
 				return scaledCanvas;
 			});
 
@@ -196,7 +236,9 @@ function Export({
 				console.log(`2`);
 				//draw initial filler frame
 				videoCanvasContext.fillRect(0, 0, scaledImageWidth, scaledImageHeight);
+				console.log(`2.1`);
 				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+				console.log(`2.2 delay = ${frameDurationMs}`);
 				await delay(frameDurationMs);
 				console.log(`3`);
 				videoCanvasContext.fillRect(0, 0, scaledImageWidth, scaledImageHeight);
@@ -223,9 +265,7 @@ function Export({
 					console.log(`TIME: ${now} DELTA: ${now-prevTime}`);
 					prevTime = now;
 				}		
-			}
-			await delay(250);
-			mediaRecorder.stop();
+			}*/
 		}
 		doRecording();
 	};
