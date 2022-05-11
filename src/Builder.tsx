@@ -19,6 +19,8 @@ function Builder({
 
 	const initializedRef = useRef(false);
 
+	//displays setup modal if setting(s) arent found
+	/* temporarily disabled
 	useEffect( () => {
 		if(initializedRef.current) {
 			return;
@@ -35,7 +37,7 @@ function Builder({
 			}
 			//setLoadedData(true);
 		});
-	}, []);
+	}, []);*/
 
 	return (
 		<div>

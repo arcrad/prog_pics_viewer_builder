@@ -97,6 +97,7 @@ function SettingsComponent({
   return (
     <div>
     	<h2>Settings</h2>
+			<p>These settings are controlled throughout the application and don't need to be edited on this page. They are provided here for diagnostic/debugging purposes.</p>
 			<ul>
 			{
 				currentSettings?.map( (setting) => 
