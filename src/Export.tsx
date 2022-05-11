@@ -5,12 +5,12 @@ import * as PIXI from 'pixi.js';
 //importi './Viewer.css';
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
+//import './Export.css';
 
 type ExportAttributes = {
 	globalState: GlobalState;
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
 }
-//import './Export.css';
 
 const MIN_FRAME_DURATION_MS = 50;
 const MAX_FRAME_DURATION_MS = 5000;
@@ -71,33 +71,28 @@ function Export({
 	}, []);
 
 	function loadImageFromBlob(blob:Blob):Promise<HTMLImageElement> {
-			return new Promise( (resolve, reject) => {
-				const image = new Image();
-				const blobUrl = URL.createObjectURL(blob);
-				image.onload = () => {
-					URL.revokeObjectURL(blobUrl);
-					resolve(image);
-				};
-				image.src = blobUrl;
-			});
+		return new Promise( (resolve, reject) => {
+			const image = new Image();
+			const blobUrl = URL.createObjectURL(blob);
+			image.onload = () => {
+				URL.revokeObjectURL(blobUrl);
+				resolve(image);
+			};
+			image.src = blobUrl;
+		});
 	}
 
 	const handleExportVideo = async () => {
 		console.log('handleExportVideo() called');
 		if(!entries) {
+			setStatusMessages(["Error: Entries not loaded or none found."]);
 			console.error('no entries found');
 			return;
 		}
 		setStatusMessages(["begin generating video for export"]);
-		//let entries = await db.entries.orderBy('date').reverse().toArray();
-		//let entries:Entry[] = await db.entries.orderBy('date').toArray();
 		setStatusMessages( cs => [...cs, "loaded entries from db"]);
-		console.log('entries = ');
-		console.dir(entries);
-		//setup constants
-		//const frameDurationMillis = 75;
-		//const frameDuration = frameDurationMillis;//*1000;
-		//const frameDuration = 5000*1000;
+		//console.log('entries = ');
+		//console.dir(entries);
 		
 		let frameDurationMs = 150;
 		if(frameDurationInputRef.current) {
@@ -112,29 +107,10 @@ function Export({
 						frameDurationInputRefValue;
 			}
 		}
-	 	setStatusMessages( cs => [...cs, `frameDurationMs = ${frameDurationMs}`]);
-		//generate images from blobs
-		/*
-		let imagePromisesArray = entries.map( (entry) => {
-			if(entry.alignedImageBlob) {
-				return loadImageFromBlob(entry.alignedImageBlob);
-			}
-		});
-		*/
-		//let imagePromisesArray:Promise<HTMLImageElement>[] = [];
-		/*
-		let imagesArray:HTMLImageElement[] = [];
-		for(let c = 0, max = entries.length; c < max; c++) {
-			let currentBlob = entries[c].alignedImageBlob;
-			if(currentBlob) {
-				console.log(`start loading image ${c}`);
-				imagesArray.push( await loadImageFromBlob(currentBlob));
-				console.log(`done loading image ${c}`);
-			}
-		}
-		*/
+	 	setStatusMessages( cs => [...cs, `target frameDurationMs = ${frameDurationMs}`]);
 		//setup media objects
 		if(!(entries[0] && entries[0].alignedImageBlob)) {
+			setStatusMessages(["Error: Unable to find first entry data."]);
 			return;
 		}
 		const videoCanvas = document.createElement('canvas');
@@ -166,8 +142,7 @@ function Export({
 			}
 		});
 		
-		const delay = (ms:number) => new Promise( (resolve) => setTimeout(resolve, ms) );
-
+		//determine scaled image dimensions (720p hardcoded currently)
 		let scaledImageWidth = 720;
 		let scaledImageHeight = 1280;
 		let firstBlob = entries[0].alignedImageBlob;
@@ -187,127 +162,70 @@ function Export({
 			videoCanvas.width = scaledImageWidth;
 			videoCanvas.height = scaledImageHeight;
 		}
+		
+		const delay = (ms:number) => new Promise( (resolve) => setTimeout(resolve, ms) );
 
-		const doRecording = async () => {
-			if(!entries) {
-				console.error('no entries found');
-				return;
-			}
-			const videoCanvasContext = videoCanvas.getContext('2d');
-			console.log(`got video canvas context`);
-			if(!videoCanvasContext) {
-				return;
-			}
-			videoCanvasContext.fillStyle = 'red';
-			videoCanvasContext.font = '42px serif';
-			mediaRecorder.start();
-			for(let c = 0, max = entries.length; c < max; c++) {
-				mediaRecorder.pause();
-				let currentBlob = entries[c].alignedImageBlob;
-				//load image
-				if(currentBlob) {
-					console.log(`load image ${c}`);
-					const currentImage = await loadImageFromBlob(currentBlob);
-					//generate scaled version in canvas
-					const scaledCanvas = document.createElement('canvas');
-					scaledCanvas.width = scaledImageWidth;
-					scaledCanvas.height = scaledImageHeight;
-					const scaledCanvasContext = scaledCanvas.getContext('2d');
-					if(scaledCanvasContext) {
-						scaledCanvasContext.drawImage(
-							currentImage, 
-							0, 
-							0, 
-							currentImage.naturalWidth, 
-							currentImage.naturalHeight, 
-							0, 
-							0, 
-							scaledImageWidth, 
-							scaledImageHeight
-						);
-					}
-					console.log(`generated scaledCanvas ${c}`);
-					console.log('started recording');
-					console.log(`start draw frame = ${c}`);
-					videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
-					videoCanvasContext.drawImage(scaledCanvas, 0, 0);
-					if(overlayFrameNumberIsChecked) {
-						videoCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
-					}
-					if(overlayEntryInfoIsChecked) {
-						videoCanvasContext.fillText(`ENTRY INFO: ${c}`, 10, 100);
-					}
-					mediaRecorder.resume();
-					const startTime = Date.now();
-					(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-					await delay(frameDurationMs);
-					(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-					mediaRecorder.pause();
-					console.log(`done drawing frame, time to draw = ${Date.now() - startTime}`);
-					setStatusMessages( cs => [...cs, `generated frame: ${c}/${max-1}, actual frame duration = ${Date.now() - startTime} ms`]);
-					await delay(50);
-				}
-			}
-			await delay(250);
-			mediaRecorder.stop();
-			setVideoIsReady(true);
-			/////const rawAlignedImages:any[] = imagesArray;//await Promise.all(imagePromisesArray)
-			//const alignedImages = rawAlignedImages.slice(0);
-			//const alignedImages = [rawAlignedImages[0], ...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
-			/////const alignedImages = [...rawAlignedImages, rawAlignedImages[rawAlignedImages.length-1]];
-			//scale images and contrain to 720p dimensions
-			//portrait or square
-			/*
-			let scaledImageCanvases:HTMLCanvasElement[] = alignedImages.map( (image, index) => {
-				return scaledCanvas;
-			});
-
-				console.log(`after generating scaled canvases`);
-			const videoCanvasContext = videoCanvas.getContext('2d');
-				console.log(`geto video canvas context`);
-			if(videoCanvasContext) {
-				console.log(`videoCanvasContext exists`);
-				videoCanvasContext.fillStyle = 'red';
-				videoCanvasContext.font = '42px serif';
-				console.log(`1`);
-				//await delay();
-				setStatusMessages( cs => [...cs, `start draw loop`]);
-				setStatusMessages( cs => [...cs, `started mediaRecorder state = ${mediaRecorder.state}`]);
-				console.log(`2`);
-				//draw initial filler frame
-				videoCanvasContext.fillRect(0, 0, scaledImageWidth, scaledImageHeight);
-				console.log(`2.1`);
-				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-				console.log(`2.2 delay = ${frameDurationMs}`);
-				await delay(frameDurationMs);
-				console.log(`3`);
-				videoCanvasContext.fillRect(0, 0, scaledImageWidth, scaledImageHeight);
-				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-				await delay(frameDurationMs);
-				console.log(`4`);
-				mediaRecorder.start();
-				let prevTime = Date.now();
-				console.log(`about to start drawing video frames`);
-				for(let c = 0, max = scaledImageCanvases.length; c < max; c++) {
-					const now = Date.now();
-					setStatusMessages( cs => [...cs, `generating frame: ${c}`]);
-					console.log(`renderFrame() time = ${now-prevTime}`);
-					console.log(`start draw frame = ${c}`);
-					videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
-					videoCanvasContext.drawImage(scaledImageCanvases[c], 0, 0);
-					(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-					//videoCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
-					//videoCanvasContext.fillText(`TIME: ${now}`, 10, 100);
-					//videoCanvasContext.fillText(`DELTA: ${now-prevTime}`, 10, 150);
-					//mediaRecorder.requestData();
-					await delay(frameDurationMs);
-					//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-					console.log(`TIME: ${now} DELTA: ${now-prevTime}`);
-					prevTime = now;
-				}		
-			}*/
+		//process frames
+		const videoCanvasContext = videoCanvas.getContext('2d');
+		console.log(`got video canvas context`);
+		if(!videoCanvasContext) {
+			return;
 		}
-		doRecording();
+		videoCanvasContext.fillStyle = 'red';
+		videoCanvasContext.font = '42px serif';
+		mediaRecorder.start();
+		for(let c = 0, max = entries.length; c < max; c++) {
+			mediaRecorder.pause();
+			await delay(50);
+			let currentBlob = entries[c].alignedImageBlob;
+			//load image
+			if(currentBlob) {
+				console.log(`load image ${c}`);
+				const currentImage = await loadImageFromBlob(currentBlob);
+				
+				//generate scaled version in canvas
+				const scaledCanvas = document.createElement('canvas');
+				scaledCanvas.width = scaledImageWidth;
+				scaledCanvas.height = scaledImageHeight;
+				const scaledCanvasContext = scaledCanvas.getContext('2d');
+				if(scaledCanvasContext) {
+					scaledCanvasContext.drawImage(
+						currentImage, 
+						0, 
+						0, 
+						currentImage.naturalWidth, 
+						currentImage.naturalHeight, 
+						0, 
+						0, 
+						scaledImageWidth, 
+						scaledImageHeight
+					);
+				}
+				console.log(`generated scaledCanvas ${c}`);
+				console.log('started recording');
+				console.log(`start draw frame = ${c}`);
+				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+				videoCanvasContext.drawImage(scaledCanvas, 0, 0);
+				if(overlayFrameNumberIsChecked) {
+					videoCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
+				}
+				if(overlayEntryInfoIsChecked) {
+					videoCanvasContext.fillText(`ENTRY INFO: ${c}`, 10, 100);
+				}
+				mediaRecorder.resume();
+				const startTime = Date.now();
+				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+				await delay(frameDurationMs);
+				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+				const endTime = Date.now();
+				mediaRecorder.pause();
+				console.log(`done drawing frame, time to draw = ${endTime - startTime}`);
+				setStatusMessages( cs => [...cs, `generated frame: ${c}/${max-1}, actual frame duration = ${endTime - startTime} ms`]);
+			}
+		}
+		await delay(500);
+		mediaRecorder.stop();
+		setVideoIsReady(true);
 	};
 
 	let debounceInputTimeout = useRef(0);
