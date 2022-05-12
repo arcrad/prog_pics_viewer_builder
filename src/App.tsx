@@ -6,7 +6,7 @@ import { db, Entry, Setting } from './db';
 import './App.css';
 import EntryComponent from './Entry';
 import Adjust from './Adjust';
-import Viewer from './Viewer';
+import Process from './Process';
 import Export from './Export';
 import SettingsComponent from './Settings';
 import ImageStorePOC from './ImageStorePOC';
@@ -163,9 +163,9 @@ function App() {
 						}
 					/>
 					<Route 
-						path="viewer" 
+						path="process" 
 						element={
-							<Viewer
+							<Process
 								globalState={globalState} 
 								setGlobalState={setGlobalState}
 							/>

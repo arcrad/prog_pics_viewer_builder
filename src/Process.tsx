@@ -20,7 +20,9 @@ function Viewer({
 	let [entries, setEntries] = useState<Entry[]>([]);
 	let [currentEntry, setCurrentEntry] = useState(0);
 	let [allEntriesHaveAlignedImage, setAllEntriesHaveAlignedImage] = useState(false);
-	
+	let [entriesWithAlignedImageCount, setEntriesWithAlignedImageCount] = useState(0);
+	let [cancelProcessingRequested, setCancelProcessingRequested] = useState(false);
+
 	const initializedRef = useRef(false);
 	const originalCoordinatesFromDbRef = useRef<any[]>([]);
 	const scaleWidthSettingRef = useRef(0);
@@ -30,14 +32,18 @@ function Viewer({
 	const chosenEntryRef = useRef<Entry | null>(null);
 
 	const checkAllEntriesHaveAlignedImage = (_entries:Entry[]) => {
-		return _entries.reduce( (accumulator, entry) => {
+		let entriesWithAlignedImageCount:number = 0;
+		const allEntriesHaveAlignedImage:boolean = _entries.reduce( (accumulator, entry) => {
 			console.log('checking entries for alignedimage');
 			if(!entry.alignedImageBlob) {
 				console.log('entry doesnt have aligned image');
 				accumulator = false;
-			} 
+			} else {
+				entriesWithAlignedImageCount++;
+			}
 			return accumulator;
-		}, true);
+		}, true as boolean);
+		return [allEntriesHaveAlignedImage, entriesWithAlignedImageCount]; 
 	};
 
 	useEffect( () => {
@@ -83,12 +89,11 @@ function Viewer({
 				//	originalCoordinatesFromDbRef.current = coordinates;
 				if(_sortedEntries) {
 					sortedEntriesRef.current = _sortedEntries;
-					let _allEntriesHaveAlignedImage = checkAllEntriesHaveAlignedImage(_sortedEntries);
-					setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage);
-					if(_allEntriesHaveAlignedImage) {
-						console.log(`_allEntriesHaveAlignedImage = ${_allEntriesHaveAlignedImage}`);
-						setEntries(_sortedEntries);
-					}
+					const [_allEntriesHaveAlignedImage, _entriesWithAlignedImageCount] = checkAllEntriesHaveAlignedImage(_sortedEntries);
+					setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage as boolean);
+					console.log(`_allEntriesHaveAlignedImage = ${_allEntriesHaveAlignedImage}`);
+					setEntries(_sortedEntries);
+					setEntriesWithAlignedImageCount(_entriesWithAlignedImageCount as number);
 				}
 
 				originalCoordinatesFromDbRef.current = [
@@ -266,6 +271,7 @@ function Viewer({
 						}).then( () => {
 							console.log('processed entry! id=', entryToProcess.id);
 							//attempt to guide garbage collector to free the resources
+							//need to determine if this is necessary
 							baseImage = null;
 							warpedImageCanvas = null;
 							scaledImageCanvas = null;
@@ -284,58 +290,60 @@ function Viewer({
 		});
 	};
 
-  const handleProcessEntries = () => {
+  const handleProcessAllEntries = () => {
 		if(processingState !== 'unstarted') {
 			return;
 		}
 		setProcessingState('started');
 		let chosenEntryImage = new Image();
 		chosenEntryImage.onload = async () => {
-			let entriesToProcess:Promise<number>[] = [];
-			/*sortedEntriesRef.current.forEach( entry => {
-				entriesToProcess.push(processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight));
-				//entriesToProcess.push(processEntry(entry));
-			});
-	
-			Promise.all(entriesToProcess).then( () => {
-				setProcessingState('complete');
-				console.log('all entries have been processed');
-				db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
-					let _allEntriesHaveAlignedImage = checkAllEntriesHaveAlignedImage(_entries);
-					setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage);
-					//setEntries(sortedEntriesRef.current);
-					setEntries(_entries);
-				});
-			});
-			*/
-			//sortedEntriesRef.current.forEach( async (entry, index) => {
 			for(let c = 0, max = sortedEntriesRef.current.length; c < max; c++) {
-				/*await (new Promise( (resolve, reject) => {
-					processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
-				});*/
-				//setTimeout( async () => {
-					await processEntry(sortedEntriesRef.current[c], chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
-				//}, 1000);
-				//await processEntry(entry, chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
-			//});
+				await processEntry(sortedEntriesRef.current[c], chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
 			}
 			setProcessingState('complete');
 			console.log('all entries have been processed');
 			db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
-				let _allEntriesHaveAlignedImage = checkAllEntriesHaveAlignedImage(_entries);
-				setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage);
-				//setEntries(sortedEntriesRef.current);
+				const [_allEntriesHaveAlignedImage, _entriesWithAlignedImageCount] = checkAllEntriesHaveAlignedImage(_entries);
+				setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage as boolean);
+					setEntriesWithAlignedImageCount(_entriesWithAlignedImageCount as number);
 				setEntries(_entries);
 			});	
-		}
-		
+		}	
 		if(chosenEntryRef.current && chosenEntryRef.current.imageBlob) {
-			//chosenEntryImage.src = chosenEntryRef.current.image;
 			chosenEntryImage.src = URL.createObjectURL(chosenEntryRef.current.imageBlob);
 		}
-		//setEntriesProcessed( cs => cs+1);
 	};
 
+	const handleProcessUnprocessedEntries = () => {
+		if(processingState !== 'unstarted') {
+			return;
+		}
+		setProcessingState('started');
+		//filter entries to just the ones without an aligned image
+		const entriesWithoutAlignedImage = sortedEntriesRef.current.filter( (entry) => {
+			return !entry.alignedImageBlob;
+		});
+		console.log('entriesWithoutAlignedImage = ');
+		console.dir(entriesWithoutAlignedImage);
+		let chosenEntryImage = new Image();
+		chosenEntryImage.onload = async () => {
+			for(let c = 0, max = entriesWithoutAlignedImage.length; c < max; c++) {
+				await processEntry(entriesWithoutAlignedImage[c], chosenEntryImage.naturalWidth, chosenEntryImage.naturalHeight);
+			}
+			setProcessingState('complete');
+			console.log('all unprocessed entries have been processed');
+			db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
+				const [_allEntriesHaveAlignedImage, _entriesWithAlignedImageCount] = checkAllEntriesHaveAlignedImage(_entries);
+				setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage as boolean);
+					setEntriesWithAlignedImageCount(_entriesWithAlignedImageCount as number);
+				setEntries(_entries);
+			});	
+		}	
+		if(chosenEntryRef.current && chosenEntryRef.current.imageBlob) {
+			chosenEntryImage.src = URL.createObjectURL(chosenEntryRef.current.imageBlob);
+		}
+	};
+	
 	let currentImage = '';
 //	if(entries && entries[currentEntry] && entries[currentEntry].alignedImageBlob) {
 		const blob = entries[currentEntry]?.alignedImageBlob;
@@ -346,18 +354,24 @@ function Viewer({
 
 	return (
     <div>
-    	<h2>Viewer ( id = {globalState.currentEntryId} )</h2>
+    	<h2>Process ( id = {globalState.currentEntryId} )</h2>
 			{ !loadedData && <div>
 				<h1>LOADING...</h1>
 			</div> }
 			
 			{ loadedData && <div>
-				<h1>Process Entries?</h1>
+				<h1>Process Entries</h1>
 				<button
 					type="button"
-					onClick={handleProcessEntries}
+					onClick={handleProcessAllEntries}
 				>
-					Process Entries
+					Process All Entries
+				</button><button
+					type="button"
+					onClick={handleProcessUnprocessedEntries}
+					disabled={ entriesWithAlignedImageCount === totalEntries ? true : false}
+				>
+					Process Only Unprocessed Entries
 				</button><br/>
 				<label>Entries Processed
 					<progress max={totalEntries} value={entriesProcessed}>
@@ -371,7 +385,10 @@ function Viewer({
 					Processing: {processingState}
 				</p>
 				<hr/>
-				<h2>Processed Entries</h2>
+				<h2>Processed Entries Preview</h2>
+				<p>
+					{entriesWithAlignedImageCount} of {totalEntries} entries have an aligned image.
+				</p>
 				<p>
 					Do all entries have an aligned image?  
 					{allEntriesHaveAlignedImage ? ' Yes' : <> No (Click <b>Process Entries</b> button)</>}
