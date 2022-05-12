@@ -40,3 +40,5 @@
 
 +add functionality to abort 'export video locally' frame rendering loop
 	--for example when the page changes or with a cancel button
+
++add option on viewer component to process just entries with no aligned image (partial processing)

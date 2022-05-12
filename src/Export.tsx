@@ -25,6 +25,7 @@ function Export({
 	let [overlayFrameNumberIsChecked, setOverlayFrameNumberIsChecked] = useState<boolean>(false);
 	let [overlayEntryInfoIsChecked, setOverlayEntryInfoIsChecked] = useState<boolean>(false);
 	let [entries, setEntries] = useState<Entry[]|null>(null);
+	let [entriesProcessed, setEntriesProcessed] = useState(0);
 
 	const initializedRef = useRef<boolean>(false);
 	const videoElementRef = useRef<HTMLVideoElement|null>(null);
@@ -90,7 +91,6 @@ function Export({
 			return;
 		}
 		setStatusMessages(["begin generating video for export"]);
-		setStatusMessages( cs => [...cs, "loaded entries from db"]);
 		//console.log('entries = ');
 		//console.dir(entries);
 		
@@ -221,6 +221,7 @@ function Export({
 				mediaRecorder.pause();
 				console.log(`done drawing frame, time to draw = ${endTime - startTime}`);
 				setStatusMessages( cs => [...cs, `generated frame: ${c}/${max-1}, actual frame duration = ${endTime - startTime} ms`]);
+				setEntriesProcessed(c);
 			}
 		}
 		await delay(500);
@@ -244,13 +245,13 @@ function Export({
 				console.log('value = ', newValue);
 				setFrameDuration(newValue);
 			} else if(event.target.dataset.settingsKeyToModify === 'exportOverlayFrameNumber') {
-				let isChecked:boolean|undefined = event.target.checked;
+				let isChecked:boolean = event.target.checked;
 				console.log('checked? = ', isChecked);
 				(isChecked === true) ? setOverlayFrameNumberIsChecked(true) : setOverlayFrameNumberIsChecked(false);
 				newValue = isChecked;
 				console.log('value = ', newValue);
 			} else if(event.target.dataset.settingsKeyToModify === 'exportOverlayEntryInfo') {
-				let isChecked:boolean|undefined = event.target.checked;
+				let isChecked:boolean = event.target.checked;
 				console.log('checked? = ', isChecked);
 				(isChecked === true) ? setOverlayEntryInfoIsChecked(true) : setOverlayEntryInfoIsChecked(false);
 				newValue = isChecked;
@@ -316,6 +317,11 @@ function Export({
 			>
 				Export Video
 			</button>
+			<label>Progress
+				<progress max={entries?.length} value={entriesProcessed}>
+					{entriesProcessed} entries processed out of {entries?.length}
+				</progress>
+			</label>
 			<p>Status:</p>
 			<div style={{
 				border: '1px solid black',

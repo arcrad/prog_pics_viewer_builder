@@ -358,7 +358,12 @@ function Viewer({
 					onClick={handleProcessEntries}
 				>
 					Process Entries
-				</button>
+				</button><br/>
+				<label>Entries Processed
+					<progress max={totalEntries} value={entriesProcessed}>
+						{entriesProcessed} entries processed out of {totalEntries} total entries.
+					</progress>
+				</label>
 				<p>
 					{entriesProcessed} entries processed out of {totalEntries} total entries.
 				</p>
