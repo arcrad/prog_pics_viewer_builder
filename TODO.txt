@@ -42,3 +42,5 @@
 	--for example when the page changes or with a cancel button
 
 +add option on viewer component to process just entries with no aligned image (partial processing)
+
++consider making cropping resize instead of reset to corners when image scaling is changed (on adjust component)

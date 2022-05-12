@@ -291,10 +291,11 @@ function Viewer({
 	};
 
   const handleProcessAllEntries = () => {
-		if(processingState !== 'unstarted') {
+		if(!(processingState == 'unstarted' || processingState == 'complete')) {
 			return;
 		}
 		setProcessingState('started');
+		setEntriesProcessed(0);
 		let chosenEntryImage = new Image();
 		chosenEntryImage.onload = async () => {
 			for(let c = 0, max = sortedEntriesRef.current.length; c < max; c++) {
@@ -315,7 +316,7 @@ function Viewer({
 	};
 
 	const handleProcessUnprocessedEntries = () => {
-		if(processingState !== 'unstarted') {
+		if(!(processingState == 'unstarted' || processingState == 'complete')) {
 			return;
 		}
 		setProcessingState('started');
@@ -374,7 +375,16 @@ function Viewer({
 					Process Only Unprocessed Entries
 				</button><br/>
 				<label>Entries Processed
-					<progress max={totalEntries} value={entriesProcessed}>
+					<progress 
+						max={totalEntries} 
+						value={entriesProcessed}
+						style={{
+							display: 'block',
+							width: '70vw',
+							maxWidth: '65rem',
+							margin: '1rem auto'
+						}}
+					>
 						{entriesProcessed} entries processed out of {totalEntries} total entries.
 					</progress>
 				</label>
