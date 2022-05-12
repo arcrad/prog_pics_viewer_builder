@@ -176,7 +176,6 @@ function Export({
 		mediaRecorder.start();
 		for(let c = 0, max = entries.length; c < max; c++) {
 			mediaRecorder.pause();
-			await delay(50);
 			let currentBlob = entries[c].alignedImageBlob;
 			//load image
 			if(currentBlob) {
@@ -212,6 +211,9 @@ function Export({
 				if(overlayEntryInfoIsChecked) {
 					videoCanvasContext.fillText(`ENTRY INFO: ${c}`, 10, 100);
 				}
+				//additional delay to allow canvas drawing actions to settle
+				//discovered via testing that this improves frame drawing time consistency greatly
+				await delay(50);
 				mediaRecorder.resume();
 				const startTime = Date.now();
 				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
