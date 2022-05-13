@@ -31,14 +31,23 @@ function EntryComponent({
 	let [changeImageModalIsVisible, setChangeImageModalIsVisible] = useState(false);
 	let [markImageModalIsVisible, setMarkImageModalIsVisible] = useState(false);
 	let [entryIdBeingEdited, setEntryIdBeingEdited] = useState(-1);
-
+	let [pagerOffset, setPagerOffset] = useState(0);
+	
 	let addEntryRef = useRef<HTMLButtonElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
   let entrySelectRef = useRef<HTMLSelectElement>(null);
 
-	const entries = useLiveQuery(
-		() => db.entries.orderBy('date').reverse().toArray()
+	const pagerLimit = 10;
+
+	const totalEntriesCount = useLiveQuery(
+		() => db.entries.count()
 	);
+	const entries = useLiveQuery(
+		() => db.entries.orderBy('date').reverse().offset(pagerOffset).limit(pagerLimit).toArray()
+	, [
+		pagerOffset, 
+		pagerLimit
+	]);
 
 	const currentEntry = useLiveQuery(
 		() => db.entries.get(globalState.currentEntryId)
@@ -159,8 +168,13 @@ function EntryComponent({
 				const numberDeleted = await db.entries
 					.where("id").anyOf(parseInt(event.target.dataset.entryId))
 					.delete();
-				let newState = { currentEntryId: parseInt(event.target.dataset.entryId)};
-				setGlobalState( (prevState):GlobalState => { return {...prevState, ...newState}});
+				//let newState = { currentEntryId: parseInt(event.target.dataset.entryId)};
+				db.entries.orderBy('date').reverse().toArray().then( (newEntries) => {
+					if(newEntries && newEntries[0] && newEntries[0].id) {
+						let newState = { currentEntryId: newEntries[0].id};
+						setGlobalState( (prevState):GlobalState => { return {...prevState, ...newState}});
+					}
+				});
 				console.log(`Successfully deleted ${numberDeleted} records.`);
 			} catch(error) {
 				console.error(`encountered error trying to delete record with id = ${event.target.dataset.entryId}`);
@@ -338,6 +352,48 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 				<button ref={addEntryRef} type="button" onClick={handleAddEntry}>Add Entry</button>
 				<hr/>
 				{/*<button type="button" onClick={handleListRefresh}> Refresh List</button>*/}
+				<button
+					type="button"
+					onClick={() => {
+						setPagerOffset(0)
+					}}
+				>
+					First
+				</button>
+				<button
+					type="button"
+					onClick={() => {
+						setPagerOffset( curOffset => {
+							return curOffset - pagerLimit >= 0 ? curOffset - pagerLimit : 0
+						})
+					}}
+				>
+					Previous
+				</button>
+				<span> {pagerOffset} ({pagerOffset/pagerLimit}) (of {totalEntriesCount})</span>
+				<button
+					type="button"
+					onClick={() => {
+						setPagerOffset( curOffset => {
+							if(totalEntriesCount) {
+								return curOffset + pagerLimit < totalEntriesCount ? curOffset + pagerLimit : totalEntriesCount - pagerLimit
+							}
+							return curOffset;
+						})
+					}}
+				>
+					Next
+				</button>
+				<button
+					type="button"
+					onClick={() => {
+						if(totalEntriesCount) {
+							setPagerOffset(totalEntriesCount - pagerLimit)
+						}
+					}}
+				>
+					Last
+				</button>
 				<ol>
 				{
 					entries?.map( entry =>
