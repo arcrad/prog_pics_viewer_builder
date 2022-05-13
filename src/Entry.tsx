@@ -15,6 +15,7 @@ import { db, Entry } from './db';
 import { GlobalState } from './App';
 import ChangeImageModal from './ChangeImageModal';
 import MarkImageModal from './MarkImageModal';
+import AddEntryModal from './AddEntryModal';
 
 type EntryAttributes = {
 	globalState: GlobalState,
@@ -30,6 +31,7 @@ function EntryComponent({
 	let [currentEntryDate, setCurrentEntryDate] = useState("april 5, 2022");
 	let [changeImageModalIsVisible, setChangeImageModalIsVisible] = useState(false);
 	let [markImageModalIsVisible, setMarkImageModalIsVisible] = useState(false);
+	let [addEntryModalIsVisible, setAddEntryModalIsVisible] = useState(false);
 	let [entryIdBeingEdited, setEntryIdBeingEdited] = useState(-1);
 	let [pagerOffset, setPagerOffset] = useState(0);
 	
@@ -92,6 +94,8 @@ function EntryComponent({
 	const handleAddEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		//console.dir(imageUploadRef.current);
 		console.log("handle add entry..");
+		setAddEntryModalIsVisible(true);
+		return; 
 		try {
 			const date = ((new Date()).toISOString()).substring(0, 16); 
 			//datetime needs to be more robust
@@ -487,6 +491,12 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 					setGlobalState={setGlobalState} 
 					isModalVisible={markImageModalIsVisible}
 					setIsModalVisible={setMarkImageModalIsVisible}
+				/>
+				<AddEntryModal 
+					globalState={globalState} 
+					setGlobalState={setGlobalState} 
+					isModalVisible={addEntryModalIsVisible}
+					setIsModalVisible={setAddEntryModalIsVisible}
 				/>
 			</div>
     </div>
