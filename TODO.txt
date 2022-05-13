@@ -44,3 +44,7 @@
 +add option on viewer component to process just entries with no aligned image (partial processing)
 
 +consider making cropping resize instead of reset to corners when image scaling is changed (on adjust component)
+
++refine paging functionality on entry component 
+
++add streamlined "add entry" wizard to entry component
