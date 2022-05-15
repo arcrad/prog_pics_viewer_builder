@@ -55,3 +55,6 @@
 +add clear marks option to mark image component
 
 +improve dialogs/modals
+
++fix typescript error for HTMLDialogElement
+	--doesnt think show, showModal, or close methods exist
