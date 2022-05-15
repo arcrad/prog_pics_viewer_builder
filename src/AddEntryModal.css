@@ -1,0 +1,38 @@
+
+.modalOverlay {
+	background: rgba(0,0,0,0.5);
+	z-index: 9000;
+	width: 100vw;
+	height: 100vh;
+	box-sizing: border-box;
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+}
+
+.modalVisible {
+	display: visible;
+}
+
+.addEntryContentContainer {
+	border: 1px solid black;
+	/*display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;*/
+	background: #fff;
+	padding: 0.5rem;
+	width: 70rem;
+	width: 85vw;
+	height: 90vh;
+	margin: 0;
+	overflow: hidden scroll;
+}
+
+.addEntryControlsContainer {
+	border: 1px solid black;
+	background: #fff;
+	padding: 1rem;
+	width: 70rem;
+	max-width: 85vw;
+}

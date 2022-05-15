@@ -20,6 +20,7 @@ type ChangeImageComponentAttributes= {
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>,
 	isModalVisible: boolean,
 	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
+	closeModalOnLoad: boolean,
 };
 
 function ChangeImageComponent({
@@ -27,6 +28,7 @@ function ChangeImageComponent({
 	setGlobalState,
 	isModalVisible,
 	setIsModalVisible,
+	closeModalOnLoad,
 } : ChangeImageComponentAttributes ) {
 	let [statusMessages, setStatusMessages] = useState<string[]>([]);
 	
@@ -79,8 +81,10 @@ function ChangeImageComponent({
 									imageNaturalHeight: tempImage.naturalHeight
 								}).then( () => {
 									setStatusMessages( cs => [...cs, "saved full-res image data"]);
-									setIsModalVisible(false);
-									setStatusMessages([]);
+									if(closeModalOnLoad) {
+										setIsModalVisible(false);
+										setStatusMessages([]);
+									}
 								});
 							});
 						});

@@ -51,6 +51,7 @@ function ChangeImageModal({
 					setGlobalState={setGlobalState} 
 					isModalVisible={isModalVisible}
 					setIsModalVisible={setIsModalVisible}
+					closeModalOnLoad={true}
 				/>
 				<button type="button" onClick={ () => setIsModalVisible(false) }>Cancel</button>
 			</div>
