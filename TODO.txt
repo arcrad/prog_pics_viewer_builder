@@ -51,3 +51,7 @@
 
 +improve styles (layout and code)
 	--implement bulma?
+
++add clear marks option to mark image component
+
++improve dialogs/modals
