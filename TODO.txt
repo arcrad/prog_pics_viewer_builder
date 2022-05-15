@@ -48,3 +48,6 @@
 +refine paging functionality on entry component 
 
 +add streamlined "add entry" wizard to entry component
+
++improve styles (layout and code)
+	--implement bulma?
