@@ -10,6 +10,7 @@ import
 		MouseEvent,
 		ChangeEvent 
 	} from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
@@ -33,7 +34,7 @@ function AddEntryModal({
 } : AddEntryModalAttributes ) {
 	let [isLoaded, setIsLoaded] = useState(false);
 
-	const modalOverlayRef = useRef<HTMLDivElement>(null);
+	const modalOverlayRef = useRef<any>(null);
 
 	const currentEntry = useLiveQuery(
 		() => db.entries.get(globalState.currentEntryId)
@@ -72,18 +73,13 @@ function AddEntryModal({
 		}
 	};
 
-	let handleCloseButton = () => {
-			setIsLoaded(false);
-			setIsModalVisible(false);
-	};
-	
 	useEffect( () => {
 		if(isModalVisible) {
 			addEntry();
 		}
 	}, [isModalVisible]);
 
-	useEffect( () => {
+	/*useEffect( () => {
 		if(modalOverlayRef.current) {
 			isModalVisible ? 
 				modalOverlayRef.current.classList.add("modalVisible")
@@ -91,10 +87,40 @@ function AddEntryModal({
 				modalOverlayRef.current.classList.remove("modalVisible");
 		}
 
+	}, [isModalVisible]);*/
+	
+	useEffect( () => {
+		if(modalOverlayRef.current) {
+			isModalVisible ? 
+				//modalOverlayRef.current.classList.add("modalVisible")
+				modalOverlayRef.current.showModal()
+				:
+				modalOverlayRef.current.close();
+				//modalOverlayRef.current.classList.remove("modalVisible");
+		}
 	}, [isModalVisible]);
+	
+	useEffect( () => {
+		if(modalOverlayRef.current) {
+			modalOverlayRef.current.addEventListener('close', handleCloseButton);
+			modalOverlayRef.current.addEventListener('cancel', handleCloseButton);
+		}
+		return () => {
+			if(modalOverlayRef.current) {
+				modalOverlayRef.current.removeEventListener('close', handleCloseButton);
+				modalOverlayRef.current.removeEventListener('cancel', handleCloseButton);
+			}
+		}
+	}, []);
+
+	let handleCloseButton = () => {
+			console.log('handleCloseButton()');
+			setIsLoaded(false);
+			setIsModalVisible(false);
+	};
 
 	return (
-    <div ref={modalOverlayRef} className="modalOverlay">
+    <dialog ref={modalOverlayRef} className="modalOverlay1">
 			<div className="addEntryContentContainer">
 				<div className="main">
 					<h2>Add Entry</h2>
@@ -125,7 +151,7 @@ function AddEntryModal({
 					</button>
 				</div>
 			</div>
-    </div>
+    </dialog>
   );
 }
 

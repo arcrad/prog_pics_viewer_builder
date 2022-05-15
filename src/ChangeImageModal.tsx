@@ -31,9 +31,9 @@ function ChangeImageModal({
 } : ChangeImageModalAttributes ) {
 	let [statusMessages, setStatusMessages] = useState<string[]>([]);
 	
-	let modalOverlayRef = useRef<HTMLDivElement>(null);
+	let modalOverlayRef = useRef<any>(null);
 
-	useEffect( () => {
+	/*useEffect( () => {
 		if(modalOverlayRef.current) {
 			isModalVisible ? 
 				modalOverlayRef.current.classList.add("modalVisible")
@@ -41,10 +41,40 @@ function ChangeImageModal({
 				modalOverlayRef.current.classList.remove("modalVisible");
 		}
 
+	}, [isModalVisible]);*/
+	
+	useEffect( () => {
+		if(modalOverlayRef.current) {
+			isModalVisible ? 
+				//modalOverlayRef.current.classList.add("modalVisible")
+				modalOverlayRef.current.showModal()
+				:
+				modalOverlayRef.current.close();
+				//modalOverlayRef.current.classList.remove("modalVisible");
+		}
 	}, [isModalVisible]);
+	
+	useEffect( () => {
+		if(modalOverlayRef.current) {
+			modalOverlayRef.current.addEventListener('close', handleCloseButton);
+			modalOverlayRef.current.addEventListener('cancel', handleCloseButton);
+		}
+		return () => {
+			if(modalOverlayRef.current) {
+				modalOverlayRef.current.removeEventListener('close', handleCloseButton);
+				modalOverlayRef.current.removeEventListener('cancel', handleCloseButton);
+			}
+		}
+	}, []);
+
+	let handleCloseButton = () => {
+			console.log('handleCloseButton()');
+			//setIsLoaded(false);
+			setIsModalVisible(false);
+	};
 
 	return (
-    <div ref={modalOverlayRef} className="modalOverlay">
+    <dialog ref={modalOverlayRef} className="modalOverlay1">
 			<div className="controlsContainer">
 				<ChangeImageComponent
 					globalState={globalState} 
@@ -53,9 +83,9 @@ function ChangeImageModal({
 					setIsModalVisible={setIsModalVisible}
 					closeModalOnLoad={true}
 				/>
-				<button type="button" onClick={ () => setIsModalVisible(false) }>Cancel</button>
+				<button type="button" onClick={handleCloseButton}>Cancel</button>
 			</div>
-    </div>
+    </dialog>
   );
 }
 
