@@ -55,8 +55,10 @@ function MarkImageComponent({
 } : MarkImageComponentAttributes ) {
 	let [xNaturalHoverCoord, setXNaturalHoverCoord] = useState(0);
 	let [yNaturalHoverCoord, setYNaturalHoverCoord] = useState(0);
-	let [clientX, setClientX] = useState(0);
-	let [clientY, setClientY] = useState(0);
+	let [hoverX, setHoverX] = useState(0);
+	let [hoverY, setHoverY] = useState(0);
+	let [imageCanvasOffsetLeft, setImageCanvasOffsetLeft] = useState(0);
+	let [imageCanvasOffsetTop, setImageCanvasOffsetTop] = useState(0);
 	let [isHoverMarkerVisible, setIsHoverMarkerVisible] = useState(false);
 	let [activeMark, setActiveMark] = useState("A");
 	let [marks, setMarks] = useState<Marks>({});
@@ -243,41 +245,45 @@ function MarkImageComponent({
 	}, [currentEntry, renderTrigger, resizeCanary]);
 
 	let handleImageHover = (event:MouseEvent<HTMLCanvasElement>) => {
-		//console.dir(event);
+		console.dir(event);
 		let target = event.target as HTMLCanvasElement;
 		if(
-			target 
-			&& target.offsetLeft 
-			//&& target.offsetRight 
-			&& target.offsetTop
-			//&& target.offsetBottom
-			&& target.clientWidth
-			&& target.clientHeight
-			//&& target.naturalWidth
-			//&& target.naturalHeight
-			&& event.clientX
-			&& event.clientY
-			&& currentEntry
-			&& currentEntry.imageBlob
+			target !== undefined
+			&& target.offsetLeft !== undefined
+			&& target.offsetTop !== undefined
+			&& target.clientWidth !== undefined
+			&& target.clientHeight !== undefined
+			&& event.clientX !== undefined
+			&& event.clientY !== undefined
+			&& event.pageX !== undefined
+			&& event.pageY !== undefined
+			&& currentEntry !== undefined
+			&& currentEntry.imageBlob !== undefined
 		)	{
 			//console.log(`target.clientWidth = ${target.clientWidth}, target.clientHeight = ${target.clientHeight}`);
 			let image = new Image();
-			//image.src = currentEntry.image;
 			image.onload = () => {
-			let widthRatio = image.naturalWidth / target.clientWidth;
-			let heightRatio = image.naturalHeight / target.clientHeight;
-			let xHoverCoord = event.clientX - target.offsetLeft;
-			let yHoverCoord = event.clientY - target.offsetTop;
-			//setXHoverCoord(xHoverCoord);
-			//setYHoverCoord(yHoverCoord);
-			setXNaturalHoverCoord(xHoverCoord*widthRatio);
-			setYNaturalHoverCoord(yHoverCoord*heightRatio);
-			setClientX(event.clientX);	
-			setClientY(event.clientY);
-			//setOffsetLeft(target.offsetLeft);	
-			//setOffsetRight(target.offsetRight);	
-			//setOffsetTop(target.offsetTop);	
-			//setOffsetBottom(target.offsetBottom);	
+				const boundingRect = target.getBoundingClientRect();
+				let widthRatio = image.naturalWidth / target.clientWidth;
+				let heightRatio = image.naturalHeight / target.clientHeight;
+				let xHoverCoord = event.clientX - boundingRect.x;
+				let yHoverCoord = event.clientY - boundingRect.y;
+				//setXHoverCoord(xHoverCoord);
+				//setYHoverCoord(yHoverCoord);
+				setXNaturalHoverCoord(xHoverCoord*widthRatio);
+				setYNaturalHoverCoord(yHoverCoord*heightRatio);
+				/*console.dir(target.getBoundingClientRect())
+				console.log(`event.pageX = ${event.pageX}, event.pageY = ${event.pageY}`);
+				console.log(`event.clientX = ${event.clientX}, event.clientY = ${event.clientY}`);
+				console.log(`target.offsetLeft = ${target.offsetLeft}, target.offsetTop = ${target.offsetTop}`);
+				console.log(`xHoverCoord = ${xHoverCoord}, yHoverCoord = ${yHoverCoord}`);
+				console.log(`xHoverCoordAlt = ${event.clientX - boundingRect.x}, yHoverCoordAlt = ${event.clientY - boundingRect.y}`);*/
+				setHoverX(xHoverCoord);
+				setHoverY(yHoverCoord);
+				setImageCanvasOffsetLeft(target.offsetLeft);	
+				//setOffsetRight(target.offsetRight);	
+				setImageCanvasOffsetTop(target.offsetTop);	
+				//setOffsetBottom(target.offsetBottom);	
 			}
 
 			image.src = URL.createObjectURL(currentEntry.imageBlob)
@@ -295,19 +301,20 @@ function MarkImageComponent({
 	let handleImageClick = (event:MouseEvent<HTMLCanvasElement>) => {
 		let target = event.target as HTMLCanvasElement;
 		if(
-			target 
-			&& target.offsetLeft 
-			&& target.offsetTop
+			target !== undefined
+			&& target.offsetLeft !== undefined 
+			&& target.offsetTop !== undefined
 			&& fullResImageCanvasRef.current
 			&& imageCanvasRef.current
-			&& currentEntry
+			&& currentEntry !== undefined
 		)	{
 			console.log(`full width = ${fullResImageCanvasRef.current.width} / scale width = ${imageCanvasRef.current.width}`);
 			console.log(`full height = ${fullResImageCanvasRef.current.height} / scale height = ${imageCanvasRef.current.height}`);
+			const boundingRect = target.getBoundingClientRect();
 			let widthRatio = fullResImageCanvasRef.current.width / imageCanvasRef.current.width;
 			let heightRatio = fullResImageCanvasRef.current.height / imageCanvasRef.current.height;
-			let xClickValue = event.clientX - target.offsetLeft;
-			let yClickValue = event.clientY - target.offsetTop;
+			let xClickValue = event.clientX - boundingRect.x;
+			let yClickValue = event.clientY - boundingRect.y;
 			let fullResXClickValue = xClickValue * widthRatio;
 			let fullResYClickValue = yClickValue * heightRatio;
 			console.log(`xClickValue = ${xClickValue}, yClickValue = ${yClickValue}`);
@@ -366,6 +373,7 @@ function MarkImageComponent({
 					*/}
 				</div>
 				<div ref={imageContainerRef} className="imageContainer">
+					<div className="imageSandwich">
 					<canvas
 							ref={imageCanvasRef}
 							className="entryImage"
@@ -380,27 +388,14 @@ function MarkImageComponent({
 					<div 
 						className={"hoverMarker" + (isHoverMarkerVisible ? " hoverMarkerVisible" : "") + ( activeMark ? ' activeMark'+activeMark : '')}
 						style={{
-							left: clientX, 
-							top: clientY,
+							left: hoverX,
+							top:hoverY,
 							backgroundImage: 'url("'+fullResImageData+'")',
-							//backgroundPosition: 'right '+(xNaturalHoverCoord-offsetLeft-xHoverCoord)+'px bottom '+(yNaturalHoverCoord-offsetTop-yHoverCoord)+'px',
-							//backgroundPosition: 'left 0px top 0px'
 							backgroundPosition: 'left calc(-'+(xNaturalHoverCoord)+'px + 9vh) top calc(-'+(yNaturalHoverCoord)+'px + 9vh)',
 						}}
 					>
 					</div>
-					{
-					/*<div 
-						className="clickMarker" 
-						style={{
-							left: clickX, 
-							top: clickY,
-						}}
-					>
-					</div>*/
-					}
-					<canvas ref={fullResImageCanvasRef} style={{visibility: "hidden"}} />
-						
+					</div>
 				</div>
 				<div className="footer">
 					<button 
@@ -425,6 +420,7 @@ function MarkImageComponent({
 						Set Mark C
 					</button>				
 				</div>
+				<canvas ref={fullResImageCanvasRef} style={{visibility: "hidden", height: 0, width: 0, pointerEvents: 'none'}} />
 			</>
   );
 }
