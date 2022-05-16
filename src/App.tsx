@@ -145,7 +145,7 @@ function App() {
 					}
 				>
 					<Route 
-						path="entry" 
+						path="entry/*" 
 						element={
 							<EntryComponent
 								globalState={globalState} 

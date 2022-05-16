@@ -16,11 +16,12 @@ import { GlobalState } from './App';
 //import './ChangeImageComponent.css';
 
 type ChangeImageComponentAttributes= {
-	globalState: GlobalState,
-	setGlobalState: Dispatch<SetStateAction<GlobalState>>,
-	isModalVisible: boolean,
-	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
-	closeModalOnLoad: boolean,
+	globalState: GlobalState;
+	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
+	isModalVisible: boolean;
+	setIsModalVisible: Dispatch<SetStateAction<boolean>>;
+	closeModalOnLoad: boolean;
+	afterLoadImageFn?: () => void;
 };
 
 function ChangeImageComponent({
@@ -29,6 +30,7 @@ function ChangeImageComponent({
 	isModalVisible,
 	setIsModalVisible,
 	closeModalOnLoad,
+	afterLoadImageFn,
 } : ChangeImageComponentAttributes ) {
 	let [statusMessages, setStatusMessages] = useState<string[]>([]);
 	
@@ -84,6 +86,9 @@ function ChangeImageComponent({
 									if(closeModalOnLoad) {
 										setIsModalVisible(false);
 										setStatusMessages([]);
+									}
+									if(afterLoadImageFn) {
+										afterLoadImageFn();
 									}
 								});
 							});

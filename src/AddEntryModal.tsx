@@ -10,7 +10,13 @@ import
 		MouseEvent,
 		ChangeEvent 
 	} from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { 
+	BrowserRouter, 
+	Routes, 
+	Route, 
+	NavLink, 
+	useNavigate 
+} from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
@@ -18,6 +24,7 @@ import { GlobalState } from './App';
 import './AddEntryModal.css';
 import ChangeImageComponent from './ChangeImageComponent';
 import MarkImageComponent from './MarkImageComponent';
+import UpdateEntryDataComponent from './UpdateEntryDataComponent';
 
 type AddEntryModalAttributes = {
 	globalState: GlobalState,
@@ -33,8 +40,10 @@ function AddEntryModal({
 	setIsModalVisible,
 } : AddEntryModalAttributes ) {
 	let [isLoaded, setIsLoaded] = useState(false);
-
+	
 	const modalOverlayRef = useRef<any>(null);
+
+	const navigate = useNavigate();
 
 	const currentEntry = useLiveQuery(
 		() => db.entries.get(globalState.currentEntryId)
@@ -76,6 +85,7 @@ function AddEntryModal({
 	useEffect( () => {
 		if(isModalVisible) {
 			addEntry();
+			navigate('/entry/add');
 		}
 	}, [isModalVisible]);
 
@@ -125,21 +135,40 @@ function AddEntryModal({
 				<div className="main">
 					<h2>Add Entry</h2>
 					<p>Updating entry with id = { globalState.currentEntryId }</p>
-					<ChangeImageComponent
-						globalState={globalState} 
-						setGlobalState={setGlobalState} 
-						isModalVisible={isModalVisible}
-						setIsModalVisible={setIsModalVisible}
-						closeModalOnLoad={false}
-					/>
-					<MarkImageComponent
-						globalState={globalState} 
-						setGlobalState={setGlobalState} 
-						isModalVisible={isModalVisible}
-						setIsModalVisible={setIsModalVisible}
-						isLoaded={isLoaded}
-						setIsLoaded={setIsLoaded}
-					/>
+					<NavLink to="./add" className="addEntryStepLink">Change Image</NavLink>
+					<NavLink to="./mark" className="addEntryStepLink">Mark Image</NavLink>
+					<NavLink to="./updateinfo" className="addEntryStepLink">Update Data</NavLink>
+					<Routes>
+						<Route path="/add" element={
+							<ChangeImageComponent
+								globalState={globalState} 
+								setGlobalState={setGlobalState} 
+								isModalVisible={isModalVisible}
+								setIsModalVisible={setIsModalVisible}
+								closeModalOnLoad={false}
+								afterLoadImageFn={ () => { navigate("./mark") }}
+							/>
+						} />
+						<Route path="/mark" element={
+							<MarkImageComponent
+								globalState={globalState} 
+								setGlobalState={setGlobalState} 
+								isModalVisible={isModalVisible}
+								setIsModalVisible={setIsModalVisible}
+								isLoaded={isLoaded}
+								setIsLoaded={setIsLoaded}
+							/>
+						} />
+						<Route path="/updateinfo" element={
+							<UpdateEntryDataComponent
+								globalState={globalState} 
+								setGlobalState={setGlobalState} 
+								isModalVisible={isModalVisible}
+								setIsModalVisible={setIsModalVisible}
+								afterUpdateFn={ () => {}}
+							/>
+						} />
+					</Routes>
 				</div>
 				<div className="footer">
 					<button 

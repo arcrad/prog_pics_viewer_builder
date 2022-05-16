@@ -36,3 +36,13 @@
 	width: 70rem;
 	max-width: 85vw;
 }
+
+.addEntryStepLink {
+	margin: 0.5rem;
+}
+
+.addEntryStepLink.active {
+	background: black;
+	color: #fff;
+	padding: 0.5rem;
+}
