@@ -159,7 +159,9 @@ function AddEntryModal({
 					<h2>Add Entry</h2>
 					<p>Updating entry with id = { globalState.currentEntryId }</p>
 					<NavLink to="./add/image" className="addEntryStepLink">Change Image</NavLink>
+					&gt;
 					<NavLink to="./add/mark" className="addEntryStepLink">Mark Image</NavLink>
+					&gt;
 					<NavLink to="./add/updateinfo" className="addEntryStepLink">Update Data</NavLink>
 					<Routes>
 						<Route path="/add/image" element={

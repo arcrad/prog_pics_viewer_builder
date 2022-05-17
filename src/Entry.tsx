@@ -198,6 +198,7 @@ function EntryComponent({
 				try {
 					const id = await db.entries.add({
 						date: date,//entryToDuplicate.date,
+						draft: entryToDuplicate.draft,
 						weight: entryToDuplicate.weight,
 						notes: entryToDuplicate.notes,
 						imageBlob: entryToDuplicate.imageBlob,
