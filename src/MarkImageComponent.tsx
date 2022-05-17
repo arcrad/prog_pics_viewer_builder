@@ -64,6 +64,7 @@ function MarkImageComponent({
 	let [marks, setMarks] = useState<Marks>({});
 	let [fullResImageData, setFullResImageData] = useState('');
 	let [resizeCanary, setResizeCanary] = useState(false);
+	let [entryHasImage, setEntryHasImage] = useState(false);
 	//let [isLoaded, setIsLoaded] = useState(false);
 	let [renderTrigger, setRenderTrigger] = useState(Date.now());
 
@@ -162,11 +163,13 @@ function MarkImageComponent({
 		}
 		};
 			//
-		if(
-			currentEntry 
-			&& currentEntry.imageBlob
-		) {
-			image.src = URL.createObjectURL(currentEntry.imageBlob);
+		if(currentEntry) {
+			if(currentEntry.imageBlob) {
+				setEntryHasImage(true);
+				image.src = URL.createObjectURL(currentEntry.imageBlob);
+			} else {
+				setEntryHasImage(false);
+			}
 		}
 		
 	}, [currentEntry]);
@@ -383,8 +386,9 @@ function MarkImageComponent({
 							onMouseOver={handleImageMouseOver}
 							onMouseOut={handleImageMouseOut}
 							onClick={handleImageClick}
-						/> 
-						{ !isLoaded && <p>loading image...</p> }
+						/>
+						{ !entryHasImage && <p>Entry has no image</p>} 
+						{ entryHasImage && !isLoaded && <p>loading image...</p> }
 					<div 
 						className={"hoverMarker" + (isHoverMarkerVisible ? " hoverMarkerVisible" : "") + ( activeMark ? ' activeMark'+activeMark : '')}
 						style={{

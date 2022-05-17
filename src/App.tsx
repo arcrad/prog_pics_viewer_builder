@@ -13,7 +13,7 @@ import ImageStorePOC from './ImageStorePOC';
 import Builder from './Builder';
 
 export type Settings = {
-	[key: string]: number;
+	[key: string]: any;
 }
 /*	markLineWidthScalePercent: number;
 	markRadiusScalePercent: number;
@@ -53,6 +53,7 @@ const defaultSettings:Settings = {
 	bottomLeftCornerCropCoordinateX: -1,
 	bottomLeftCornerCropCoordinateY: -1,
 	exportFrameDuration: 500,
+	showDraftsInEntries: true,
 };
 
 function App() {

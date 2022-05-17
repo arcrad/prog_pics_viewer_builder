@@ -49,6 +49,8 @@ function AddEntryModal({
 		() => db.entries.get(globalState.currentEntryId)
 	, [globalState]);
 
+	
+
 	/*
 	useEffect( () => {
 		function updateResizeCanary() {
@@ -124,10 +126,30 @@ function AddEntryModal({
 		}
 	}, []);
 
-	let handleCloseButton = () => {
-			console.log('handleCloseButton()');
-			setIsLoaded(false);
-			setIsModalVisible(false);
+	let closeModal = () => {
+		setIsLoaded(false);
+		setIsModalVisible(false);
+	}
+
+	let handleCloseButton = async () => {
+		console.log('handleCloseButton()');
+		console.log('attempt to delete current draft entry');
+		try {
+			const numberDeleted = await db.entries
+				.where("id").equals(globalState.currentEntryId)
+				.delete();
+			console.log(`Successfully deleted ${numberDeleted} records.`);
+		} catch(error) {
+			console.error(`encountered error trying to delete record with id = ${globalState.currentEntryId}`);
+		}
+		closeModal();
+	};
+
+	let handleSaveButton = () => {
+		db.entries.update(globalState.currentEntryId, {
+			draft: false
+		});
+		closeModal();
 	};
 
 	return (
@@ -171,13 +193,21 @@ function AddEntryModal({
 						} />
 					</Routes>
 				</div>
+				<hr/>
 				<div className="footer">
+					<button 
+						type="button" 
+						className="saveButton"
+						onClick={ handleSaveButton }
+					>
+							Save
+					</button>
 					<button 
 						type="button" 
 						className="closeButton"
 						onClick={ handleCloseButton }
 					>
-							Close
+							Cancel
 					</button>
 				</div>
 			</div>

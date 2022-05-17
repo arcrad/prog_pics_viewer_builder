@@ -58,3 +58,5 @@
 
 +fix typescript error for HTMLDialogElement
 	--doesnt think show, showModal, or close methods exist
+
++modularize common db calls 

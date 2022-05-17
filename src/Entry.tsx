@@ -42,10 +42,10 @@ function EntryComponent({
 	const pagerLimit = 10;
 
 	const totalEntriesCount = useLiveQuery(
-		() => db.entries.filter((entry) => entry.draft !== true).count()
+		() => db.entries.filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).count()
 	);
 	const entries = useLiveQuery(
-		() => db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().offset(pagerOffset).limit(pagerLimit).toArray()
+		() => db.entries.orderBy('date').filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).reverse().offset(pagerOffset).limit(pagerLimit).toArray()
 	, [
 		pagerOffset, 
 		pagerLimit
@@ -429,7 +429,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 									</button>
 								</div> 
 								:
-								<span>({entry.id}) Weight: {entry.weight} @ {entry.date}</span>
+								<span>({entry.id}) Weight: {entry.weight} @ {entry.date} {entry.draft ? '[draft]' : ''}</span>
 							}
 							<div>
 								<button 
