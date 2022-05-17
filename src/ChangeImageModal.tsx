@@ -76,6 +76,7 @@ function ChangeImageModal({
 	return (
     <dialog ref={modalOverlayRef} className="modalOverlay1">
 			<div className="controlsContainer">
+				<h2>Change Image</h2>
 				<ChangeImageComponent
 					globalState={globalState} 
 					setGlobalState={setGlobalState} 

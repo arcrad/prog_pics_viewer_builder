@@ -55,12 +55,14 @@ function UpdateEntryDataComponent({
 			]) => {
 				if(_currentEntry) {
 					setCurrentEntry(_currentEntry);
+					/*
 					if(_currentEntry.weight) {
 						setCurrentEntryWeight(_currentEntry.weight);
 					}
 					if(_currentEntry.date) {
 						setCurrentEntryDate(_currentEntry.date);
 					}
+					*/
 				}
 				setIsLoaded(true);
 				console.group('got data from db'); 
@@ -69,11 +71,11 @@ function UpdateEntryDataComponent({
 	}, [initialized.current]);
 
 	let debounceInputTimeout = useRef(0);
-	const handleEntryInputChange = async (event:ChangeEvent<HTMLInputElement>) => {
+	const handleEntryInputChange = async (event:ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => {
 		console.log('handleEntryInputChange');
 		if(
 			event.target
-			&& event.target instanceof HTMLInputElement
+			&& ( event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement )
 			&& event.target.dataset.entryId
 			&& event.target.dataset.entryKeyToModify
 		) {
@@ -83,11 +85,15 @@ function UpdateEntryDataComponent({
 			console.log('entryId = ', entryIdToModify);
 			console.log('entryKeyToModify = ', entryKeyToModify);
 			console.log('value = ', newValue);
+			/*
 			if(event.target.dataset.entryKeyToModify === 'weight') {
 				setCurrentEntryWeight(parseFloat(event.target.value as string));
-			} else {
+			} else if(event.target.dataset.entryKeyToModify === 'date') {
 				setCurrentEntryDate(event.target.value);
+			} else if(event.target.dataset.entryKeyToModify === 'notes') {
+				setCurrentEntryNotes(event.target.value);
 			}
+			*/
 			clearTimeout(debounceInputTimeout.current);
 			let modifyDbValueHandler = () => {
 					console.log('fire update db with new input', newValue, entryIdToModify);
@@ -122,6 +128,13 @@ function UpdateEntryDataComponent({
 							data-entry-key-to-modify="date"
 							onChange={handleEntryInputChange}
 						/>
+						<textarea
+							data-entry-id={currentEntry?.id} 
+							data-entry-key-to-modify="notes"
+							onChange={handleEntryInputChange}
+						>
+							{currentEntry?.notes}
+						</textarea>
 					</div> 
 				<button type="button">
 					Save

@@ -88,7 +88,7 @@ function AddEntryModal({
 	useEffect( () => {
 		if(isModalVisible) {
 			addEntry();
-			navigate('/entry/add');
+			navigate('/entry/add/image');
 		}
 	}, [isModalVisible]);
 
@@ -158,21 +158,21 @@ function AddEntryModal({
 				<div className="main">
 					<h2>Add Entry</h2>
 					<p>Updating entry with id = { globalState.currentEntryId }</p>
-					<NavLink to="./add" className="addEntryStepLink">Change Image</NavLink>
-					<NavLink to="./mark" className="addEntryStepLink">Mark Image</NavLink>
-					<NavLink to="./updateinfo" className="addEntryStepLink">Update Data</NavLink>
+					<NavLink to="./add/image" className="addEntryStepLink">Change Image</NavLink>
+					<NavLink to="./add/mark" className="addEntryStepLink">Mark Image</NavLink>
+					<NavLink to="./add/updateinfo" className="addEntryStepLink">Update Data</NavLink>
 					<Routes>
-						<Route path="/add" element={
+						<Route path="/add/image" element={
 							<ChangeImageComponent
 								globalState={globalState} 
 								setGlobalState={setGlobalState} 
 								isModalVisible={isModalVisible}
 								setIsModalVisible={setIsModalVisible}
 								closeModalOnLoad={false}
-								afterLoadImageFn={ () => { navigate("./mark") }}
+								afterLoadImageFn={ () => { navigate("./add/mark") }}
 							/>
 						} />
-						<Route path="/mark" element={
+						<Route path="/add/mark" element={
 							<MarkImageComponent
 								globalState={globalState} 
 								setGlobalState={setGlobalState} 
@@ -182,7 +182,7 @@ function AddEntryModal({
 								setIsLoaded={setIsLoaded}
 							/>
 						} />
-						<Route path="/updateinfo" element={
+						<Route path="/add/updateinfo" element={
 							<UpdateEntryDataComponent
 								globalState={globalState} 
 								setGlobalState={setGlobalState} 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, NavLink } from 'react-router-dom';
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
@@ -50,11 +50,11 @@ function Builder({
 				border: "1px solid red",
 				padding: "1rem"
 			}}>
-				<Link to="/entry">Entry</Link>
-				<Link to="/adjust">Adjust</Link>
-				<Link to="/process">Process</Link>
-				<Link to="/export">Export</Link>
-				<Link to="/settings">Settings</Link>
+				<NavLink to="/entry">Entry</NavLink>
+				<NavLink to="/adjust">Adjust</NavLink>
+				<NavLink to="/process">Process</NavLink>
+				<NavLink to="/export">Export</NavLink>
+				<NavLink to="/settings">Settings</NavLink>
 			</nav>
 			<Outlet />
 			<SetupModal 

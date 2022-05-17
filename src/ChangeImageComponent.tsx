@@ -113,13 +113,12 @@ function ChangeImageComponent({
 
 	return (
 			<>
-				<h1>Change Image</h1>
 				<p>Updating entry with id = { globalState.currentEntryId }.</p>
 				<p>Messages:</p>
 				<ul>
 				{
-					statusMessages?.map( (message) => {
-						return <li>{message}</li>
+					statusMessages?.map( (message, index) => {
+						return <li key={index}>{message}</li>
 					})
 				}
 				</ul>
