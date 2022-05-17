@@ -12,6 +12,7 @@ export type MarkCollection = {
 
 export type Entry = {
 	id?: number;
+	draft?: boolean;
 	date: string;
 	weight?: number;
 	notes?: string;
@@ -37,7 +38,7 @@ export class TypedDexie extends Dexie {
 
 	constructor() {
 		super('db');
-		this.version(23).stores({
+		this.version(24).stores({
 			entries: '++id, date, weight, notes, marks',
 			settings: 'key, value'
 		});
