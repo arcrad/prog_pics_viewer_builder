@@ -65,7 +65,7 @@ function Viewer({
 				db.settings.get('bottomRightCornerCropCoordinateY'),
 				db.settings.get('bottomLeftCornerCropCoordinateX'),
 				db.settings.get('bottomLeftCornerCropCoordinateY'),
-				db.entries.orderBy('date').reverse().toArray(),
+				db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray(),
 				db.settings.get('scaleWidth'),
 				db.settings.get('scaleHeight'),
 				db.entries.get( parseInt(_chosenEntryIdForAdjustments?.value as string) )
@@ -303,7 +303,7 @@ function Viewer({
 			}
 			setProcessingState('complete');
 			console.log('all entries have been processed');
-			db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
+			db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray().then( (_entries) => {
 				const [_allEntriesHaveAlignedImage, _entriesWithAlignedImageCount] = checkAllEntriesHaveAlignedImage(_entries);
 				setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage as boolean);
 					setEntriesWithAlignedImageCount(_entriesWithAlignedImageCount as number);
@@ -333,7 +333,7 @@ function Viewer({
 			}
 			setProcessingState('complete');
 			console.log('all unprocessed entries have been processed');
-			db.entries.orderBy('date').reverse().toArray().then( (_entries) => {
+			db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray().then( (_entries) => {
 				const [_allEntriesHaveAlignedImage, _entriesWithAlignedImageCount] = checkAllEntriesHaveAlignedImage(_entries);
 				setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage as boolean);
 					setEntriesWithAlignedImageCount(_entriesWithAlignedImageCount as number);

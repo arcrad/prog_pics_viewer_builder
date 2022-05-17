@@ -41,7 +41,7 @@ function Export({
 		console.log('intialize data from DB started');
 		initializedRef.current = true;
 		Promise.all([
-		  db.entries.orderBy('date').toArray(),
+		  db.entries.orderBy('date').filter((entry) => entry.draft !== true).toArray(),
 			db.settings.get('exportFrameDuration'),
 			db.settings.get('exportOverlayFrameNumber'),
 			db.settings.get('exportOverlayEntryInfo')

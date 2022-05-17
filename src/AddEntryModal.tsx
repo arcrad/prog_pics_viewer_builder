@@ -69,7 +69,8 @@ function AddEntryModal({
 			const date = ((new Date()).toISOString()).substring(0, 16); 
 			//datetime needs to be more robust
 			const id = await db.entries.add({
-				date
+				date: date,
+				draft: true
 			});
 			console.log( 'new id =', id);
 			setGlobalState( (cs):GlobalState => {

@@ -118,7 +118,8 @@ function App() {
 	useEffect( () => {
 		console.log('app initialize currentEntryId');
 		async function initializeCurrentEntryId() {
-			const entries = await db.entries.orderBy('date').reverse().toArray();
+			//TODO: can improve this by maing it query the newest entry directly
+			const entries = await db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray();
 			setGlobalState( (cs):GlobalState => {
 				console.log(JSON.stringify(cs));
 				if(entries) {

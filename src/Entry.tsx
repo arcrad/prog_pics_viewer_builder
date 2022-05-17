@@ -42,10 +42,10 @@ function EntryComponent({
 	const pagerLimit = 10;
 
 	const totalEntriesCount = useLiveQuery(
-		() => db.entries.count()
+		() => db.entries.filter((entry) => entry.draft !== true).count()
 	);
 	const entries = useLiveQuery(
-		() => db.entries.orderBy('date').reverse().offset(pagerOffset).limit(pagerLimit).toArray()
+		() => db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().offset(pagerOffset).limit(pagerLimit).toArray()
 	, [
 		pagerOffset, 
 		pagerLimit

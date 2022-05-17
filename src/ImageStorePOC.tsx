@@ -7,7 +7,7 @@ function ImageStorePOC() {
 	let imageUploadRef = useRef<HTMLInputElement>(null);
   
 	const entries = useLiveQuery(
-		() => db.entries.toArray()
+		() => db.entries.filter((entry) => entry.draft !== true).toArray()
 	);
 
 	useEffect( () => {
