@@ -38,7 +38,7 @@ export class TypedDexie extends Dexie {
 
 	constructor() {
 		super('db');
-		this.version(24).stores({
+		this.version(25).stores({
 			entries: '++id, draft, date, weight, notes, marks',
 			settings: 'key, value'
 		});
