@@ -19,14 +19,14 @@ import { GlobalState } from './App';
 //import './UpdateEntryDataComponent.css';
 
 type UpdateEntryDataComponentAttributes= {
-	globalState: GlobalState;
-	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
+	//globalState: GlobalState;
+	//setGlobalState: Dispatch<SetStateAction<GlobalState>>;
 	afterUpdateFn?: () => void;
 };
 
 function UpdateEntryDataComponent({
-	globalState, 
-	setGlobalState,
+	//globalState, 
+	//setGlobalState,
 	afterUpdateFn,
 } : UpdateEntryDataComponentAttributes ) {
 	let [isLoaded, setIsLoaded] = useState<boolean>(false);
@@ -59,6 +59,8 @@ function UpdateEntryDataComponent({
 				_currentEntry,
 			]) => {
 				if(_currentEntry) {
+					console.log('_currentEntry=');
+					console.dir(_currentEntry);
 					setCurrentEntry(_currentEntry);
 					/*
 					if(_currentEntry.weight) {
@@ -116,9 +118,9 @@ function UpdateEntryDataComponent({
 	return (
 			<>
 				<h1>Update Entry Data</h1>
-				<p>Updating entry with id = { globalState.currentEntryId }.</p>
+				<p>Updating entry with entryId = {entryId}.</p>
 					<div>
-						Weight: 
+						Weight:
 						<input 
 							type="number" 
 							defaultValue={currentEntry?.weight} 
@@ -137,8 +139,8 @@ function UpdateEntryDataComponent({
 							data-entry-id={currentEntry?.id} 
 							data-entry-key-to-modify="notes"
 							onChange={handleEntryInputChange}
+							defaultValue={currentEntry?.notes}
 						>
-							{currentEntry?.notes}
 						</textarea>
 					</div> 
 				<button type="button">

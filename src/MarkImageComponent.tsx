@@ -22,8 +22,6 @@ import { GlobalState } from './App';
 type MarkImageComponentAttributes = {
 	globalState: GlobalState,
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>,
-//	isModalVisible: boolean,
-//	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
 	isLoaded: boolean,
 	setIsLoaded: Dispatch<SetStateAction<boolean>>,
 };
@@ -51,8 +49,6 @@ const markFillStyles:MarkFillStyles = {
 function MarkImageComponent({
 	globalState, 
 	setGlobalState,
-//	isModalVisible,
-//	setIsModalVisible,
 	isLoaded,
 	setIsLoaded
 } : MarkImageComponentAttributes ) {
@@ -327,19 +323,6 @@ function MarkImageComponent({
 			let fullResYClickValue = yClickValue * heightRatio;
 			console.log(`xClickValue = ${xClickValue}, yClickValue = ${yClickValue}`);
 			console.log(`fullResXClickValue = ${fullResXClickValue}, fullResYClickValue = ${fullResYClickValue}`);
-			/*setMarks( (cs) => {
-				let ns = { [activeMark]: {
-										x: fullResXClickValue, 
-										y: fullResYClickValue, 
-										fillStyle: markFillStyles[activeMark]
-									}}
-				return {...cs, ...ns};
-			});*/
-			/*let newMark = { [activeMark]: {
-									x: fullResXClickValue, 
-									y: fullResYClickValue, 
-									style: markFillStyles[activeMark]
-								}}*/
 			let newMarkData = { 
 									x: fullResXClickValue, 
 									y: fullResYClickValue, 
@@ -347,11 +330,13 @@ function MarkImageComponent({
 								}
 			const markUpdateKey = 'marks.'+activeMark;
 			//let updatedMarks = {...currentEntry.marks, ...newMark};
-			db.entries.update(globalState.currentEntryId, {
-				['marks.'+activeMark]: newMarkData
-			}).then( () => {
-				setRenderTrigger(Date.now());
-			});
+			if(entryId) {
+				db.entries.update(parseInt(entryId), {
+					['marks.'+activeMark]: newMarkData
+				}).then( () => {
+					setRenderTrigger(Date.now());
+				});
+			}
 			//console.log('marks = ');
 			//console.dir(currentEntry.marks);
 		}
@@ -359,7 +344,7 @@ function MarkImageComponent({
 
 	let handleCloseButton = () => {
 			setIsLoaded(false);
-		//	setIsModalVisible(false);
+//	setIsModalVisible(false);
 	};
 
 	return (
@@ -369,7 +354,6 @@ function MarkImageComponent({
 					<p>isLoaded = {isLoaded ? 'true' : 'false'}</p>
 					<div className="debugInfo">
 						<p>
-							Updating entry with id = { globalState.currentEntryId }
 							Updating entry with entryId = { entryId }
 						</p>
 					</div>

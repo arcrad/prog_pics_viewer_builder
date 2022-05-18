@@ -8,7 +8,11 @@ import
 		SetStateAction, 
 		MouseEvent,
 		ChangeEvent 
-	} from 'react';
+	} 
+from 'react';
+import {
+	useNavigate,
+} from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
@@ -17,21 +21,23 @@ import ChangeImageComponent from './ChangeImageComponent';
 import './ChangeImageModal.css';
 
 type ChangeImageModalAttributes= {
-	globalState: GlobalState,
-	setGlobalState: Dispatch<SetStateAction<GlobalState>>,
+	//globalState: GlobalState,
+	//setGlobalState: Dispatch<SetStateAction<GlobalState>>,
 //	isModalVisible: boolean,
 //	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
 };
 
 function ChangeImageModal({
-	globalState, 
-	setGlobalState,
+//	globalState, 
+//	setGlobalState,
 //	isModalVisible,
 //	setIsModalVisible,
 } : ChangeImageModalAttributes ) {
 	let [statusMessages, setStatusMessages] = useState<string[]>([]);
 	
 	let modalOverlayRef = useRef<any>(null);
+
+	let navigate = useNavigate();
 
 	/*useEffect( () => {
 		if(modalOverlayRef.current) {
@@ -75,6 +81,7 @@ function ChangeImageModal({
 
 	let handleCloseButton = () => {
 			console.log('handleCloseButton()');
+			navigate('../');
 			//setIsLoaded(false);
 		//	setIsModalVisible(false);
 	};
@@ -84,8 +91,6 @@ function ChangeImageModal({
 			<div className="controlsContainer">
 				<h2>Change Image</h2>
 				<ChangeImageComponent
-					globalState={globalState} 
-					setGlobalState={setGlobalState} 
 					closeModalOnLoad={true}
 				/>
 				<button type="button" onClick={handleCloseButton}>Cancel</button>

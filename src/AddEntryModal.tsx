@@ -49,7 +49,6 @@ function AddEntryModal({
 	const { entryId } = useParams();
 
 	const currentEntry = useLiveQuery(
-		//() => db.entries.get(globalState.currentEntryId)
 		() => db.entries.get(entryId || 0)
 	, [entryId]);
 
@@ -162,7 +161,6 @@ function AddEntryModal({
 				//console.dir(currentEntry);
 				if(currentEntry && currentEntry.draft) {
 					const numberDeleted = await db.entries
-						//.where("id").equals(globalState.currentEntryId)
 						.where("id").equals(parseInt(entryId))
 						.delete();
 					console.log(`Successfully deleted ${numberDeleted} records.`);
@@ -171,13 +169,12 @@ function AddEntryModal({
 				}
 			}
 		} catch(error) {
-			console.error(`encountered error trying to delete record with id = ${globalState.currentEntryId}`);
+			console.error(`encountered error trying to delete record with id = ${entryId}`);
 		}
 		closeModal();
 	};
 
 	let handleSaveButton = () => {
-		//db.entries.update(globalState.currentEntryId, {
 		if(entryId != null) {
 			db.entries.update(parseInt(entryId), {
 				draft: false
@@ -192,7 +189,7 @@ function AddEntryModal({
 			<div className="addEntryContentContainer">
 				<div className="main">
 					<h2>Add Entry</h2>
-					<p>Updating entry with id = { globalState.currentEntryId } entryId = {entryId}</p>
+					<p>Updating entry with entryId = {entryId}</p>
 					<NavLink to="./image" className="addEntryStepLink">Change Image</NavLink>
 					&gt;
 					<NavLink to="./mark" className="addEntryStepLink">Mark Image</NavLink>
@@ -201,8 +198,6 @@ function AddEntryModal({
 					<Routes>
 						<Route path="/image" element={
 							<ChangeImageComponent
-								globalState={globalState} 
-								setGlobalState={setGlobalState} 
 								closeModalOnLoad={false}
 								afterLoadImageFn={ () => { navigate("./mark") }}
 							/>
@@ -217,8 +212,6 @@ function AddEntryModal({
 						} />
 						<Route path="/updateinfo" element={
 							<UpdateEntryDataComponent
-								globalState={globalState} 
-								setGlobalState={setGlobalState} 
 								afterUpdateFn={ () => {}}
 							/>
 						} />

@@ -60,6 +60,7 @@ function EntryComponent({
 		pagerLimit
 	]);
 
+/*
 	const currentEntry = useLiveQuery(
 		() => db.entries.get(globalState.currentEntryId)
 	, [globalState]);
@@ -68,8 +69,9 @@ function EntryComponent({
 		setCurrentEntryWeight( c => currentEntry?.weight ? String(currentEntry.weight) : '');
 		setCurrentEntryDate( c => currentEntry?.date ? currentEntry.date : '');
 	}, [currentEntry]);
-	
+	*/
 
+/*
 	let handleEntrySelectChange = (event:ChangeEvent<HTMLSelectElement>) => {
 		//console.dir(event);
 		let newEntryId = parseInt( (event.target as HTMLSelectElement).value );
@@ -79,7 +81,8 @@ function EntryComponent({
 			return { ...cs, ...ns }; 
 		});
 	};
-	
+	*/
+
 	/*useEffect( () => {
 		let handleEntrySelectChange = (event:Event) => {
 			//console.dir(event);
@@ -520,10 +523,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 				<Route 
 					path="/change_image/:entryId/*"
 					element={
-						<ChangeImageModal 
-							globalState={globalState} 
-							setGlobalState={setGlobalState} 
-						/>
+						<ChangeImageModal/>
 					}
 				/>
 				</Routes>

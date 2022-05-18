@@ -20,8 +20,8 @@ import { GlobalState } from './App';
 //import './ChangeImageComponent.css';
 
 type ChangeImageComponentAttributes= {
-	globalState: GlobalState;
-	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
+	//globalState: GlobalState;
+	//setGlobalState: Dispatch<SetStateAction<GlobalState>>;
 //	isModalVisible: boolean;
 //	setIsModalVisible: Dispatch<SetStateAction<boolean>>;
 	closeModalOnLoad: boolean;
@@ -29,8 +29,8 @@ type ChangeImageComponentAttributes= {
 };
 
 function ChangeImageComponent({
-	globalState, 
-	setGlobalState,
+	//globalState, 
+	//setGlobalState,
 //	isModalVisible,
 //	setIsModalVisible,
 	closeModalOnLoad,
