@@ -19,15 +19,15 @@ import './ChangeImageModal.css';
 type ChangeImageModalAttributes= {
 	globalState: GlobalState,
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>,
-	isModalVisible: boolean,
-	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
+//	isModalVisible: boolean,
+//	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
 };
 
 function ChangeImageModal({
 	globalState, 
 	setGlobalState,
-	isModalVisible,
-	setIsModalVisible,
+//	isModalVisible,
+//	setIsModalVisible,
 } : ChangeImageModalAttributes ) {
 	let [statusMessages, setStatusMessages] = useState<string[]>([]);
 	
@@ -43,7 +43,7 @@ function ChangeImageModal({
 
 	}, [isModalVisible]);*/
 	
-	useEffect( () => {
+	/*useEffect( () => {
 		if(modalOverlayRef.current) {
 			isModalVisible ? 
 				//modalOverlayRef.current.classList.add("modalVisible")
@@ -52,7 +52,13 @@ function ChangeImageModal({
 				modalOverlayRef.current.close();
 				//modalOverlayRef.current.classList.remove("modalVisible");
 		}
-	}, [isModalVisible]);
+	}, [isModalVisible]);*/
+	
+	useEffect( () => {
+		if(modalOverlayRef.current && !modalOverlayRef.current.open) {
+				modalOverlayRef.current.showModal();
+		}
+	}, []);
 	
 	useEffect( () => {
 		if(modalOverlayRef.current) {
@@ -70,7 +76,7 @@ function ChangeImageModal({
 	let handleCloseButton = () => {
 			console.log('handleCloseButton()');
 			//setIsLoaded(false);
-			setIsModalVisible(false);
+		//	setIsModalVisible(false);
 	};
 
 	return (
@@ -80,8 +86,6 @@ function ChangeImageModal({
 				<ChangeImageComponent
 					globalState={globalState} 
 					setGlobalState={setGlobalState} 
-					isModalVisible={isModalVisible}
-					setIsModalVisible={setIsModalVisible}
 					closeModalOnLoad={true}
 				/>
 				<button type="button" onClick={handleCloseButton}>Cancel</button>

@@ -9,6 +9,9 @@ import
 		MouseEvent,
 		ChangeEvent 
 	} from 'react';
+import {
+	useParams
+} from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
@@ -18,16 +21,12 @@ import { GlobalState } from './App';
 type UpdateEntryDataComponentAttributes= {
 	globalState: GlobalState;
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
-	isModalVisible: boolean;
-	setIsModalVisible: Dispatch<SetStateAction<boolean>>;
 	afterUpdateFn?: () => void;
 };
 
 function UpdateEntryDataComponent({
 	globalState, 
 	setGlobalState,
-	isModalVisible,
-	setIsModalVisible,
 	afterUpdateFn,
 } : UpdateEntryDataComponentAttributes ) {
 	let [isLoaded, setIsLoaded] = useState<boolean>(false);
@@ -38,8 +37,14 @@ function UpdateEntryDataComponent({
 	
 	const initialized = useRef<boolean>(false);
 
+	let { entryId } = useParams();
+	
 	useEffect( () => {
 		//fetch all initial data and then set intializedData flag 	
+		if(entryId == null) {
+			console.error('no entryId');
+			return;
+		}
 		console.warn('INITIALIZER FIRED!');
 		if(initialized.current) {
 				console.log('already initialized, aborting');
@@ -49,7 +54,7 @@ function UpdateEntryDataComponent({
 		initialized.current = true;
 		//db.settings.get('chosenEntryIdForAdjustments').then((_chosenEntryIdForAdjustments) => {
 			Promise.all([
-				db.entries.get(globalState.currentEntryId),
+				db.entries.get(parseInt(entryId)),
 			]).then(([
 				_currentEntry,
 			]) => {
@@ -68,7 +73,7 @@ function UpdateEntryDataComponent({
 				console.group('got data from db'); 
 			});
 		//});
-	}, [initialized.current]);
+	}, [initialized.current, entryId]);
 
 	let debounceInputTimeout = useRef(0);
 	const handleEntryInputChange = async (event:ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => {

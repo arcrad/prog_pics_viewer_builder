@@ -10,6 +10,9 @@ import
 		MouseEvent,
 		ChangeEvent 
 	} from 'react';
+import {
+	useParams
+} from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
@@ -19,8 +22,8 @@ import { GlobalState } from './App';
 type MarkImageComponentAttributes = {
 	globalState: GlobalState,
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>,
-	isModalVisible: boolean,
-	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
+//	isModalVisible: boolean,
+//	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
 	isLoaded: boolean,
 	setIsLoaded: Dispatch<SetStateAction<boolean>>,
 };
@@ -48,8 +51,8 @@ const markFillStyles:MarkFillStyles = {
 function MarkImageComponent({
 	globalState, 
 	setGlobalState,
-	isModalVisible,
-	setIsModalVisible,
+//	isModalVisible,
+//	setIsModalVisible,
 	isLoaded,
 	setIsLoaded
 } : MarkImageComponentAttributes ) {
@@ -74,13 +77,14 @@ function MarkImageComponent({
 	const imageContainerRef = useRef<HTMLDivElement>(null);
 	const fullResImageCanvasRef = useRef<HTMLCanvasElement>(null);
 
-	const currentEntry = useLiveQuery(
-		() => db.entries.get(globalState.currentEntryId)
-	, [globalState]);
+	let { entryId } = useParams();
+	let currentEntry = useLiveQuery(
+		() =>	db.entries.get(parseInt(entryId != null ? entryId : '0'))
+	, [entryId]);
 
 	useEffect( () => {
 		setActiveMark('A');
-	}, [isModalVisible]);
+	}, []);
 
 	useEffect( () => {
 		function updateResizeCanary() {
@@ -96,10 +100,10 @@ function MarkImageComponent({
 	useEffect( () => {
 		//render full-res entry image
 		console.log('render full-res canvas');
-		if(!isModalVisible) {
+	/*	if(!isModalVisible) {
 				console.log('modal is not visible, aborting render...');
 				return;
-		}
+		}*/
 		const image = new Image();
 		//image.src = currentEntry.image;
 		image.onload = () => {
@@ -177,10 +181,11 @@ function MarkImageComponent({
 	const renderScaledCanvas = () => {
 		//render scaled canvas
 		console.log('render scaled canvas, current entry id = ', currentEntry?.id);
-		if(!isModalVisible) {
+		console.dir(currentEntry);
+	/*	if(!isModalVisible) {
 				console.log('modal is not visible, aborting render...');
 				return;
-		}
+		}*/
 		//console.log(`before: clientWidth = ${imageContainerRef?.current?.clientWidth}, clientHeight = ${imageContainerRef?.current?.clientHeight}`);
 		if(
 			imageCanvasRef.current 
@@ -354,7 +359,7 @@ function MarkImageComponent({
 
 	let handleCloseButton = () => {
 			setIsLoaded(false);
-			setIsModalVisible(false);
+		//	setIsModalVisible(false);
 	};
 
 	return (
@@ -362,6 +367,12 @@ function MarkImageComponent({
 				<div className="header">
 					<h2>Mark Image</h2>	
 					<p>isLoaded = {isLoaded ? 'true' : 'false'}</p>
+					<div className="debugInfo">
+						<p>
+							Updating entry with id = { globalState.currentEntryId }
+							Updating entry with entryId = { entryId }
+						</p>
+					</div>
 					{/*
 					<div className="debugInfo">
 						<p>

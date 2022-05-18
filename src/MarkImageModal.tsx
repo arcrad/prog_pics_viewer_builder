@@ -10,6 +10,9 @@ import
 		MouseEvent,
 		ChangeEvent 
 	} from 'react';
+import {
+	useNavigate,
+} from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
@@ -20,8 +23,8 @@ import './MarkImageModal.css';
 type MarkImageModalAttributes = {
 	globalState: GlobalState,
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>,
-	isModalVisible: boolean,
-	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
+//	isModalVisible: boolean,
+//	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
 };
 
 type MarkPoint = {
@@ -47,15 +50,17 @@ const markFillStyles:MarkFillStyles = {
 function MarkImageModal({
 	globalState, 
 	setGlobalState,
-	isModalVisible,
-	setIsModalVisible,
+//	isModalVisible,
+//	setIsModalVisible,
 } : MarkImageModalAttributes ) {
 	let [isLoaded, setIsLoaded] = useState(false);
 
 	//const modalOverlayRef = useRef<HTMLDialogElement>(null);
 	const modalOverlayRef = useRef<any>(null);
 
-	useEffect( () => {
+	const navigate = useNavigate();
+
+/*	useEffect( () => {
 		if(modalOverlayRef.current) {
 			isModalVisible ? 
 				//modalOverlayRef.current.classList.add("modalVisible")
@@ -65,7 +70,13 @@ function MarkImageModal({
 				//modalOverlayRef.current.classList.remove("modalVisible");
 		}
 
-	}, [isModalVisible]);
+	}, [isModalVisible]);*/
+
+	useEffect( () => {
+		if(modalOverlayRef.current && !modalOverlayRef.current.open) {
+				modalOverlayRef.current.showModal();
+		}
+	}, []);
 
 	useEffect( () => {
 		if(modalOverlayRef.current) {
@@ -83,7 +94,8 @@ function MarkImageModal({
 	let handleCloseButton = () => {
 			console.log('handleCloseButton()');
 			setIsLoaded(false);
-			setIsModalVisible(false);
+			navigate('/entry');
+		//	setIsModalVisible(false);
 	};
 
 	return (
@@ -92,8 +104,6 @@ function MarkImageModal({
 				<MarkImageComponent
 					globalState={globalState} 
 					setGlobalState={setGlobalState} 
-					isModalVisible={isModalVisible}
-					setIsModalVisible={setIsModalVisible}
 					isLoaded={isLoaded}
 					setIsLoaded={setIsLoaded}
 				/>

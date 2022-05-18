@@ -15,7 +15,8 @@ import {
 	Routes, 
 	Route, 
 	NavLink, 
-	useNavigate 
+	useNavigate,
+	useParams
 } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -29,25 +30,28 @@ import UpdateEntryDataComponent from './UpdateEntryDataComponent';
 type AddEntryModalAttributes = {
 	globalState: GlobalState,
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>,
-	isModalVisible: boolean,
-	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
+//	isModalVisible: boolean,
+//	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
 };
 
 function AddEntryModal({
 	globalState, 
 	setGlobalState,
-	isModalVisible,
-	setIsModalVisible,
+//	isModalVisible,
+//	setIsModalVisible,
 } : AddEntryModalAttributes ) {
 	let [isLoaded, setIsLoaded] = useState(false);
-	
+	let [modalIsLoaded, setModalIsLoaded] = useState(false);
+
 	const modalOverlayRef = useRef<any>(null);
 
 	const navigate = useNavigate();
+	const { entryId } = useParams();
 
 	const currentEntry = useLiveQuery(
-		() => db.entries.get(globalState.currentEntryId)
-	, [globalState]);
+		//() => db.entries.get(globalState.currentEntryId)
+		() => db.entries.get(entryId || 0)
+	, [entryId]);
 
 	
 
@@ -85,12 +89,22 @@ function AddEntryModal({
 		}
 	};
 
-	useEffect( () => {
+/*	useEffect( () => {
 		if(isModalVisible) {
 			addEntry();
 			navigate('/entry/add/image');
 		}
 	}, [isModalVisible]);
+*/
+
+/*
+	useEffect( () => {
+		if(modalOverlayRef.current.open) {
+			addEntry();
+			//navigate('/entry/add/image');
+		}
+	}, []);
+*/
 
 	/*useEffect( () => {
 		if(modalOverlayRef.current) {
@@ -103,6 +117,12 @@ function AddEntryModal({
 	}, [isModalVisible]);*/
 	
 	useEffect( () => {
+		if(modalOverlayRef.current && !modalOverlayRef.current.open) {
+				modalOverlayRef.current.showModal();
+		}
+	}, []);
+
+/*	useEffect( () => {
 		if(modalOverlayRef.current) {
 			isModalVisible ? 
 				//modalOverlayRef.current.classList.add("modalVisible")
@@ -112,33 +132,44 @@ function AddEntryModal({
 				//modalOverlayRef.current.classList.remove("modalVisible");
 		}
 	}, [isModalVisible]);
-	
+	*/
+
 	useEffect( () => {
 		if(modalOverlayRef.current) {
-			modalOverlayRef.current.addEventListener('close', handleCloseButton);
-			modalOverlayRef.current.addEventListener('cancel', handleCloseButton);
+			modalOverlayRef.current.addEventListener('close', handleCancelButton);
+			modalOverlayRef.current.addEventListener('cancel', handleCancelButton);
 		}
 		return () => {
 			if(modalOverlayRef.current) {
-				modalOverlayRef.current.removeEventListener('close', handleCloseButton);
-				modalOverlayRef.current.removeEventListener('cancel', handleCloseButton);
+				modalOverlayRef.current.removeEventListener('close', handleCancelButton);
+				modalOverlayRef.current.removeEventListener('cancel', handleCancelButton);
 			}
 		}
 	}, []);
 
 	let closeModal = () => {
 		setIsLoaded(false);
-		setIsModalVisible(false);
+		navigate('/entry');
+	//	setIsModalVisible(false);
 	}
 
-	let handleCloseButton = async () => {
-		console.log('handleCloseButton()');
+	let handleCancelButton = async () => {
+		console.log('handleCancelButton()');
 		console.log('attempt to delete current draft entry');
 		try {
-			const numberDeleted = await db.entries
-				.where("id").equals(globalState.currentEntryId)
-				.delete();
-			console.log(`Successfully deleted ${numberDeleted} records.`);
+			if(entryId != null) {
+				const currentEntry = await db.entries.get(parseInt(entryId));
+				//console.dir(currentEntry);
+				if(currentEntry && currentEntry.draft) {
+					const numberDeleted = await db.entries
+						//.where("id").equals(globalState.currentEntryId)
+						.where("id").equals(parseInt(entryId))
+						.delete();
+					console.log(`Successfully deleted ${numberDeleted} records.`);
+				} else {
+					console.log('entry is not draft, so not deleting');
+				}
+			}
 		} catch(error) {
 			console.error(`encountered error trying to delete record with id = ${globalState.currentEntryId}`);
 		}
@@ -146,50 +177,48 @@ function AddEntryModal({
 	};
 
 	let handleSaveButton = () => {
-		db.entries.update(globalState.currentEntryId, {
-			draft: false
-		});
+		//db.entries.update(globalState.currentEntryId, {
+		if(entryId != null) {
+			db.entries.update(parseInt(entryId), {
+				draft: false
+			});
+		}
 		closeModal();
 	};
 
+    //<dialog ref={modalOverlayRef} className="modalOverlay1" open={true}>
 	return (
     <dialog ref={modalOverlayRef} className="modalOverlay1">
 			<div className="addEntryContentContainer">
 				<div className="main">
 					<h2>Add Entry</h2>
-					<p>Updating entry with id = { globalState.currentEntryId }</p>
-					<NavLink to="./add/image" className="addEntryStepLink">Change Image</NavLink>
+					<p>Updating entry with id = { globalState.currentEntryId } entryId = {entryId}</p>
+					<NavLink to="./image" className="addEntryStepLink">Change Image</NavLink>
 					&gt;
-					<NavLink to="./add/mark" className="addEntryStepLink">Mark Image</NavLink>
+					<NavLink to="./mark" className="addEntryStepLink">Mark Image</NavLink>
 					&gt;
-					<NavLink to="./add/updateinfo" className="addEntryStepLink">Update Data</NavLink>
+					<NavLink to="./updateinfo" className="addEntryStepLink">Update Data</NavLink>
 					<Routes>
-						<Route path="/add/image" element={
+						<Route path="/image" element={
 							<ChangeImageComponent
 								globalState={globalState} 
 								setGlobalState={setGlobalState} 
-								isModalVisible={isModalVisible}
-								setIsModalVisible={setIsModalVisible}
 								closeModalOnLoad={false}
-								afterLoadImageFn={ () => { navigate("./add/mark") }}
+								afterLoadImageFn={ () => { navigate("./mark") }}
 							/>
 						} />
-						<Route path="/add/mark" element={
+						<Route path="/mark" element={
 							<MarkImageComponent
 								globalState={globalState} 
 								setGlobalState={setGlobalState} 
-								isModalVisible={isModalVisible}
-								setIsModalVisible={setIsModalVisible}
 								isLoaded={isLoaded}
 								setIsLoaded={setIsLoaded}
 							/>
 						} />
-						<Route path="/add/updateinfo" element={
+						<Route path="/updateinfo" element={
 							<UpdateEntryDataComponent
 								globalState={globalState} 
 								setGlobalState={setGlobalState} 
-								isModalVisible={isModalVisible}
-								setIsModalVisible={setIsModalVisible}
 								afterUpdateFn={ () => {}}
 							/>
 						} />
@@ -207,7 +236,7 @@ function AddEntryModal({
 					<button 
 						type="button" 
 						className="closeButton"
-						onClick={ handleCloseButton }
+						onClick={ handleCancelButton }
 					>
 							Cancel
 					</button>

@@ -10,6 +10,13 @@ import
 		ChangeEvent 
 	} from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { 
+	BrowserRouter, 
+	Routes, 
+	Route, 
+	NavLink, 
+	useNavigate 
+} from 'react-router-dom';
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
@@ -38,6 +45,8 @@ function EntryComponent({
 	let addEntryRef = useRef<HTMLButtonElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
   let entrySelectRef = useRef<HTMLSelectElement>(null);
+
+	const navigate = useNavigate();
 
 	const pagerLimit = 10;
 
@@ -94,13 +103,15 @@ function EntryComponent({
 	const handleAddEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		//console.dir(imageUploadRef.current);
 		console.log("handle add entry..");
-		setAddEntryModalIsVisible(true);
-		return; 
-		try {
+		//setAddEntryModalIsVisible(true);
+	//	navigate(`./add/${globalState.currentEntryId}/image`);
+	/////	return; 
+ 		try {
 			const date = ((new Date()).toISOString()).substring(0, 16); 
 			//datetime needs to be more robust
 			const id = await db.entries.add({
-				date
+				date: date,
+				draft: true
 			});
 			console.log( 'new id =', id);
 			setGlobalState( (cs):GlobalState => {
@@ -108,6 +119,8 @@ function EntryComponent({
 				let ns = { currentEntryId: id as number};
 				return { ...cs, ...ns };
 			});
+			setAddEntryModalIsVisible(true);
+			navigate(`./add/${id}/image`);
 		} catch(error) {
 			console.error(`failed to add db entry. ${error}`);
 		}
@@ -238,7 +251,7 @@ function EntryComponent({
 			&& event.target instanceof HTMLButtonElement
 			&& event.target.dataset.entryId
 		) {
-			setGlobalState( (cs):GlobalState =>{
+			/*setGlobalState( (cs):GlobalState =>{
 				let eventTargetElement = event.target as HTMLButtonElement;
 				if(eventTargetElement && eventTargetElement.dataset.entryId) {
 					let newCurrentEntryId = parseInt(eventTargetElement.dataset.entryId);
@@ -246,8 +259,10 @@ function EntryComponent({
 					return { ...cs, ...ns};
 				}
 				return cs;
-			});
-			setMarkImageModalIsVisible(true);
+			});*/
+			let entryId = parseInt(event.target.dataset.entryId);
+			//setMarkImageModalIsVisible(true);
+			navigate(`./mark/${entryId}`);
 		}
 	};
 	
@@ -258,7 +273,7 @@ function EntryComponent({
 			&& event.target instanceof HTMLButtonElement
 			&& event.target.dataset.entryId
 		) {
-			setGlobalState( (cs):GlobalState =>{
+			/*setGlobalState( (cs):GlobalState =>{
 				let eventTargetElement = event.target as HTMLButtonElement;
 				if(eventTargetElement && eventTargetElement.dataset.entryId) {
 					let newCurrentEntryId = parseInt(eventTargetElement.dataset.entryId);
@@ -266,8 +281,10 @@ function EntryComponent({
 					return { ...cs, ...ns};
 				}
 				return cs;
-			});
-			setChangeImageModalIsVisible(true);
+			});*/
+			let entryId = parseInt(event.target.dataset.entryId);
+			//setChangeImageModalIsVisible(true);
+			navigate(`./change_image/${entryId}`);
 		}
 	};
 
@@ -481,24 +498,35 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 							<button type="button" data-entry-id={entry.id} onClick={handleDeleteEntry}>Delete</button>
 						</div> )*/
 				}
-				<ChangeImageModal 
-					globalState={globalState} 
-					setGlobalState={setGlobalState} 
-					isModalVisible={changeImageModalIsVisible}
-					setIsModalVisible={setChangeImageModalIsVisible}
+				<Routes>
+				<Route 
+					path="/add/:entryId/*"
+					element={
+						<AddEntryModal 
+							globalState={globalState} 
+							setGlobalState={setGlobalState} 
+						/>
+					}
 				/>
-				<MarkImageModal 
-					globalState={globalState} 
-					setGlobalState={setGlobalState} 
-					isModalVisible={markImageModalIsVisible}
-					setIsModalVisible={setMarkImageModalIsVisible}
+				<Route 
+					path="/mark/:entryId/*"
+					element={
+						<MarkImageModal 
+							globalState={globalState} 
+							setGlobalState={setGlobalState} 
+						/>
+					}
 				/>
-				<AddEntryModal 
-					globalState={globalState} 
-					setGlobalState={setGlobalState} 
-					isModalVisible={addEntryModalIsVisible}
-					setIsModalVisible={setAddEntryModalIsVisible}
+				<Route 
+					path="/change_image/:entryId/*"
+					element={
+						<ChangeImageModal 
+							globalState={globalState} 
+							setGlobalState={setGlobalState} 
+						/>
+					}
 				/>
+				</Routes>
 			</div>
     </div>
   );

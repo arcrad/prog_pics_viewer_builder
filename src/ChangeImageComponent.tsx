@@ -9,6 +9,10 @@ import
 		MouseEvent,
 		ChangeEvent 
 	} from 'react';
+import {
+	useNavigate,
+	useParams,
+} from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
@@ -18,8 +22,8 @@ import { GlobalState } from './App';
 type ChangeImageComponentAttributes= {
 	globalState: GlobalState;
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
-	isModalVisible: boolean;
-	setIsModalVisible: Dispatch<SetStateAction<boolean>>;
+//	isModalVisible: boolean;
+//	setIsModalVisible: Dispatch<SetStateAction<boolean>>;
 	closeModalOnLoad: boolean;
 	afterLoadImageFn?: () => void;
 };
@@ -27,8 +31,8 @@ type ChangeImageComponentAttributes= {
 function ChangeImageComponent({
 	globalState, 
 	setGlobalState,
-	isModalVisible,
-	setIsModalVisible,
+//	isModalVisible,
+//	setIsModalVisible,
 	closeModalOnLoad,
 	afterLoadImageFn,
 } : ChangeImageComponentAttributes ) {
@@ -40,6 +44,10 @@ function ChangeImageComponent({
 	let selectImageButtonRef = useRef<HTMLButtonElement>(null);
 	let fileHandleRef = useRef<any>(null);
 
+	let navigate = useNavigate();
+	
+	let { entryId } = useParams();
+	
 	const loadImageHandler = async (event:MouseEvent<HTMLButtonElement>) => {
 		//console.dir(imageUploadRef.current);
 		console.log("handle load image..");
@@ -72,26 +80,31 @@ function ChangeImageComponent({
 					if(thumbCanvasContext) {
 						thumbCanvasContext.drawImage(tempImage, 0, 0, thumbWidth, thumbHeight);
 						thumbCanvas.toBlob( (blob) => {
-							db.entries.update(globalState.currentEntryId, {
+							if(entryId != null ) {
+							db.entries.update(parseInt(entryId), {
 								thumbImageBlob: blob
 							}).then( () => {
 								//thumb blob saved
 								setStatusMessages( cs => [...cs, "saved thumbnail data"]);
-								db.entries.update(globalState.currentEntryId, {
+								if(entryId != null) {
+								db.entries.update(parseInt(entryId), {
 									imageBlob: selectedFile,
 									imageNaturalWidth: tempImage.naturalWidth,
 									imageNaturalHeight: tempImage.naturalHeight
 								}).then( () => {
 									setStatusMessages( cs => [...cs, "saved full-res image data"]);
 									if(closeModalOnLoad) {
-										setIsModalVisible(false);
+									//	setIsModalVisible(false);
+										navigate('/entry');
 										setStatusMessages([]);
 									}
 									if(afterLoadImageFn) {
 										afterLoadImageFn();
 									}
 								});
+								}
 							});
+							}
 						});
 					}
 				//} else {
@@ -113,7 +126,7 @@ function ChangeImageComponent({
 
 	return (
 			<>
-				<p>Updating entry with id = { globalState.currentEntryId }.</p>
+				<p>Updating entry with id = { entryId }.</p>
 				<p>Messages:</p>
 				<ul>
 				{
