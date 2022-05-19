@@ -122,7 +122,6 @@ function SetupModal({
 					loadedData &&
 					<div> 
 				<h1>Setup</h1>
-				<p>currentEntryId = { globalState.currentEntryId }.</p>
 				<h2>Filesystem</h2>
 				<p>Configure directory for data storage</p>
 				<p>Current working directory: {workingDirectoryHandle?.name }</p>

@@ -37,7 +37,7 @@ declare global {
 };
 
 export type GlobalState = {
-	currentEntryId: number;
+//	currentEntryId: number;
 	settings: Settings;
 };
 
@@ -58,7 +58,7 @@ const defaultSettings:Settings = {
 
 function App() {
 	let [globalState, setGlobalState] = useState<GlobalState>({ 
-		currentEntryId: -1,
+	//	currentEntryId: -1,
 		settings: defaultSettings
 	});
 

@@ -41,6 +41,7 @@ function EntryComponent({
 	let [addEntryModalIsVisible, setAddEntryModalIsVisible] = useState(false);
 	let [entryIdBeingEdited, setEntryIdBeingEdited] = useState(-1);
 	let [pagerOffset, setPagerOffset] = useState(0);
+	let [entryThumbnailImageUrls, setEntryThumbnailImageUrls] = useState<{[key:number]:string}>();
 	
 	let addEntryRef = useRef<HTMLButtonElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
@@ -59,6 +60,31 @@ function EntryComponent({
 		pagerOffset, 
 		pagerLimit
 	]);
+
+	useEffect( () => {
+		//remove old urls 
+		setEntryThumbnailImageUrls( (cs) => {
+			if(cs) {
+				Object.keys(cs).forEach( (key) => {
+					console.log(`revokeObjectUrl(${cs[parseInt(key)]})`);
+					URL.revokeObjectURL(cs[parseInt(key)]);
+				});
+			}
+			return {};
+		});
+		//generate new urls 
+		if(entries) {
+			const entryThumbnailUrls = entries.reduce( (accumulator, currentEntry) => {
+				if(currentEntry.thumbImageBlob) {
+					let newData = {[currentEntry.id as number]: URL.createObjectURL(currentEntry.thumbImageBlob)};
+					return { ...accumulator, ...newData};
+				}
+				return accumulator;
+			}, {});
+			console.dir(entryThumbnailUrls);
+			setEntryThumbnailImageUrls(entryThumbnailUrls);
+		}
+	}, [entries]);
 
 /*
 	const currentEntry = useLiveQuery(
@@ -117,11 +143,11 @@ function EntryComponent({
 				draft: true
 			});
 			console.log( 'new id =', id);
-			setGlobalState( (cs):GlobalState => {
+			/*setGlobalState( (cs):GlobalState => {
 				console.log('inner id=',id);
 				let ns = { currentEntryId: id as number};
 				return { ...cs, ...ns };
-			});
+			});*/
 			setAddEntryModalIsVisible(true);
 			navigate(`./add/${id}/image`);
 		} catch(error) {
@@ -189,12 +215,12 @@ function EntryComponent({
 					.where("id").anyOf(parseInt(event.target.dataset.entryId))
 					.delete();
 				//let newState = { currentEntryId: parseInt(event.target.dataset.entryId)};
-				db.entries.orderBy('date').reverse().toArray().then( (newEntries) => {
+			/*	db.entries.orderBy('date').reverse().toArray().then( (newEntries) => {
 					if(newEntries && newEntries[0] && newEntries[0].id) {
 						let newState = { currentEntryId: newEntries[0].id};
 						setGlobalState( (prevState):GlobalState => { return {...prevState, ...newState}});
 					}
-				});
+				});*/
 				console.log(`Successfully deleted ${numberDeleted} records.`);
 			} catch(error) {
 				console.error(`encountered error trying to delete record with id = ${event.target.dataset.entryId}`);
@@ -224,11 +250,11 @@ function EntryComponent({
 						marks: entryToDuplicate.marks
 					});
 					console.log( 'new id =', id);
-					setGlobalState( (cs):GlobalState => {
+				/*	setGlobalState( (cs):GlobalState => {
 						console.log('inner id=',id);
 						let ns = { currentEntryId: id as number};
 						return { ...cs, ...ns };
-					});
+					});*/
 				} catch(error) {
 					console.error(`failed to duplicate db entry. ${error}`);
 				}
@@ -373,7 +399,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 	return (
     <div>
 			<div>
-				<h2>Entries ( id = {globalState.currentEntryId} )</h2>
+				<h2>Entries</h2>
 				<button ref={addEntryRef} type="button" onClick={handleAddEntry}>Add Entry</button>
 				<hr/>
 				{/*<button type="button" onClick={handleListRefresh}> Refresh List</button>*/}
@@ -423,7 +449,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 				{
 					entries?.map( entry =>
 						<li key={entry.id}>
-							{ entry.thumbImageBlob && <img src={URL.createObjectURL(entry.thumbImageBlob)} style={{maxWidth: "6rem"}} /> }
+							{ entryThumbnailImageUrls && entry.id && <img src={entryThumbnailImageUrls[entry.id]} style={{maxWidth: "6rem"}} /> }
 							{ ( entryIdBeingEdited === entry.id ) ? 
 								<div>
 									Weight: 

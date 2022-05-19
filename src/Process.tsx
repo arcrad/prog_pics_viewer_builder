@@ -355,7 +355,7 @@ function Viewer({
 
 	return (
     <div>
-    	<h2>Process ( id = {globalState.currentEntryId} )</h2>
+    	<h2>Process</h2>
 			{ !loadedData && <div>
 				<h1>LOADING...</h1>
 			</div> }

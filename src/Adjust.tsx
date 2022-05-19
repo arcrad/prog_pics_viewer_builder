@@ -892,7 +892,7 @@ function Adjust({
  
 	return (
     <div>
-    	<h2>Adjust ( id = {globalState.currentEntryId}, chosenEntryIdForAdjustments = {chosenEntryIdForAdjustments?.value} )</h2>
+    	<h2>Adjust ( chosenEntryIdForAdjustments = {chosenEntryIdForAdjustments?.value} )</h2>
 			<p>All images must be cropped and/or scaled to be the same size. On this page, configure the desired size and, if needed, cropping.</p>
 			<select 
 				ref={imageSelectRef} 
