@@ -2,6 +2,10 @@ import React, { useState, useRef, useEffect, Dispatch, SetStateAction, ChangeEve
 import  * as mathjs  from 'mathjs';
 import * as PIXI from 'pixi.js';
 
+import * as d3 from 'd3';
+import { ScaleTime, ScaleLinear } from 'd3-scale'; //from DefinitelyTyped types
+import { Line } from 'd3-shape'; //from DefinitelyTyped types
+
 //importi './Viewer.css';
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
@@ -11,6 +15,10 @@ type ExportAttributes = {
 	globalState: GlobalState;
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
 }
+
+const margin = { top: 5, right: 15, bottom: 15, left: 30 };
+const defaultChartDimensions = { width: 900, height: 250 };
+const smallScreenBreakpoint = 700;
 
 const MIN_FRAME_DURATION_MS = 50;
 const MAX_FRAME_DURATION_MS = 5000;
@@ -82,6 +90,53 @@ function Export({
 			image.src = blobUrl;
 		});
 	}
+	
+	const setupD3ChartScales = (entries:Entry[], width: number, height: number) => {
+		//let x:(ScaleTime<number, number, never>|any) = 0;
+		//let y:(ScaleLinear<number, number, never>|any) = 
+		//TODO: need to improve data 
+		const [minX=0, maxX=0] = d3.extent(entries, d => Date.parse(d.date));
+		//setup x axis timeScale
+    let x = d3.scaleUtc()
+      .domain([minX, maxX])
+      .range([margin.left-8, width - margin.right])
+			.nice();
+    
+		//setup y axis linear scale
+    let y = d3.scaleLinear()
+      .domain(
+        [
+          (d3.min(entries, d => d.weight) ?? 0),
+          (d3.max(entries, d => d.weight) ?? 0)
+        ]
+      )
+      .range([height - margin.bottom, margin.top])
+			.nice();
+
+    //let line = d3.line<wlProgressDataWithMetadataMemberType>()
+    let line = d3.line<Entry>()
+      .x( (d) => x(Date.parse(d.date)) )
+      .y( (d) => y(d.weight || 0) );
+
+		return [x, y, line];
+	};
+
+	let formatXAxis = (function() {
+		let xFormatShort = d3.utcFormat('%b');
+		let xFormatLong = d3.utcFormat('%b'); //redundant right now
+		let prevYear = 0;
+		return (d:any) => {
+			if(prevYear !== d.getUTCFullYear()) {
+				//console.log('d=',d,'year=',d.getUTCFullYear(),'prevYear=',prevYear);
+				prevYear = d.getUTCFullYear();
+				return String(d.getUTCFullYear()).substring(2,4);
+			}
+			return xFormatShort(d).substring(0,1);
+		}
+	})();
+
+
+
 
 	const handleExportVideo = async () => {
 		console.log('handleExportVideo() called');
@@ -138,6 +193,7 @@ function Export({
 			console.dir(recorderData);
 			let recordedBlob = new Blob(recorderData, {type: "video/webm"});
 			if(videoElementRef.current) {
+				//not recommended praactice but for Blobs is currently only woring solution for non-Safari browsers
 				videoElementRef.current.src = URL.createObjectURL(recordedBlob);
 			}
 		});
@@ -164,6 +220,132 @@ function Export({
 		}
 		
 		const delay = (ms:number) => new Promise( (resolve) => setTimeout(resolve, ms) );
+
+		//setup d3
+		//const [x, y, line] = setupD3ChartScales(entries, scaledImageWidth, scaledImageHeight);
+		
+		const [minX=0, maxX=0] = d3.extent(entries, d => Date.parse(d.date));
+		//setup x axis timeScale
+    let x = d3.scaleUtc()
+      .domain([minX, maxX])
+      .range([margin.left-8, scaledImageWidth - margin.right])
+			.nice();
+    
+		//setup y axis linear scale
+    let y = d3.scaleLinear()
+      .domain(
+        [
+          (d3.min(entries, d => d.weight) ?? 0),
+          (d3.max(entries, d => d.weight) ?? 0)
+        ]
+      )
+      .range([scaledImageHeight - margin.bottom, margin.top])
+			.nice();
+
+    //let line = d3.line<wlProgressDataWithMetadataMemberType>()
+    let line = d3.line<Entry>()
+      .x( (d) => x(Date.parse(d.date)) )
+      .y( (d) => y(d.weight || 0) );
+		
+		/*
+		d3.select("#graphContainer").selectAll("*").remove();
+		
+    const svg = d3
+      .select("#graphContainer")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+		*/
+
+    const svg = d3
+			.create("svg")
+      .attr("width", scaledImageWidth + margin.left + margin.right)
+      .attr("height", scaledImageHeight + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+    
+		svg
+			.append("g")
+			.attr("class","graphAxis")
+			.attr("transform", `translate(0, ${scaledImageHeight-margin.bottom+1})`)
+			.attr("color","white")
+			//.call(d3.axisBottom(x).ticks(undefined, '%b'));//d3.utcFormat('%b %d')));
+			//.call(d3.axisBottom(x).ticks(undefined).tickFormat(formatXAxis));
+			.call(d3.axisBottom(x).tickFormat((d) => formatXAxis(d)));
+			//.call(d3.axisBottom(x));
+
+    svg
+			.append("g")
+			.attr("class","graphAxis")
+			.attr("transform", `translate(10, 0)`)
+			.attr("color","white")
+			.call(d3.axisLeft(y));
+    
+		//build line 
+    svg.append("path")
+      //.data([wlProgressDataWithMetadata])
+      .attr("d", line(entries))
+      .attr("fill", "none")
+      .attr("stroke","white")
+      .attr("stroke-width", () => '1')
+      .attr("stroke-miterlimit","1"); 
+
+		//build circle markers
+		svg.append("g").selectAll("circle")
+    .data(entries)
+    .join("circle")
+      .attr("fill", (d,i) => { 
+				//if(d.cheatDay) { return "darkRed"; }
+				return "rgba(0,0,0,0)";
+			})
+      .attr("stroke", (d,i) => { 
+				//if(d.cheatDay) { return "white"; }
+				return "rgba(0,0,0,0)";
+			})
+      .attr("stroke-width", () => '0')
+      //.attr("id", (d,i) => "circle_mark_"+d.indexRef)
+      .attr("cx", d => x(Date.parse(d.date)))
+      .attr("cy", d => y(d.weight || 0))
+      .attr("r", (d,i) => { 
+				/*if(d.cheatDay) { 
+					return '1.25'; 
+				}*/
+				return '2';
+			});
+
+    svg.append("g").selectAll("circle")
+    	.data([entries[1]]) //set to for loop index
+	    .join("circle")
+      	.attr("fill", "none")
+	      .attr("stroke", d => {
+					//return d.cheatDay ? "darkRed" : "#39e";
+					return "#39e";
+				})
+	      .attr("stroke-width", 3)
+	      .attr("cx", d => x(Date.parse(d.date)))
+	      .attr("cy", d => y(d.weight || 0))
+      	.attr("r", '5');
+		/*
+	  svg.on('click', (event, d) => {
+			//console.log('event=',event);
+			let eventTargetIndexRef = event?.target?.__data__?.indexRef;
+			if(event.target.localName === 'circle' && eventTargetIndexRef > -1) {
+				//console.log('indexRef=',eventTargetIndexRef);
+				handleXIndexUpdate(xIndex, eventTargetIndexRef ?? 0);
+			}
+		});
+		*/
+
+
+
+
+
+
+
+
+
 
 		//process frames
 		const videoCanvasContext = videoCanvas.getContext('2d');
@@ -211,7 +393,8 @@ function Export({
 					videoCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
 				}
 				if(overlayEntryInfoIsChecked) {
-					videoCanvasContext.fillText(`ENTRY INFO: ${c}`, 10, 100);
+					videoCanvasContext.fillText(`Weight ${entries[c].weight} lbs`, 10, 100);
+					videoCanvasContext.fillText(`Date ${entries[c].date}`, 10, 150);
 				}
 				//additional delay to allow canvas drawing actions to settle
 				//discovered via testing that this improves frame drawing time consistency greatly
