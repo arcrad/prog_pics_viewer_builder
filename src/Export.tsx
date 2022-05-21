@@ -259,17 +259,112 @@ function Export({
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 		*/
 
+		const svgWidth = scaledImageWidth;
+		const svgHeight = Math.floor(scaledImageHeight/4);
+
+
+		/*
+	  svg.on('click', (event, d) => {
+			//console.log('event=',event);
+			let eventTargetIndexRef = event?.target?.__data__?.indexRef;
+			if(event.target.localName === 'circle' && eventTargetIndexRef > -1) {
+				//console.log('indexRef=',eventTargetIndexRef);
+				handleXIndexUpdate(xIndex, eventTargetIndexRef ?? 0);
+			}
+		});
+		*/
+
+
+
+//function drawInlineSVG(ctx, rawSVG, callback) {
+//const drawInlineSVG = (rawSVG:string):Promise<HTMLImageElement> => {
+const drawInlineSVG = (svgElem:SVGSVGElement):Promise<HTMLImageElement> => {
+	return new Promise( (resolve,reject) => {
+		console.log('drawInlineSVG');
+  // 	console.log(rawSVG);
+	  var svgURL = new XMLSerializer().serializeToString(svgElem);
+			//const svg = new Blob([rawSVG], {type:"image/svg+xml;charset=utf-8"});
+		//	const svg = new Blob([rawSVG], {type:"image/svg+xml"});
+       // domURL = self.URL || self.webkitURL || self,
+   // const url = URL.createObjectURL(svg);
+    const img = new Image;
+
+    img.onload =  () => {
+				console.log('img.onload fired');
+        //ctx.drawImage(this, 0, 0);     
+        //domURL.revokeObjectURL(url);
+        //callback(this);
+        resolve(img);
+    };
+	//	console.log(`set src. url = ${url}`);
+  img.src = 'data:image/svg+xml; charset=utf8, ' + encodeURIComponent(svgURL);
+
+//    img.src = url;
+	});
+}
+
+
+
+
+
+
+
+		//process frames
+		const videoCanvasContext = videoCanvas.getContext('2d');
+		console.log(`got video canvas context`);
+		if(!videoCanvasContext) {
+			return;
+		}
+		videoCanvasContext.fillStyle = 'red';
+		videoCanvasContext.font = '42px serif';
+		mediaRecorder.start();
+		for(let c = 0, max = entries.length; c < max; c++) {
+			mediaRecorder.pause();
+			//await delay(50);
+			await delay(50);
+			let currentBlob = entries[c].alignedImageBlob;
+			//load image
+			if(currentBlob) {
+				console.log(`load image ${c}`);
+				const currentImage = await loadImageFromBlob(currentBlob);
+				
+				//generate scaled version in canvas
+				const scaledCanvas = document.createElement('canvas');
+				scaledCanvas.width = scaledImageWidth;
+				scaledCanvas.height = scaledImageHeight;
+				const scaledCanvasContext = scaledCanvas.getContext('2d');
+				if(scaledCanvasContext) {
+					scaledCanvasContext.drawImage(
+						currentImage, 
+						0, 
+						0, 
+						currentImage.naturalWidth, 
+						currentImage.naturalHeight, 
+						0, 
+						0, 
+						scaledImageWidth, 
+						scaledImageHeight
+					);
+				}
+				console.log(`generated scaledCanvas ${c}`);
+
+				//generate svg graph overlay
+		//const svg = document.createElementNS(d3.ns.prefix.svg, 'svg');
+		//const svgElem = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const svg = d3
-			.create("svg")
-      .attr("width", scaledImageWidth + margin.left + margin.right)
-      .attr("height", scaledImageHeight + margin.top + margin.bottom)
+			.create("svg");
+
+		svg
+    //const svg = d3.select(svgElem)
+      .attr("width", svgWidth + margin.left + margin.right)
+      .attr("height", svgHeight + margin.top + margin.bottom)
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
     
 		svg
 			.append("g")
 			.attr("class","graphAxis")
-			.attr("transform", `translate(0, ${scaledImageHeight-margin.bottom+1})`)
+			.attr("transform", `translate(0, ${svgHeight-margin.bottom+1})`)
 			.attr("color","white")
 			//.call(d3.axisBottom(x).ticks(undefined, '%b'));//d3.utcFormat('%b %d')));
 			//.call(d3.axisBottom(x).ticks(undefined).tickFormat(formatXAxis));
@@ -327,65 +422,8 @@ function Export({
 	      .attr("cx", d => x(Date.parse(d.date)))
 	      .attr("cy", d => y(d.weight || 0))
       	.attr("r", '5');
-		/*
-	  svg.on('click', (event, d) => {
-			//console.log('event=',event);
-			let eventTargetIndexRef = event?.target?.__data__?.indexRef;
-			if(event.target.localName === 'circle' && eventTargetIndexRef > -1) {
-				//console.log('indexRef=',eventTargetIndexRef);
-				handleXIndexUpdate(xIndex, eventTargetIndexRef ?? 0);
-			}
-		});
-		*/
 
 
-
-
-
-
-
-
-
-
-		//process frames
-		const videoCanvasContext = videoCanvas.getContext('2d');
-		console.log(`got video canvas context`);
-		if(!videoCanvasContext) {
-			return;
-		}
-		videoCanvasContext.fillStyle = 'red';
-		videoCanvasContext.font = '42px serif';
-		mediaRecorder.start();
-		for(let c = 0, max = entries.length; c < max; c++) {
-			mediaRecorder.pause();
-			//await delay(50);
-			await delay(50);
-			let currentBlob = entries[c].alignedImageBlob;
-			//load image
-			if(currentBlob) {
-				console.log(`load image ${c}`);
-				const currentImage = await loadImageFromBlob(currentBlob);
-				
-				//generate scaled version in canvas
-				const scaledCanvas = document.createElement('canvas');
-				scaledCanvas.width = scaledImageWidth;
-				scaledCanvas.height = scaledImageHeight;
-				const scaledCanvasContext = scaledCanvas.getContext('2d');
-				if(scaledCanvasContext) {
-					scaledCanvasContext.drawImage(
-						currentImage, 
-						0, 
-						0, 
-						currentImage.naturalWidth, 
-						currentImage.naturalHeight, 
-						0, 
-						0, 
-						scaledImageWidth, 
-						scaledImageHeight
-					);
-				}
-				console.log(`generated scaledCanvas ${c}`);
-				console.log('started recording');
 				console.log(`start draw frame = ${c}`);
 				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
 				videoCanvasContext.drawImage(scaledCanvas, 0, 0);
@@ -393,13 +431,27 @@ function Export({
 					videoCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
 				}
 				if(overlayEntryInfoIsChecked) {
-					videoCanvasContext.fillText(`Weight ${entries[c].weight} lbs`, 10, 100);
-					videoCanvasContext.fillText(`Date ${entries[c].date}`, 10, 150);
+					//videoCanvasContext.fillText(`Weight ${entries[c].weight} lbs`, 10, 100);
+					//videoCanvasContext.fillText(`Date ${entries[c].date}`, 10, 150);
+					//const svgNode = svg.node();
+					console.log('start draw svg overlay');
+					const svgNode = svg.node();
+					if(svgNode != null) {
+						//console.log(svgNode.outerHTML);
+						//console.dir(svg);
+						//let svgImage = await drawInlineSVG(svgNode.outerHTML);
+						let svgImage = await drawInlineSVG(svgNode);
+						//console.log('got svgImage');
+						if(svgImage != null){
+							videoCanvasContext.drawImage(svgImage, 0, 0);
+						}
+					}
 				}
 				//additional delay to allow canvas drawing actions to settle
 				//discovered via testing that this improves frame drawing time consistency greatly
 				//NOTE: further testing revealed that this breaks rendering in some cases, not sure exactly why. commented out for now
 				//await delay(50);
+				console.log('resume recording');
 				mediaRecorder.resume();
 				const startTime = Date.now();
 				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
