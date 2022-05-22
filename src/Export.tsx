@@ -9,6 +9,8 @@ import { Line } from 'd3-shape'; //from DefinitelyTyped types
 //importi './Viewer.css';
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
+import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
+
 //import './Export.css';
 
 type ExportAttributes = {
@@ -93,6 +95,7 @@ function Export({
 	let [overlayEntryInfoIsChecked, setOverlayEntryInfoIsChecked] = useState<boolean>(false);
 	let [entries, setEntries] = useState<Entry[]|null>(null);
 	let [entriesProcessed, setEntriesProcessed] = useState(0);
+	let [validationResults, setValidationResults] = useState<ValidationResults>(defaultValidationResults);
 
 	const initializedRef = useRef<boolean>(false);
 	const videoElementRef = useRef<HTMLVideoElement|null>(null);
@@ -419,7 +422,7 @@ function Export({
 						if(svgImage != null){
 							const prevFillStyle:string = videoCanvasContext.fillStyle;
 							videoCanvasContext.fillStyle = 'rgba(0,0,0,0.5)';
-							videoCanvasContext.fillRect(25, margin.top, svgWidth - margin.right+margin.left, svgHeight - margin.bottom);
+							videoCanvasContext.fillRect(25, margin.top - 10, svgWidth - margin.right+margin.left, svgHeight - margin.bottom);
 							videoCanvasContext.drawImage(svgImage, 50, 0);
 							videoCanvasContext.fillStyle = prevFillStyle;
 						}
@@ -497,6 +500,10 @@ function Export({
     <div>
     	<h2>Export Video Locally (Experimental)</h2>
 			<p>Exports video of progress pictures completely in-browser and local to your device. Currently not very consistent at low frame durations (faster timelapse). Export occurs in real-time.</p>
+			<EntriesValidator
+				validationResults={validationResults}
+				setValidationResults={setValidationResults}
+			/>
 			<label> Frame Duration (ms):
 			<input
 				ref={frameDurationInputRef}

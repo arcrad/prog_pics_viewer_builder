@@ -3,6 +3,7 @@ import  * as mathjs  from 'mathjs';
 //importi './Viewer.css';
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
+import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
 
 type ViewerAttributes = {
 	globalState: GlobalState;
@@ -22,6 +23,7 @@ function Viewer({
 	let [allEntriesHaveAlignedImage, setAllEntriesHaveAlignedImage] = useState(false);
 	let [entriesWithAlignedImageCount, setEntriesWithAlignedImageCount] = useState(0);
 	let [cancelProcessingRequested, setCancelProcessingRequested] = useState(false);
+	let [validationResults, setValidationResults] = useState<ValidationResults>(defaultValidationResults);
 
 	const initializedRef = useRef(false);
 	const originalCoordinatesFromDbRef = useRef<any[]>([]);
@@ -362,6 +364,10 @@ function Viewer({
 			
 			{ loadedData && <div>
 				<h1>Process Entries</h1>
+				<EntriesValidator
+					validationResults={validationResults}
+					setValidationResults={setValidationResults}
+				/>
 				<button
 					type="button"
 					onClick={handleProcessAllEntries}
