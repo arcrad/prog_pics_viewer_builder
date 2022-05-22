@@ -27,6 +27,7 @@ export type ValidationResults = {
 	allEntriesHaveDate: boolean;
 	allEntriesHaveWeight: boolean;
 	allEntriesHaveAllMarks: boolean;
+	adjustmentImageCropAndScalingChosen: boolean;
 };
 
 export const defaultValidationResults:ValidationResults = {
@@ -36,6 +37,7 @@ export const defaultValidationResults:ValidationResults = {
 	allEntriesHaveDate: false,
 	allEntriesHaveWeight: false,
 	allEntriesHaveAllMarks: false,
+	adjustmentImageCropAndScalingChosen: false,
 };
 
 const validationResultsDisplayNameMap:{[key: string]: string} = {
@@ -45,6 +47,7 @@ const validationResultsDisplayNameMap:{[key: string]: string} = {
 	allEntriesHaveDate: 'All Entries have a date?',
 	allEntriesHaveWeight: 'All Entries have a weight?',
 	allEntriesHaveAllMarks: 'All Entries have three marks?',
+	adjustmentImageCropAndScalingChosen: 'A crop/scaling image was chosen?',
 };
 
 type EntriesValidatorAttributes= {
@@ -74,6 +77,7 @@ function EntriesValidator({
 			allEntriesHaveDate: true,
 			allEntriesHaveWeight: true,
 			allEntriesHaveAllMarks: true,
+			adjustmentImageCropAndScalingChosen: true,
 		};
 
 		if(entries) {
@@ -124,6 +128,16 @@ function EntriesValidator({
 					break;
 				}
 			}
+			
+			//check for crop/scaling image chosen 
+			/*
+			for(const entry of entries) {
+				if(entry.marks == null || Object.keys(entry.marks).length != 3) {
+					newValidationResults.allEntriesHaveAllMarks = false;
+					break;
+				}
+			}
+			*/
 			
 			setValidationResults(newValidationResults);
 		}
