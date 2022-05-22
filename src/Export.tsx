@@ -16,12 +16,71 @@ type ExportAttributes = {
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
 }
 
-const margin = { top: 5, right: 15, bottom: 15, left: 30 };
+const margin = { top: 50, right: 50, bottom: 10, left: 50 };
 const defaultChartDimensions = { width: 900, height: 250 };
 const smallScreenBreakpoint = 700;
 
 const MIN_FRAME_DURATION_MS = 50;
 const MAX_FRAME_DURATION_MS = 5000;
+
+function delay(ms:number) {
+	return new Promise( (resolve) => setTimeout(resolve, ms) )
+}
+
+function clampFrameDuration(frameDurationInput:number):number {
+	if(frameDurationInput) {
+		//const frameDurationInputRefValue = parseInt(frameDurationInputRef.current.value as string);
+			return frameDurationInput < MIN_FRAME_DURATION_MS ? 
+				MIN_FRAME_DURATION_MS 
+				: 
+				frameDurationInput > MAX_FRAME_DURATION_MS ? 
+					MAX_FRAME_DURATION_MS
+					: 
+					frameDurationInput;
+	}
+	return frameDurationInput;
+}
+
+function getSVGOverlayAxesAndLine(entries:Entry[], svgWidth: number, svgHeight:number) {
+		const [minX=0, maxX=0] = d3.extent(entries, d => Date.parse(d.date));
+		//setup x axis timeScale
+    const _x = d3.scaleUtc()
+      .domain([minX, maxX])
+      .range([margin.left - 25, svgWidth - margin.right])
+			.nice(); 
+		//setup y axis linear scale
+    const _y = d3.scaleLinear()
+      .domain(
+        [
+          (d3.min(entries, d => d.weight) ?? 0),
+          (d3.max(entries, d => d.weight) ?? 0)
+        ]
+      )
+      .range([svgHeight - margin.bottom, margin.top])
+			.nice();
+    const _line = d3.line<Entry>()
+      .x( (d) => _x(Date.parse(d.date)) )
+      .y( (d) => _y(d.weight || 0) );
+		return {
+			x: _x,
+			y: _y,
+			line: _line
+		};
+}
+
+function drawInlineSVG(svgElem:SVGSVGElement):Promise<HTMLImageElement> {
+	return new Promise( (resolve,reject) => {
+		console.log('drawInlineSVG');
+  	//console.log(rawSVG);
+	  var svgURL = new XMLSerializer().serializeToString(svgElem);
+    const img = new Image;
+    img.onload =  () => {
+				console.log('img.onload fired');
+        resolve(img);
+    };
+  	img.src = 'data:image/svg+xml; charset=utf8, ' + encodeURIComponent(svgURL);
+	});
+}
 
 function Export({
 	globalState,
@@ -92,9 +151,7 @@ function Export({
 	}
 	
 	const setupD3ChartScales = (entries:Entry[], width: number, height: number) => {
-		//let x:(ScaleTime<number, number, never>|any) = 0;
-		//let y:(ScaleLinear<number, number, never>|any) = 
-		//TODO: need to improve data 
+		//TODO: need to improve/clean up data 
 		const [minX=0, maxX=0] = d3.extent(entries, d => Date.parse(d.date));
 		//setup x axis timeScale
     let x = d3.scaleUtc()
@@ -135,9 +192,6 @@ function Export({
 		}
 	})();
 
-
-
-
 	const handleExportVideo = async () => {
 		console.log('handleExportVideo() called');
 		if(!entries) {
@@ -150,9 +204,12 @@ function Export({
 		//console.dir(entries);
 		
 		let frameDurationMs = 150;
+		
 		if(frameDurationInputRef.current) {
 			const frameDurationInputRefValue = parseInt(frameDurationInputRef.current.value as string);
 			if(frameDurationInputRefValue) {
+				frameDurationMs = clampFrameDuration(frameDurationInputRefValue);
+				/*
 				frameDurationMs = frameDurationInputRefValue < MIN_FRAME_DURATION_MS ? 
 					MIN_FRAME_DURATION_MS 
 					: 
@@ -160,50 +217,51 @@ function Export({
 						MAX_FRAME_DURATION_MS
 						: 
 						frameDurationInputRefValue;
+				*/
 			}
 		}
 	 	setStatusMessages( cs => [...cs, `target frameDurationMs = ${frameDurationMs}`]);
-		//setup media objects
+		//ensure first entry exists
 		if(!(entries[0] && entries[0].alignedImageBlob)) {
 			setStatusMessages(["Error: Unable to find first entry data."]);
 			return;
 		}
+		//setup media objects
 		const videoCanvas = document.createElement('canvas');
-	 	setStatusMessages( cs => [...cs, 'created MediaStream']);
 		const canvasStream = videoCanvas.captureStream(0);
+	 	setStatusMessages( cs => [...cs, 'created canvas and canvas stream']);
 		const mediaRecorder = new window.MediaRecorder(canvasStream, {
 			mimeType: 'video/webm;',
 			videoBitsPerSecond: 5000000
 		});
 		let recorderData:any[] = [];
 	 	setStatusMessages( cs => [...cs, 'created MediaRecorder']);
-
+		//setup handler for data available event
 		mediaRecorder.ondataavailable = (event) => {
 			setStatusMessages( cs => [...cs, `pushed data from mediaRecorder`]);
 			console.dir(event)
 			recorderData.push(event.data);
 		};
-		
+		//promisify mediaRecorder onstop handler and attach handler to it to display final video
 		let recorderStopped = new Promise( (resolve, reject) => {
 			mediaRecorder.onstop = resolve;
 		});
-		
 		recorderStopped.then( () => {
 			setStatusMessages( cs => [...cs, `mediaRecorder stopped`]);
 			console.dir(recorderData);
 			let recordedBlob = new Blob(recorderData, {type: "video/webm"});
 			if(videoElementRef.current) {
-				//not recommended praactice but for Blobs is currently only woring solution for non-Safari browsers
+				//not recommended practice but for Blobs is currently only woring solution for non-Safari browsers
 				videoElementRef.current.src = URL.createObjectURL(recordedBlob);
 			}
 		});
-		
 		//determine scaled image dimensions (720p hardcoded currently)
 		let scaledImageWidth = 720;
 		let scaledImageHeight = 1280;
 		let firstBlob = entries[0].alignedImageBlob;
 		if(firstBlob) {
 			let firstImage = await loadImageFromBlob(firstBlob);
+			//portrait by default 
 			const imageRatio = firstImage.naturalHeight/1280;
 			scaledImageWidth = firstImage.naturalWidth/imageRatio;
 			scaledImageHeight = 1280;
@@ -219,95 +277,10 @@ function Export({
 			videoCanvas.height = scaledImageHeight;
 		}
 		
-		const delay = (ms:number) => new Promise( (resolve) => setTimeout(resolve, ms) );
-
-		//setup d3
-		//const [x, y, line] = setupD3ChartScales(entries, scaledImageWidth, scaledImageHeight);
-		
-		const [minX=0, maxX=0] = d3.extent(entries, d => Date.parse(d.date));
-		//setup x axis timeScale
-    let x = d3.scaleUtc()
-      .domain([minX, maxX])
-      .range([margin.left-8, scaledImageWidth - margin.right])
-			.nice();
-    
-		//setup y axis linear scale
-    let y = d3.scaleLinear()
-      .domain(
-        [
-          (d3.min(entries, d => d.weight) ?? 0),
-          (d3.max(entries, d => d.weight) ?? 0)
-        ]
-      )
-      .range([scaledImageHeight - margin.bottom, margin.top])
-			.nice();
-
-    //let line = d3.line<wlProgressDataWithMetadataMemberType>()
-    let line = d3.line<Entry>()
-      .x( (d) => x(Date.parse(d.date)) )
-      .y( (d) => y(d.weight || 0) );
-		
-		/*
-		d3.select("#graphContainer").selectAll("*").remove();
-		
-    const svg = d3
-      .select("#graphContainer")
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left}, ${margin.top})`);
-		*/
-
-		const svgWidth = scaledImageWidth;
+		//setup svg graph overlay 
+		const svgWidth = scaledImageWidth - (scaledImageWidth * 0.05);
 		const svgHeight = Math.floor(scaledImageHeight/4);
-
-
-		/*
-	  svg.on('click', (event, d) => {
-			//console.log('event=',event);
-			let eventTargetIndexRef = event?.target?.__data__?.indexRef;
-			if(event.target.localName === 'circle' && eventTargetIndexRef > -1) {
-				//console.log('indexRef=',eventTargetIndexRef);
-				handleXIndexUpdate(xIndex, eventTargetIndexRef ?? 0);
-			}
-		});
-		*/
-
-
-
-//function drawInlineSVG(ctx, rawSVG, callback) {
-//const drawInlineSVG = (rawSVG:string):Promise<HTMLImageElement> => {
-const drawInlineSVG = (svgElem:SVGSVGElement):Promise<HTMLImageElement> => {
-	return new Promise( (resolve,reject) => {
-		console.log('drawInlineSVG');
-  // 	console.log(rawSVG);
-	  var svgURL = new XMLSerializer().serializeToString(svgElem);
-			//const svg = new Blob([rawSVG], {type:"image/svg+xml;charset=utf-8"});
-		//	const svg = new Blob([rawSVG], {type:"image/svg+xml"});
-       // domURL = self.URL || self.webkitURL || self,
-   // const url = URL.createObjectURL(svg);
-    const img = new Image;
-
-    img.onload =  () => {
-				console.log('img.onload fired');
-        //ctx.drawImage(this, 0, 0);     
-        //domURL.revokeObjectURL(url);
-        //callback(this);
-        resolve(img);
-    };
-	//	console.log(`set src. url = ${url}`);
-  img.src = 'data:image/svg+xml; charset=utf8, ' + encodeURIComponent(svgURL);
-
-//    img.src = url;
-	});
-}
-
-
-
-
-
-
+		const {x, y, line} = getSVGOverlayAxesAndLine(entries, svgWidth, svgHeight);
 
 		//process frames
 		const videoCanvasContext = videoCanvas.getContext('2d');
@@ -318,7 +291,8 @@ const drawInlineSVG = (svgElem:SVGSVGElement):Promise<HTMLImageElement> => {
 		videoCanvasContext.fillStyle = 'red';
 		videoCanvasContext.font = '42px serif';
 		mediaRecorder.start();
-		for(let c = 0, max = entries.length; c < max; c++) {
+		//for(let c = 0, max = entries.length; c < max; c++) {
+		for(let c = 0, max = 5; c < max; c++) {
 			mediaRecorder.pause();
 			//await delay(50);
 			await delay(50);
@@ -443,7 +417,11 @@ const drawInlineSVG = (svgElem:SVGSVGElement):Promise<HTMLImageElement> => {
 						let svgImage = await drawInlineSVG(svgNode);
 						//console.log('got svgImage');
 						if(svgImage != null){
-							videoCanvasContext.drawImage(svgImage, 0, 0);
+							const prevFillStyle:string = videoCanvasContext.fillStyle;
+							videoCanvasContext.fillStyle = 'rgba(0,0,0,0.5)';
+							videoCanvasContext.fillRect(25, margin.top, svgWidth - margin.right+margin.left, svgHeight - margin.bottom);
+							videoCanvasContext.drawImage(svgImage, 50, 0);
+							videoCanvasContext.fillStyle = prevFillStyle;
 						}
 					}
 				}
