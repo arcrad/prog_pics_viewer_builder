@@ -396,6 +396,22 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 //	};
 	//}, [entries]);
 
+	const getEntryValidationErrors = (entry: Entry) => {
+		const entryHasAllMarks = entry.marks && Object.keys(entry.marks).length == 3; 
+		const entryDoesntHaveWeight = entry.weight == null || String(entry.weight) == '';
+		const entryDoesntHaveDate = entry.date == null;
+		if( !entryHasAllMarks || entryDoesntHaveWeight || entryDoesntHaveDate) {
+			return <div>
+				⚠️  Validation errors exist!
+				<ul>
+					{ entryHasAllMarks ? '' : <li>❌ Entry doesn't have all marks</li>}
+					{ entryDoesntHaveWeight ? <li>❌ Entry is missing weight</li> : ''}
+					{ entryDoesntHaveDate ? <li>❌ Entry is missing date</li> : ''}
+				</ul>
+			</div>
+		}
+	}
+
 	return (
     <div>
 			<div>
@@ -515,6 +531,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 									Duplicate
 								</button>
 							</div>
+							{ getEntryValidationErrors(entry) }
 						</li>
 					)
 				}
