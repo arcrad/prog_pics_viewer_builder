@@ -53,12 +53,14 @@ const validationResultsDisplayNameMap:{[key: string]: string} = {
 type EntriesValidatorAttributes= {
 	validationResults: ValidationResults;
 	setValidationResults: Dispatch<SetStateAction<ValidationResults>>;
+	showOnlyErrors?: boolean;
 };
 
 
 function EntriesValidator({
 	validationResults,
-	setValidationResults
+	setValidationResults,
+	showOnlyErrors
 } : EntriesValidatorAttributes ) {
 	let [statusMessages, setStatusMessages] = useState<string[]>([]);
 	
@@ -143,6 +145,13 @@ function EntriesValidator({
 		}
 	}, [entries]);
 
+	const filteredValidationResultsKeys = showOnlyErrors ? 
+		Object.keys(validationResults).filter( (key) => {
+			return !validationResults[key];
+		})
+		:
+		Object.keys(validationResults);
+
 	return (
 			<div style={{
 				border: '1px solid black', 
@@ -152,15 +161,15 @@ function EntriesValidator({
 				<p>Validation Results</p>
 				{ entries == null && <p>Validating entries...</p>}
 				{ entries && 
-				<ul>
-				{
-					Object.keys(validationResults).map( (key, index) => {
-						return <li key={index}>
-							{validationResultsDisplayNameMap[key]} {validationResults[key] ? '✅' : '❌'}
-						</li>
-					})
-				}
-				</ul>
+					<ul>
+					{
+						filteredValidationResultsKeys.map( (key, index) => {
+							return <li key={index}>
+								{validationResultsDisplayNameMap[key]} {validationResults[key] ? '✅' : '❌'}
+							</li>
+						})
+					}
+					</ul>
 				}
 			</div>
   );

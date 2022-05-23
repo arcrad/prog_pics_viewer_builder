@@ -503,6 +503,7 @@ function Export({
 			<EntriesValidator
 				validationResults={validationResults}
 				setValidationResults={setValidationResults}
+				showOnlyErrors={false}
 			/>
 			<label> Frame Duration (ms):
 			<input

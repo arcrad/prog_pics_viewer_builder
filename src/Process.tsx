@@ -367,6 +367,7 @@ function Viewer({
 				<EntriesValidator
 					validationResults={validationResults}
 					setValidationResults={setValidationResults}
+					showOnlyErrors={false}
 				/>
 				<button
 					type="button"
