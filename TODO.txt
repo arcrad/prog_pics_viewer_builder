@@ -60,3 +60,6 @@
 	--doesnt think show, showModal, or close methods exist
 
 +modularize common db calls 
+
++make it so that boolean 'false' can be entered on the settings component
+	--currently entering 'false' puts in literal 'false' string which is truthy
