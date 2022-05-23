@@ -357,13 +357,13 @@ function Viewer({
 
 	return (
     <div>
-    	<h2>Process</h2>
+    	<h2>Process Entries</h2>
+			<p>Generate scaled, cropped, and aligned images from base images.</p>
 			{ !loadedData && <div>
 				<h1>LOADING...</h1>
 			</div> }
 			
 			{ loadedData && <div>
-				<h1>Process Entries</h1>
 				<EntriesValidator
 					validationResults={validationResults}
 					setValidationResults={setValidationResults}
