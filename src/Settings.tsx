@@ -80,17 +80,9 @@ function SettingsComponent({
 			console.log('settingKeyToUpdate = ', settingKeyToUpdate);
 			console.log('value = ', newValue);
 			//do db update
-					db.settings.update(settingKeyToUpdate, {
-						value: newValue
-					});
-			/*clearTimeout(debounceInputTimeout.current);
-			let modifyDbValueHandler = () => {
-					console.log('fire update db with new input', newValue, settingKeyToUpdate);
-					db.settings.update(settingKeyToUpdate, {
-						value: newValue
-					});
-			};
-			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);*/
+			db.settings.update(settingKeyToUpdate, {
+				value: newValue
+			});
 		}
 	};
 
