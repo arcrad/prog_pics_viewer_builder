@@ -453,7 +453,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 					type="button"
 					onClick={() => {
 						setPagerOffset( curOffset => {
-							if(totalEntriesCount) {
+							if(totalEntriesCount && curOffset < totalEntriesCount - pagerLimit) {
 								return curOffset + pagerLimit < totalEntriesCount ? curOffset + pagerLimit : totalEntriesCount - pagerLimit
 							}
 							return curOffset;
@@ -466,7 +466,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 					type="button"
 					onClick={() => {
 						if(totalEntriesCount) {
-							setPagerOffset(totalEntriesCount - pagerLimit)
+							setPagerOffset(Math.floor((totalEntriesCount-1)/pagerLimit)*pagerLimit)
 						}
 					}}
 				>
