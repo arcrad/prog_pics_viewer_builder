@@ -143,9 +143,6 @@ function UpdateEntryDataComponent({
 						>
 						</textarea>
 					</div> 
-				<button type="button">
-					Save
-				</button>
 			</>
   );
 }

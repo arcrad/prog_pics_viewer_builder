@@ -224,7 +224,7 @@ function AddEntryModal({
 						className="saveButton"
 						onClick={ handleSaveButton }
 					>
-							Save
+							Save Entry
 					</button>
 					<button 
 						type="button" 
