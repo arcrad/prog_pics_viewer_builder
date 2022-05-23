@@ -6,6 +6,8 @@ import { db, Entry } from './db';
 import { GlobalState } from './App';
 import SetupModal from './SetupModal';
 
+import './Builder.css';
+
 type BuilderAttributes= {
 	globalState: GlobalState;
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
@@ -50,11 +52,11 @@ function Builder({
 				border: "1px solid red",
 				padding: "1rem"
 			}}>
-				<NavLink to="/entry">Entry</NavLink>
-				<NavLink to="/adjust">Adjust</NavLink>
-				<NavLink to="/process">Process</NavLink>
-				<NavLink to="/export">Export</NavLink>
-				<NavLink to="/settings">Settings</NavLink>
+				<NavLink to="/entry" className="mainNavLink">Entry</NavLink>
+				<NavLink to="/adjust" className="mainNavLink">Adjust</NavLink>
+				<NavLink to="/process" className="mainNavLink">Process</NavLink>
+				<NavLink to="/export" className="mainNavLink">Export</NavLink>
+				<NavLink to="/settings" className="mainNavLink">Settings</NavLink>
 			</nav>
 			<Outlet />
 			<SetupModal 
