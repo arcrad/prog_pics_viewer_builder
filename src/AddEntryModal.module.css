@@ -41,7 +41,7 @@
 	margin: 0.5rem;
 }
 
-.addEntryStepLink.active {
+.addEntryStepLink[class~="active"] {
 	background: black;
 	color: #fff;
 	padding: 0.5rem;

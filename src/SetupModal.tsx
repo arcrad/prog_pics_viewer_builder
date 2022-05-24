@@ -13,7 +13,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
-import './SetupModal.css';
+
+import styles from './SetupModal.module.css';
 
 type SetupModalAttributes= {
 	globalState: GlobalState,
@@ -102,16 +103,16 @@ function SetupModal({
 	useEffect( () => {
 		if(modalOverlayRef.current) {
 			isModalVisible ? 
-				modalOverlayRef.current.classList.add("modalVisible")
+				modalOverlayRef.current.classList.add(styles.modalVisible)
 				:
-				modalOverlayRef.current.classList.remove("modalVisible");
+				modalOverlayRef.current.classList.remove(styles.modalVisible);
 		}
 
 	}, [isModalVisible]);
 
 	return (
-    <div ref={modalOverlayRef} className="modalOverlay">
-			<div className="controlsContainer">
+    <div ref={modalOverlayRef} className={styles.modalOverlay}>
+			<div className={styles.controlsContainer}>
 				{ 
 					!loadedData && 
 					<div>

@@ -1,0 +1,7 @@
+.mainNavLink {
+	padding-bottom: 0.25rem;
+}
+
+.mainNavLink[class~="active"] {
+	border-bottom: 5px solid blue;
+}

@@ -18,7 +18,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Entry } from './db';
 import { GlobalState } from './App';
 import ChangeImageComponent from './ChangeImageComponent';
-import './ChangeImageModal.css';
+
+import styles from './ChangeImageModal.module.css';
 
 type ChangeImageModalAttributes= {
 	//globalState: GlobalState,
@@ -87,8 +88,8 @@ function ChangeImageModal({
 	};
 
 	return (
-    <dialog ref={modalOverlayRef} className="modalOverlay1">
-			<div className="controlsContainer">
+    <dialog ref={modalOverlayRef} className={styles.modalOverlay1}>
+			<div className={styles.controlsContainer}>
 				<h2>Change Image</h2>
 				<ChangeImageComponent
 					closeModalOnLoad={true}

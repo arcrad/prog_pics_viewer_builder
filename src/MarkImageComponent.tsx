@@ -17,7 +17,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
-//import './MarkImageComponent.css';
+
+import styles from './MarkImageComponent.module.css';
 
 type MarkImageComponentAttributes = {
 	globalState: GlobalState,
@@ -349,10 +350,10 @@ function MarkImageComponent({
 
 	return (
 			<>
-				<div className="header">
+				<div className={styles.header}>
 					<h2>Mark Image</h2>	
 					<p>isLoaded = {isLoaded ? 'true' : 'false'}</p>
-					<div className="debugInfo">
+					<div className={styles.debugInfo}>
 						<p>
 							Updating entry with entryId = { entryId }
 						</p>
@@ -370,11 +371,11 @@ function MarkImageComponent({
 					</div>
 					*/}
 				</div>
-				<div ref={imageContainerRef} className="imageContainer">
-					<div className="imageSandwich">
+				<div ref={imageContainerRef} className={styles.imageContainer}>
+					<div className={styles.imageSandwich}>
 					<canvas
 							ref={imageCanvasRef}
-							className="entryImage"
+							className={styles.entryImage}
 							data-rt={renderTrigger}
 							style={{display: (isLoaded ? 'block' : 'none')}}
 							onMouseMove={handleImageHover}
@@ -385,7 +386,7 @@ function MarkImageComponent({
 						{ !entryHasImage && <p>Entry has no image</p>} 
 						{ entryHasImage && !isLoaded && <p>loading image...</p> }
 					<div 
-						className={"hoverMarker" + (isHoverMarkerVisible ? " hoverMarkerVisible" : "") + ( activeMark ? ' activeMark'+activeMark : '')}
+						className={`${styles.hoverMarker} ${(isHoverMarkerVisible ? styles.hoverMarkerVisible : "")} ${( activeMark ? 'activeMark'+activeMark : '')}`}
 						style={{
 							left: hoverX,
 							top:hoverY,
@@ -396,24 +397,24 @@ function MarkImageComponent({
 					</div>
 					</div>
 				</div>
-				<div className="footer">
+				<div className={styles.footer}>
 					<button 
 						type="button"
-						className={ 'markButtonA' + (activeMark === 'A' ? ' markButtonCurrentlyActive' : '')}
+						className={`${styles.markButtonA} ${(activeMark === 'A' ? styles.markButtonCurrentlyActive : '')}`}
 						onClick={ () => setActiveMark('A') }
 					>
 						Set Mark A
 					</button>
 					<button 
 						type="button" 
-						className={ 'markButtonB' + (activeMark === 'B' ? ' markButtonCurrentlyActive' : '')}
+						className={`${styles.markButtonB} ${(activeMark === 'B' ? styles.markButtonCurrentlyActive : '')}`}
 						onClick={ () => setActiveMark('B') }
 					>
 						Set Mark B
 					</button>
 					<button 
 						type="button" 
-						className={ 'markButtonC' + (activeMark === 'C' ? ' markButtonCurrentlyActive' : '')}
+						className={`${styles.markButtonC} ${(activeMark === 'C' ? styles.markButtonCurrentlyActive : '')}`}
 						onClick={ () => setActiveMark('C')}
 					>
 						Set Mark C

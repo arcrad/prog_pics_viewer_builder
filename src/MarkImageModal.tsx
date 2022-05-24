@@ -18,7 +18,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Entry } from './db';
 import { GlobalState } from './App';
 import MarkImageComponent from './MarkImageComponent';
-import './MarkImageModal.css';
+
+import styles from './MarkImageModal.module.css';
 
 type MarkImageModalAttributes = {
 	globalState: GlobalState,
@@ -99,8 +100,8 @@ function MarkImageModal({
 	};
 
 	return (
-    <dialog ref={modalOverlayRef} className="modalOverlay1">
-			<div className="contentContainer">
+    <dialog ref={modalOverlayRef} className={styles.modalOverlay1}>
+			<div className={styles.contentContainer}>
 				<MarkImageComponent
 					globalState={globalState} 
 					setGlobalState={setGlobalState} 
@@ -110,7 +111,7 @@ function MarkImageModal({
 				<div>
 				<button 
 					type="button" 
-					className="closeButton"
+					className={styles.closeButton}
 					onClick={ handleCloseButton }
 				>
 						Close

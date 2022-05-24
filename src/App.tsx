@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry, Setting } from './db';
-import './App.css';
 import EntryComponent from './Entry';
 import Adjust from './Adjust';
 import Process from './Process';
@@ -11,6 +10,8 @@ import Export from './Export';
 import SettingsComponent from './Settings';
 import ImageStorePOC from './ImageStorePOC';
 import Builder from './Builder';
+
+import styles from './App.module.css';
 
 export type Settings = {
 	[key: string]: any;
@@ -134,7 +135,7 @@ function App() {
 	}, []);
 
   return (
-    <div className="App">
+    <div className={styles.App}>
 		<BrowserRouter>
 			<Routes>
     		<Route 

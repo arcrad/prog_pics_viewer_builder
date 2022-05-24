@@ -1,0 +1,144 @@
+
+h2 {
+	margin: 0.5rem 0;
+}
+
+.modalOverlay {
+	background: rgba(0,0,0,0.5);
+	z-index: 9000;
+	width: 100vw;
+	height: 100vh;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	top: 0;
+	left: 0;
+	visibility: hidden;
+}
+
+.modalVisible {
+	visibility: visible;
+}
+
+.contentContainer {
+	border: 1px solid black;
+	/*display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;*/
+	background: #fff;
+	padding: 0.5rem;
+	width: 70rem;
+	width: 85vw;
+	height: 90vh;
+	margin: 0;
+	overflow: hidden scroll;
+}
+
+.header {
+	flex: 0 1 auto;
+}
+
+.debugInfo {
+	font-size: 0.6rem;
+}
+
+.imageContainer {
+	/*flex: 1 1 auto;*/
+	height: 75vh;
+	box-sizing: border-box;
+/*	background-position: center center;
+	background-size: contain;
+	background-repeat: no-repeat;*/
+	border:1px solid red;
+}
+
+.imageSandwich {
+	position: relative;
+	display: inline-block;
+	box-sizing: border-box;
+	border: 1px solid blue;
+}
+.entryImage {
+	max-width: 100%;
+	max-height: 100%;
+	display: block;
+	margin: 0 auto;
+	box-sizing: border-box;
+}
+
+.hoverMarker {
+/*	border:2px solid green;
+	height:100%;
+	width: 100%;*/
+	height: 18vh;
+	width: 18vh;
+	border:2px solid #999;
+	border-radius: 9vh;
+	/*height: 100vh;
+	width: 100vw;*/
+	position: absolute;
+	z-index: 9500;
+	transform: translate(-9vh, -9vh);
+	pointer-events: none;
+	display: none;
+	background-origin: border-box;
+}
+
+.hoverMarkerVisible {
+	display: block;
+}
+
+.hoverMarker[class~="activeMarkA"] {
+	border-color: red;
+}
+
+.hoverMarker[class~="activeMarkB"] {
+	border-color: green;
+}
+
+.hoverMarker[class~="activeMarkC"] {
+	border-color: blue;
+}
+
+.clickMarker {
+	height:1px;
+	width:1px;
+	background:red;
+	z-index:9250;
+	position:fixed;
+	pointer-events:none;
+	box-sizing: border-box;
+}
+
+
+.footer {
+	flex: 0 1 auto;
+	padding: 0.5rem;
+}
+
+.closeButton,
+.markButtonA,
+.markButtonB,
+.markButtonC {
+	background: #ddd;
+	padding: 0.15rem 0.5rem;
+	margin: 0.2rem;
+	border: 1px solid #999;
+	border-radius: 0.25rem;
+}
+
+.markButtonA.markButtonCurrentlyActive {
+	background: red;
+}
+
+.markButtonB.markButtonCurrentlyActive {
+	background: green;
+}
+
+.markButtonC.markButtonCurrentlyActive {
+	background: blue;
+}

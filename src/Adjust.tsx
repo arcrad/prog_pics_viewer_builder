@@ -12,9 +12,10 @@ import
 from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 
-import './Adjust.css';
 import { db, Entry, Setting } from './db';
 import { GlobalState  } from './App';
+
+import styles from './Adjust.module.css';
 
 type AdjustAttributes = {
 	globalState: GlobalState;
@@ -301,8 +302,8 @@ function Adjust({
 			if(currentEntry && currentEntry.id == parseInt(imageSelectRef.current.value)) {
 				console.error('same image selected');
 			} else {
-				currentCropImageContainerRef.current?.classList.add('notVisible');
-				loadingIndicatorRef.current?.classList.remove('displayNone');
+				currentCropImageContainerRef.current?.classList.add(styles.notVisible);
+				loadingIndicatorRef.current?.classList.remove(styles.displayNone);
 			}
 			try {
 				const id = await db.settings.put(
@@ -615,7 +616,7 @@ function Adjust({
 		let handleMouseDown = (event: any) => {
 			console.log('handleMouseDown() called');
 			//console.dir(event.target);
-			if(event.target.classList.contains('cropCornerControl')) {
+			if(event.target.classList.contains(styles.cropCornerControl)) {
 				event.preventDefault();
 				//console.log('target is cropCornerControl');
 				//console.log('controlId = ', event.target.dataset.controlId);
@@ -946,7 +947,7 @@ function Adjust({
 			>
 				Reset Crop to Corners
 			</button>
-			<div className="cropImageArea">
+			<div className={styles.cropImageArea}>
 				<div
 					ref={loadingIndicatorRef} 
 				>
@@ -958,7 +959,7 @@ function Adjust({
 				</div>
 				<div 
 					ref={currentCropImageContainerRef}
-					className="cropImageContainer notVisible"
+					className={`${styles.cropImageContainer} ${styles.notVisible}`}
 					style={{
 							background: '#000',
 					}}
@@ -976,8 +977,8 @@ function Adjust({
 					setRenderTrigger(Date.now());
 					resizeDebounceTimeoutId.current = 0;
 				});
-							currentCropImageContainerRef.current?.classList.remove('notVisible');
-							loadingIndicatorRef.current?.classList.add('displayNone');
+							currentCropImageContainerRef.current?.classList.remove(styles.notVisible);
+							loadingIndicatorRef.current?.classList.add(styles.displayNone);
 							//setIsLoaded(true);
 						}}
 						style={{ 
@@ -1000,7 +1001,7 @@ function Adjust({
 					<div 
 						ref={topLeftCornerControl} 
 						data-control-id="topLeft" 
-						className="cropCornerControl"
+						className={styles.cropCornerControl}
 						style={{
 							left: topLeftCornerCoordinateRef.current.x || 0,
 							top: topLeftCornerCoordinateRef.current.y || 0,
@@ -1013,7 +1014,7 @@ function Adjust({
 					<div 
 						ref={topRightCornerControl} 
 						data-control-id="topRight" 
-						className="cropCornerControl"
+						className={styles.cropCornerControl}
 						style={{
 							left: topRightCornerCoordinateRef.current.x || 0,
 							top: topRightCornerCoordinateRef.current.y || 0,
@@ -1026,7 +1027,7 @@ function Adjust({
 					<div 
 						ref={bottomRightCornerControl} 
 						data-control-id="bottomRight" 
-						className="cropCornerControl"
+						className={styles.cropCornerControl}
 						style={{
 							left: bottomRightCornerCoordinateRef.current.x || 0,
 							top: bottomRightCornerCoordinateRef.current.y || 0,
@@ -1039,7 +1040,7 @@ function Adjust({
 					<div 
 						ref={bottomLeftCornerControl} 
 						data-control-id="bottomLeft" 
-						className="cropCornerControl"
+						className={styles.cropCornerControl}
 						style={{
 							left: bottomLeftCornerCoordinateRef.current.x || 0,
 							top: bottomLeftCornerCoordinateRef.current.y || 0,

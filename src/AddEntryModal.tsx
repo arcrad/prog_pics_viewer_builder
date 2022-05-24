@@ -22,10 +22,11 @@ import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
-import './AddEntryModal.css';
 import ChangeImageComponent from './ChangeImageComponent';
 import MarkImageComponent from './MarkImageComponent';
 import UpdateEntryDataComponent from './UpdateEntryDataComponent';
+
+import styles from './AddEntryModal.module.css';
 
 type AddEntryModalAttributes = {
 	globalState: GlobalState,
@@ -185,16 +186,16 @@ function AddEntryModal({
 
     //<dialog ref={modalOverlayRef} className="modalOverlay1" open={true}>
 	return (
-    <dialog ref={modalOverlayRef} className="modalOverlay1">
-			<div className="addEntryContentContainer">
-				<div className="main">
+    <dialog ref={modalOverlayRef} className={styles.modalOverlay1}>
+			<div className={styles.addEntryContentContainer}>
+				<div className={styles.main}>
 					<h2>Add Entry</h2>
 					<p>Updating entry with entryId = {entryId}</p>
-					<NavLink to="./image" className="addEntryStepLink">Change Image</NavLink>
+					<NavLink to="./image" className={styles.addEntryStepLink}>Change Image</NavLink>
 					&gt;
-					<NavLink to="./mark" className="addEntryStepLink">Mark Image</NavLink>
+					<NavLink to="./mark" className={styles.addEntryStepLink}>Mark Image</NavLink>
 					&gt;
-					<NavLink to="./updateinfo" className="addEntryStepLink">Update Data</NavLink>
+					<NavLink to="./updateinfo" className={styles.addEntryStepLink}>Update Data</NavLink>
 					<Routes>
 						<Route path="/image" element={
 							<ChangeImageComponent
