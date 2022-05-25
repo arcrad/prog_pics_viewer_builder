@@ -22,7 +22,7 @@ const margin = { top: 50, right: 50, bottom: 10, left: 50 };
 const defaultChartDimensions = { width: 900, height: 250 };
 const smallScreenBreakpoint = 700;
 
-const MIN_FRAME_DURATION_MS = 50;
+const MIN_FRAME_DURATION_MS = 5;
 const MAX_FRAME_DURATION_MS = 5000;
 
 function delay(ms:number) {
@@ -231,7 +231,8 @@ function Export({
 		}
 		//setup media objects
 		const videoCanvas = document.createElement('canvas');
-		const canvasStream = videoCanvas.captureStream(0);
+		//const canvasStream = videoCanvas.captureStream(0);
+		const canvasStream = videoCanvas.captureStream();
 	 	setStatusMessages( cs => [...cs, 'created canvas and canvas stream']);
 		const mediaRecorder = new window.MediaRecorder(canvasStream, {
 			mimeType: 'video/webm;',
@@ -288,17 +289,65 @@ function Export({
 		//process frames
 		const videoCanvasContext = videoCanvas.getContext('2d');
 		console.log(`got video canvas context`);
-		if(!videoCanvasContext) {
+
+		const intermediateCanvas = document.createElement('canvas');
+		intermediateCanvas.width = scaledImageWidth;
+		intermediateCanvas.height = scaledImageHeight;
+		const intermediateCanvasContext = intermediateCanvas.getContext('2d');
+		
+		if(!videoCanvasContext || !intermediateCanvasContext) {
 			return;
 		}
+		
 		videoCanvasContext.fillStyle = 'red';
 		videoCanvasContext.font = '42px serif';
+
+		intermediateCanvasContext.fillStyle = 'red';
+		intermediateCanvasContext.font = '42px serif';
+	/*
+		const pauseRecorder = ():Promise<void> => {
+			return new Promise( (resolve) => {
+				console.log(`media recorder state = ${mediaRecorder.state}`);
+				console.log('pause requested');
+				if(mediaRecorder.state == 'paused') {
+					console.log('already paused, doing nothing');
+					resolve();
+				} else {
+					mediaRecorder.onpause = () => {
+						console.log('pause event fired');
+						resolve();
+					}
+					console.log('pause() called');
+					mediaRecorder.pause();
+				}
+			});
+		};
+*/
+		//await pauseRecorder();
+		/*
+		console.log('fill rect called');
+		videoCanvasContext.fillStyle = 'blue';
+		videoCanvasContext.fillRect( 0, 0, scaledImageWidth, scaledImageHeight);
+		await delay(1000);
+		videoCanvasContext.fillStyle = 'red';
+		console.log('fill rect 2 called');
+		videoCanvasContext.fillRect( 0, 0, scaledImageWidth, scaledImageHeight);
+		await delay(1000);
+		videoCanvasContext.fillStyle = 'green';
+		videoCanvasContext.fillRect( 0, 0, scaledImageWidth, scaledImageHeight);
+		await delay(1000);
+		videoCanvasContext.fillRect( 0, 0, scaledImageWidth, scaledImageHeight);
+		videoCanvasContext.fillStyle = 'red';
 		mediaRecorder.start();
+		await delay(3000);
+*/
 		//for(let c = 0, max = entries.length; c < max; c++) {
 		for(let c = 0, max = 5; c < max; c++) {
-			mediaRecorder.pause();
+			console.log(`-------------------pause--------------`);
+			//mediaRecorder.pause();
+			//await pauseRecorder();
 			//await delay(50);
-			await delay(50);
+			//await delay(350-frameDurationMs > 0 ? 350 - frameDurationMs : 5);
 			let currentBlob = entries[c].alignedImageBlob;
 			//load image
 			if(currentBlob) {
@@ -381,9 +430,9 @@ function Export({
       .attr("cx", d => x(Date.parse(d.date)))
       .attr("cy", d => y(d.weight || 0))
       .attr("r", (d,i) => { 
-				/*if(d.cheatDay) { 
-					return '1.25'; 
-				}*/
+				//if(d.cheatDay) { 
+				//	return '1.25'; 
+				//}
 				return '2';
 			});
 
@@ -402,14 +451,14 @@ function Export({
 
 
 				console.log(`start draw frame = ${c}`);
-				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
-				videoCanvasContext.drawImage(scaledCanvas, 0, 0);
+				intermediateCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+				intermediateCanvasContext.drawImage(scaledCanvas, 0, 0);
 				if(overlayFrameNumberIsChecked) {
-					videoCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
+					intermediateCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
 				}
 				if(overlayEntryInfoIsChecked) {
-					//videoCanvasContext.fillText(`Weight ${entries[c].weight} lbs`, 10, 100);
-					//videoCanvasContext.fillText(`Date ${entries[c].date}`, 10, 150);
+					//intermediateCanvasContext.fillText(`Weight ${entries[c].weight} lbs`, 10, 100);
+					//intermediateCanvasContext.fillText(`Date ${entries[c].date}`, 10, 150);
 					//const svgNode = svg.node();
 					console.log('start draw svg overlay');
 					const svgNode = svg.node();
@@ -420,31 +469,70 @@ function Export({
 						let svgImage = await drawInlineSVG(svgNode);
 						//console.log('got svgImage');
 						if(svgImage != null){
-							const prevFillStyle:string = videoCanvasContext.fillStyle;
-							videoCanvasContext.fillStyle = 'rgba(0,0,0,0.5)';
-							videoCanvasContext.fillRect(25, margin.top - 10, svgWidth - margin.right+margin.left, svgHeight - margin.bottom);
-							videoCanvasContext.drawImage(svgImage, 50, 0);
-							videoCanvasContext.fillStyle = prevFillStyle;
+							const prevFillStyle:string = intermediateCanvasContext.fillStyle;
+							intermediateCanvasContext.fillStyle = 'rgba(0,0,0,0.5)';
+							intermediateCanvasContext.fillRect(25, margin.top - 10, svgWidth - margin.right+margin.left, svgHeight - margin.bottom);
+							intermediateCanvasContext.drawImage(svgImage, 50, 0);
+							intermediateCanvasContext.fillStyle = prevFillStyle;
 						}
 					}
 				}
+				
+				///draw intermediatecanvas onto videocanvas
+				/*
+				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+				videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
+				*/
+				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+				videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
 				//additional delay to allow canvas drawing actions to settle
 				//discovered via testing that this improves frame drawing time consistency greatly
 				//NOTE: further testing revealed that this breaks rendering in some cases, not sure exactly why. commented out for now
 				//await delay(50);
 				console.log('resume recording');
-				mediaRecorder.resume();
+				if(c == 0) {
+				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+				videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
+					mediaRecorder.start();
+				} else {
+					mediaRecorder.resume();
+				}
 				const startTime = Date.now();
-				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+				//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+				if(c==0) {
+				await delay(frameDurationMs*10); //optionally hold first frame longer
+				} else {
 				await delay(frameDurationMs);
-				(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+				}
+				//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
 				const endTime = Date.now();
+//				mediaRecorder.requestData();
 				mediaRecorder.pause();
+				//await pauseRecorder();
 				console.log(`done drawing frame, time to draw = ${endTime - startTime}`);
 				setStatusMessages( cs => [...cs, `generated frame: ${c}/${max-1}, actual frame duration = ${endTime - startTime} ms`]);
 				setEntriesProcessed(c);
+			await delay(frameDurationMs);
 			}
 		}
+		mediaRecorder.resume();
+ 		videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+		videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
+/*		mediaRecorder.resume();
+		//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+		await delay(frameDurationMs);
+		//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+		mediaRecorder.pause();
+*/
+		/*
+				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+				videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
+		mediaRecorder.resume();
+		//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+		await delay(frameDurationMs*5);
+		(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
+		mediaRecorder.pause();
+		*/
 		await delay(500);
 		mediaRecorder.stop();
 		setVideoIsReady(true);
