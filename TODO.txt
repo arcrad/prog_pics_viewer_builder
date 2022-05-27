@@ -63,3 +63,5 @@
 
 +make it so that boolean 'false' can be entered on the settings component
 	--currently entering 'false' puts in literal 'false' string which is truthy
+
++refine/refactor export component (very messy currently)
