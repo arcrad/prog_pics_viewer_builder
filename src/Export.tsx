@@ -88,14 +88,19 @@ function Export({
 	globalState,
 	setGlobalState
 }: ExportAttributes) { 
+	let [loadedInitialData, setLoadedInitialData] = useState<boolean>(false);
 	let [statusMessages, setStatusMessages] = useState<string[]>([]);
-	let [frameDuration, setFrameDuration] = useState<number>(150);
 	let [videoIsReady, setVideoIsReady] = useState<boolean>(false);
-	let [overlayFrameNumberIsChecked, setOverlayFrameNumberIsChecked] = useState<boolean>(false);
-	let [overlayEntryInfoIsChecked, setOverlayEntryInfoIsChecked] = useState<boolean>(false);
 	let [entries, setEntries] = useState<Entry[]|null>(null);
 	let [entriesProcessed, setEntriesProcessed] = useState(0);
 	let [validationResults, setValidationResults] = useState<ValidationResults>(defaultValidationResults);
+	let [frameDuration, setFrameDuration] = useState<number>(150);
+	let [overlayFrameNumberIsChecked, setOverlayFrameNumberIsChecked] = useState<boolean>(false);
+	let [overlayEntryInfoIsChecked, setOverlayEntryInfoIsChecked] = useState<boolean>(false);
+	let [firstFrameHoldDuration, setFirstFrameHoldDuration] = useState<number>(150);
+	let [lastFrameHoldDuration, setLastFrameHoldDuration] = useState<number>(150);
+	let [holdFirstFrameIsChecked, setHoldFirstFrameIsChecked] = useState<boolean>(false);
+	let [holdLastFrameIsChecked, setHoldLastFrameIsChecked] = useState<boolean>(false);
 
 	const initializedRef = useRef<boolean>(false);
 	const videoElementRef = useRef<HTMLVideoElement|null>(null);
@@ -103,6 +108,10 @@ function Export({
 	const frameDurationInputRef = useRef<HTMLInputElement|null>(null);
 	const overlayFrameNumberInputRef = useRef<HTMLInputElement|null>(null);
 	const overlayEntryInfoInputRef = useRef<HTMLInputElement|null>(null);
+	const holdFirstFrameInputRef = useRef<HTMLInputElement|null>(null);
+	const holdLastFrameInputRef = useRef<HTMLInputElement|null>(null);
+	const firstFrameHoldDurationInputRef = useRef<HTMLInputElement|null>(null);
+	const lastFrameHoldDurationInputRef = useRef<HTMLInputElement|null>(null);
 
 	useEffect( () => {
 		if(initializedRef.current) {
@@ -113,13 +122,21 @@ function Export({
 		Promise.all([
 		  db.entries.orderBy('date').filter((entry) => entry.draft !== true).toArray(),
 			db.settings.get('exportFrameDuration'),
+			db.settings.get('exportFirstFrameHoldDuration'),
+			db.settings.get('exportLastFrameHoldDuration'),
 			db.settings.get('exportOverlayFrameNumber'),
-			db.settings.get('exportOverlayEntryInfo')
+			db.settings.get('exportOverlayEntryInfo'),
+			db.settings.get('exportHoldFirstFrame'),
+			db.settings.get('exportHoldLastFrame'),
 		]).then( ([
 			_entries,
 			_exportFrameDurationSetting,
+			_exportFirstFrameHoldDuration,
+			_exportLastFrameHoldDuration,
 			_exportOverlayFrameNumber,
-			_exportOverlayEntryInfo
+			_exportOverlayEntryInfo,
+			_exportHoldFirstFrame,
+			_exportHoldLastFrame,
 		]) => {
 			console.log('intialize data from DB finished');
 			if(_entries) {
@@ -130,6 +147,14 @@ function Export({
 				console.log(`set frameDuration to ${_exportFrameDurationSetting.value}`);
 				setFrameDuration(_exportFrameDurationSetting.value);
 			}
+			if(_exportFirstFrameHoldDuration) {
+				console.log(`set firstFrameHoldDuration to ${_exportFirstFrameHoldDuration.value}`);
+				setFirstFrameHoldDuration(_exportFirstFrameHoldDuration.value);
+			}
+			if(_exportLastFrameHoldDuration) {
+				console.log(`set lastFrameHoldDuration to ${_exportLastFrameHoldDuration.value}`);
+				setLastFrameHoldDuration(_exportLastFrameHoldDuration.value);
+			}
 			if(_exportOverlayFrameNumber) {
 				console.log(`setOverlayFrameNumberIsChecked = ${_exportOverlayFrameNumber}`);
 				setOverlayFrameNumberIsChecked(_exportOverlayFrameNumber.value);
@@ -138,6 +163,15 @@ function Export({
 				console.log(`setOverlayEntryInfoIsChecked = ${_exportOverlayEntryInfo}`);
 				setOverlayEntryInfoIsChecked(_exportOverlayEntryInfo.value);
 			}
+			if(_exportHoldFirstFrame) {
+				console.log(`set holdFirstFrame to ${_exportHoldFirstFrame.value}`);
+				setHoldFirstFrameIsChecked(_exportHoldFirstFrame.value);
+			}
+			if(_exportHoldLastFrame) {
+				console.log(`set holdLastFrame to ${_exportHoldLastFrame.value}`);
+				setHoldLastFrameIsChecked(_exportHoldLastFrame.value);
+			}
+			setLoadedInitialData(true);
 		});
 	}, []);
 
@@ -207,22 +241,29 @@ function Export({
 		//console.dir(entries);
 		
 		let frameDurationMs = 150;
+		let firstFrameHoldDurationMs = 150;
+		let lastFrameHoldDurationMs = 150;
 		
 		if(frameDurationInputRef.current) {
 			const frameDurationInputRefValue = parseInt(frameDurationInputRef.current.value as string);
 			if(frameDurationInputRefValue) {
 				frameDurationMs = clampFrameDuration(frameDurationInputRefValue);
-				/*
-				frameDurationMs = frameDurationInputRefValue < MIN_FRAME_DURATION_MS ? 
-					MIN_FRAME_DURATION_MS 
-					: 
-					frameDurationInputRefValue > MAX_FRAME_DURATION_MS ? 
-						MAX_FRAME_DURATION_MS
-						: 
-						frameDurationInputRefValue;
-				*/
 			}
 		}
+		if(firstFrameHoldDurationInputRef.current) {
+			const firstFrameHoldDurationInputRefValue = parseInt(firstFrameHoldDurationInputRef.current.value as string);
+			if(firstFrameHoldDurationInputRefValue) {
+				firstFrameHoldDurationMs = clampFrameDuration(firstFrameHoldDurationInputRefValue);
+			}
+		}
+		if(lastFrameHoldDurationInputRef.current) {
+			const lastFrameHoldDurationInputRefValue = parseInt(lastFrameHoldDurationInputRef.current.value as string);
+			if(lastFrameHoldDurationInputRefValue) {
+				lastFrameHoldDurationMs = clampFrameDuration(lastFrameHoldDurationInputRefValue);
+			}
+		}
+
+
 	 	setStatusMessages( cs => [...cs, `target frameDurationMs = ${frameDurationMs}`]);
 		//ensure first entry exists
 		if(!(entries[0] && entries[0].alignedImageBlob)) {
@@ -341,13 +382,12 @@ function Export({
 		mediaRecorder.start();
 		await delay(3000);
 */
-		//for(let c = 0, max = entries.length; c < max; c++) {
-		for(let c = 0, max = 5; c < max; c++) {
-			console.log(`-------------------pause--------------`);
+		setStatusMessages( cs => [...cs, `start generating frames`]);
+		for(let c = 0, max = entries.length; c < max; c++) {
+		//for(let c = 0, max = 5; c < max; c++) {
 			//mediaRecorder.pause();
 			//await pauseRecorder();
 			//await delay(50);
-			//await delay(350-frameDurationMs > 0 ? 350 - frameDurationMs : 5);
 			let currentBlob = entries[c].alignedImageBlob;
 			//load image
 			if(currentBlob) {
@@ -491,18 +531,22 @@ function Export({
 				//await delay(50);
 				console.log('resume recording');
 				if(c == 0) {
-				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
-				videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
+					videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
+					videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
 					mediaRecorder.start();
 				} else {
 					mediaRecorder.resume();
 				}
 				const startTime = Date.now();
 				//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-				if(c==0) {
-				await delay(frameDurationMs*10); //optionally hold first frame longer
+				if(holdFirstFrameIsChecked && c == 0) {
+					//optionally hold first frame longer
+					await delay(firstFrameHoldDurationMs);
+				} else if(holdLastFrameIsChecked && c == max-1) {
+					//optionally hold lastframe longer
+					await delay(firstFrameHoldDurationMs);
 				} else {
-				await delay(frameDurationMs);
+					await delay(frameDurationMs);
 				}
 				//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
 				const endTime = Date.now();
@@ -553,6 +597,14 @@ function Export({
 				newValue = parseInt(newValue);
 				console.log('value = ', newValue);
 				setFrameDuration(newValue);
+			} else if(event.target.dataset.settingsKeyToModify === 'exportFirstFrameHoldDuration') {
+				newValue = parseInt(newValue);
+				console.log('value = ', newValue);
+				setFirstFrameHoldDuration(newValue);
+			} else if(event.target.dataset.settingsKeyToModify === 'exportLastFrameHoldDuration') {
+				newValue = parseInt(newValue);
+				console.log('value = ', newValue);
+				setLastFrameHoldDuration(newValue);
 			} else if(event.target.dataset.settingsKeyToModify === 'exportOverlayFrameNumber') {
 				let isChecked:boolean = event.target.checked;
 				console.log('checked? = ', isChecked);
@@ -563,6 +615,18 @@ function Export({
 				let isChecked:boolean = event.target.checked;
 				console.log('checked? = ', isChecked);
 				(isChecked === true) ? setOverlayEntryInfoIsChecked(true) : setOverlayEntryInfoIsChecked(false);
+				newValue = isChecked;
+				console.log('value = ', newValue);
+			} else if(event.target.dataset.settingsKeyToModify === 'exportHoldFirstFrame') {
+				let isChecked:boolean = event.target.checked;
+				console.log('checked? = ', isChecked);
+				(isChecked === true) ? setHoldFirstFrameIsChecked(true) : setHoldFirstFrameIsChecked(false);
+				newValue = isChecked;
+				console.log('value = ', newValue);
+			} else if(event.target.dataset.settingsKeyToModify === 'exportHoldLastFrame') {
+				let isChecked:boolean = event.target.checked;
+				console.log('checked? = ', isChecked);
+				(isChecked === true) ? setHoldLastFrameIsChecked(true) : setHoldLastFrameIsChecked(false);
 				newValue = isChecked;
 				console.log('value = ', newValue);
 			}
@@ -584,10 +648,36 @@ function Export({
 	};
 
 
-	 return (
-    <div>
+	//<p>Estimated video duration: { frameDuration && entries ? `${(frameDuration*entries.length/1000)} seconds` : 'N/A'}</p>
+
+	let estimatedVideoDurationString = 'N/A';
+	if(entries && frameDuration) {
+		let estimatedVideoDurationSeconds = frameDuration*entries.length/1000;
+		if(holdFirstFrameIsChecked && firstFrameHoldDuration) {
+			estimatedVideoDurationSeconds = (estimatedVideoDurationSeconds - (frameDuration/1000)) + (firstFrameHoldDuration/1000);
+		}
+		if(holdLastFrameIsChecked && lastFrameHoldDuration) {
+			estimatedVideoDurationSeconds = (estimatedVideoDurationSeconds - (frameDuration/1000)) + (lastFrameHoldDuration/1000);
+		}
+		const minutes = Math.floor(estimatedVideoDurationSeconds/60);
+		const minutesLabel = minutes != 1 ? 'minutes' : 'minute';
+		const seconds = estimatedVideoDurationSeconds % 60;
+		const secondsLabel = seconds != 1 ? 'seconds' : 'second';
+		if(estimatedVideoDurationSeconds < 60) {
+			estimatedVideoDurationString = `${seconds.toFixed(2)} ${secondsLabel}`;
+		} else {
+			estimatedVideoDurationString = `${minutes.toFixed(2)} ${minutesLabel} and ${seconds.toFixed(2)} ${secondsLabel}`;
+		}
+	}
+
+	return (
+  	<div>
     	<h2>Export Video Locally (Experimental)</h2>
 			<p>Exports video of progress pictures completely in-browser and local to your device. Currently not very consistent at low frame durations (faster timelapse). Export occurs in real-time.</p>
+			{ !loadedInitialData && <>
+				<p>Loading...</p>
+			</>}
+			{ loadedInitialData && <>
 			<EntriesValidator
 				validationResults={validationResults}
 				setValidationResults={setValidationResults}
@@ -600,6 +690,50 @@ function Export({
 				value={frameDuration}
 				onChange={handleInputChange}
 				data-settings-key-to-modify="exportFrameDuration" 
+				max={MAX_FRAME_DURATION_MS}
+				min={MIN_FRAME_DURATION_MS}
+			/>
+			</label><br/>
+			
+			
+			<label>Hold First Frame?:
+			<input
+				ref={holdFirstFrameInputRef}
+				type="checkbox"
+				value="true"
+				checked={holdFirstFrameIsChecked}
+				onChange={handleInputChange}
+				data-settings-key-to-modify="exportHoldFirstFrame" 
+			/>
+			</label>
+			<label> First Frame Hold Duration (ms):
+			<input
+				ref={firstFrameHoldDurationInputRef}
+				type="number"
+				value={firstFrameHoldDuration}
+				onChange={handleInputChange}
+				data-settings-key-to-modify="exportFirstFrameHoldDuration" 
+				max={MAX_FRAME_DURATION_MS}
+				min={MIN_FRAME_DURATION_MS}
+			/>
+			</label><br/>
+			<label>Hold Last Frame?:
+			<input
+				ref={holdLastFrameInputRef}
+				type="checkbox"
+				value="true"
+				checked={holdLastFrameIsChecked}
+				onChange={handleInputChange}
+				data-settings-key-to-modify="exportHoldLastFrame" 
+			/>
+			</label>
+			<label> Last Frame Hold Duration (ms):
+			<input
+				ref={lastFrameHoldDurationInputRef}
+				type="number"
+				value={lastFrameHoldDuration}
+				onChange={handleInputChange}
+				data-settings-key-to-modify="exportLastFrameHoldDuration" 
 				max={MAX_FRAME_DURATION_MS}
 				min={MIN_FRAME_DURATION_MS}
 			/>
@@ -624,14 +758,14 @@ function Export({
 				data-settings-key-to-modify="exportOverlayEntryInfo" 
 			/>
 			</label><br/>
-			<p>Estimated video duration: { frameDuration && entries ? `${(frameDuration*entries.length/1000)} seconds` : 'N/A'}</p>
+			<p>Estimated video duration: {estimatedVideoDurationString}</p>
 			<button
 				type="button"
 				onClick={handleExportVideo}
 			>
 				Export Video
-			</button>
-			<label>Progress
+			</button><br/>
+			<label>Progress&nbsp;
 				<progress max={entries?.length} value={entriesProcessed}>
 					{entriesProcessed} entries processed out of {entries?.length}
 				</progress>
@@ -669,6 +803,7 @@ function Export({
 			<hr/>
 			<h2>Upload Interactive Viewer</h2>
 			<p><i>Not yet implemented.</i></p>
+			</>}
 		</div>
   );
 }
