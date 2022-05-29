@@ -65,3 +65,5 @@
 	--currently entering 'false' puts in literal 'false' string which is truthy
 
 +refine/refactor export component (very messy currently)
+
++make duplicate feature of entry component also duplicate the alignedImage data 
