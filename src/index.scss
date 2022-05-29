@@ -1,3 +1,7 @@
+:root {
+	background: #eff;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,7 +9,6 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-	background: #eff;
 }
 
 code {
@@ -13,8 +16,14 @@ code {
     monospace;
 }
 
+@import "../node_modules/bulma/sass/utilities/initial-variables.sass";
+
+/*make navbar display at full size at all break points*/
+$navbar-breakpoint: 0px;
+
 @import "../node_modules/bulma/sass/utilities/_all.sass";
 @import "../node_modules/bulma/sass/base/_all.sass";
+@import "../node_modules/bulma/sass/grid/_all.sass";
 @import "../node_modules/bulma/sass/elements/button.sass";
 @import "../node_modules/bulma/sass/elements/container.sass";
 @import "../node_modules/bulma/sass/elements/title.sass";

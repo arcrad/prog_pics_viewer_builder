@@ -1,0 +1,25 @@
+@charset "utf-8";
+/*
+@import "../node_modules/bulma/sass/utilities/initial-variables.sass";
+
+$navbar-breakpoint: $tablet; 
+
+.navbar {
+	@extend .navbar;
+}
+
+.navbarMenu {
+	@extend .navbar-menu;
+}
+*/
+.mainNavLink {
+	@extend .navbar-item;
+	padding-bottom: 0.25rem;
+}
+
+.mainNavLink[class~="active"] {
+	border-bottom: 5px solid blue;
+}
+
+@import "../node_modules/bulma/sass/utilities/_all.sass";
+@import "../node_modules/bulma/sass/components/navbar.sass";

@@ -6,7 +6,7 @@ import { db, Entry } from './db';
 import { GlobalState } from './App';
 import SetupModal from './SetupModal';
 
-import styles from './Builder.module.css';
+import styles from './Builder.module.scss';
 
 type BuilderAttributes= {
 	globalState: GlobalState;
@@ -42,29 +42,30 @@ function Builder({
 	}, []);*/
 
 	return (
-		<div>
-			<h1>Builder</h1>
-			<nav style={{
-				display: "flex",
-				flexDirection: "row",
-				justifyContent: "space-around",
-				alignItems: "center",
-				border: "1px solid red",
-				padding: "1rem"
-			}}>
-				<NavLink to="/entry" className={styles.mainNavLink}>Entry</NavLink>
-				<NavLink to="/adjust" className={styles.mainNavLink}>Adjust</NavLink>
-				<NavLink to="/process" className={styles.mainNavLink}>Process</NavLink>
-				<NavLink to="/export" className={styles.mainNavLink}>Export</NavLink>
-				<NavLink to="/settings" className={styles.mainNavLink}>Settings</NavLink>
-			</nav>
-			<Outlet />
-			<SetupModal 
-					globalState={globalState} 
-					setGlobalState={setGlobalState} 
-					isModalVisible={setupModalIsVisible}
-					setIsModalVisible={setSetupModalIsVisible}
-				/>
+		<div className="columns">
+			<div className="column">
+				<nav className={styles.navbar} role="navigation" aria-label="main navigation">
+					<div className="navbar-brand">
+						<NavLink className="navbar-item" to="/">Builder (Home)</NavLink>
+					</div>
+					<div id="mainNavBar" className={`${styles.navbarMenu} navbar-menu is-active`}>
+						<div className="navbar-start">
+							<NavLink to="/entry" className={styles.mainNavLink}>Entry</NavLink>
+							<NavLink to="/adjust" className={styles.mainNavLink}>Adjust</NavLink>
+							<NavLink to="/process" className={styles.mainNavLink}>Process</NavLink>
+							<NavLink to="/export" className={styles.mainNavLink}>Export</NavLink>
+							<NavLink to="/settings" className={styles.mainNavLink}>Settings</NavLink>
+						</div>
+					</div>
+				</nav>
+				<Outlet />
+				<SetupModal 
+						globalState={globalState} 
+						setGlobalState={setGlobalState} 
+						isModalVisible={setupModalIsVisible}
+						setIsModalVisible={setSetupModalIsVisible}
+					/>
+			</div>
 		</div>
 	);
 }

@@ -498,10 +498,13 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 						<li key={entry.id}>
 							{ entryThumbnailImageUrls && entry.id && <img src={entryThumbnailImageUrls[entry.id]} style={{maxWidth: "6rem"}} /> }
 							{ ( entryIdBeingEdited === entry.id ) ? 
-								<div>
+								<div className="columns">
+								<div className="column is-10 is-offset-1">
+								<div className="field is-grouped is-grouped-centered">
 									Weight: 
 									<input 
 										type="number" 
+										className="input is-small"
 										defaultValue={entry.weight} 
 										data-entry-id={entry.id} 
 										data-entry-key-to-modify="weight" 
@@ -509,6 +512,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 									/> on&nbsp;
 									<input 
 										type="datetime-local" 
+										className="input is-small"
 										defaultValue={entry.date}
 										data-entry-id={entry.id} 
 										data-entry-key-to-modify="date"
@@ -516,11 +520,14 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 									/>
 									<button 
 										type="button" 
+										className="button is-light is-small"
 										data-entry-id="-1" 
 										onClick={handleEditEntry}
 									>
 										Close
 									</button>
+								</div>
+								</div>
 								</div> 
 								:
 								<span>({entry.id}) Weight: {entry.weight} @ {entry.date} {entry.draft ? '[draft]' : ''}</span>
