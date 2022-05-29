@@ -427,19 +427,31 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
     <div>
 			<div>
 				<h2>Entries</h2>
-				<button ref={addEntryRef} type="button" onClick={handleAddEntry}>Add Entry</button>
+				<div className="control">
+					<button 
+						ref={addEntryRef} 
+						type="button" 
+						className="button is-primary" 
+						onClick={handleAddEntry}>Add Entry</button>
+				</div>
 				<hr/>
 				{/*<button type="button" onClick={handleListRefresh}> Refresh List</button>*/}
+				<div className="field is-grouped is-grouped-centered">
+				<div className="control">
 				<button
 					type="button"
+					className="button is-info"
 					onClick={() => {
 						setPagerOffset(0)
 					}}
 				>
 					First
 				</button>
+				</div>
+				<div className="control">
 				<button
 					type="button"
+					className="button is-info"
 					onClick={() => {
 						setPagerOffset( curOffset => {
 							return curOffset - pagerLimit >= 0 ? curOffset - pagerLimit : 0
@@ -448,9 +460,12 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 				>
 					Previous
 				</button>
+				</div>
 				<span> {pagerOffset} ({pagerOffset/pagerLimit}) (of {totalEntriesCount})</span>
+				<div className="control">
 				<button
 					type="button"
+					className="button is-info"
 					onClick={() => {
 						setPagerOffset( curOffset => {
 							if(totalEntriesCount && curOffset < totalEntriesCount - pagerLimit) {
@@ -462,8 +477,11 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 				>
 					Next
 				</button>
+				</div>
+				<div className="control">
 				<button
 					type="button"
+					className="button is-info"
 					onClick={() => {
 						if(totalEntriesCount) {
 							setPagerOffset(Math.floor((totalEntriesCount-1)/pagerLimit)*pagerLimit)
@@ -472,6 +490,8 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 				>
 					Last
 				</button>
+				</div>
+				</div>
 				<ol>
 				{
 					entries?.map( entry =>
@@ -505,42 +525,57 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 								:
 								<span>({entry.id}) Weight: {entry.weight} @ {entry.date} {entry.draft ? '[draft]' : ''}</span>
 							}
-							<div>
+							<div className="field is-grouped is-grouped-centered">
+								<div className="control">
 								<button 
 									type="button" 
+									className="button is-info is-small"
 									data-entry-id={entry.id} 
 									onClick={handleEditEntry}
 								>
 									Edit Data
 								</button>
+								</div>
+								<div className="control">
 								<button 
 									type="button" 
+									className={`button ${entry.marks && Object.keys(entry.marks).length  == 3 ? 'is-success' : 'is-warning'} is-small`}
 									data-entry-id={entry.id} 
 									onClick={handleMarkEntry}
 								>
 									{ 'Mark (' + ( entry.marks ? Object.keys(entry.marks).length : 0) + ')'}
 								</button>
+								</div>
+								<div className="control">
 								<button 
 									type="button" 
+									className="button is-info is-small"
 									data-entry-id={entry.id} 
 									onClick={handleChangeImageEntry}
 								>
 									Change Image
 								</button>
+								</div>
+								<div className="control">
 								<button 
 									type="button" 
+									className="button is-danger is-small"
 									data-entry-id={entry.id} 
 									onClick={handleDeleteEntry}
 								>
 									Delete
 								</button>
+								</div>
+								<div className="control">
 								<button 
 									type="button" 
+									className="button is-info is-small"
 									data-entry-id={entry.id} 
 									onClick={handleDuplicateEntry}
 								>
 									Duplicate
 								</button>
+								</div>
 							</div>
 							{ getEntryValidationErrors(entry) }
 						</li>
