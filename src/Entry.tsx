@@ -424,8 +424,8 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 	}
 
 	return (
-    <div>
-			<div>
+    <div className="columns is-centered">
+			<div className="column is-10-tablet is-6-desktop">
 				<h2>Entries</h2>
 				<div className="control">
 					<button 
@@ -461,7 +461,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 					Previous
 				</button>
 				</div>
-				<span> {pagerOffset} ({pagerOffset/pagerLimit}) (of {totalEntriesCount})</span>
+				<span> {pagerOffset+1} - {pagerOffset+pagerLimit} of {totalEntriesCount} ({pagerOffset/pagerLimit}) </span>
 				<div className="control">
 				<button
 					type="button"
@@ -492,14 +492,27 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 				</button>
 				</div>
 				</div>
-				<ol>
+				<ol 
+					start={pagerOffset+1}
+				>
 				{
 					entries?.map( entry =>
 						<li key={entry.id}>
-							{ entryThumbnailImageUrls && entry.id && <img src={entryThumbnailImageUrls[entry.id]} style={{maxWidth: "6rem"}} /> }
+							<div className="columns is-centered">
+							<div className="column is-2">
+							{ entryThumbnailImageUrls && entry.id && 
+								<div style={{
+									border: '1px solid #000',
+									height: '7rem',
+									width: '7rem',
+									background: `url(${entryThumbnailImageUrls[entry.id]}) center / contain no-repeat`,
+								}}></div>
+							}
+							</div>
+							<div className="column">
 							{ ( entryIdBeingEdited === entry.id ) ? 
-								<div className="columns">
-								<div className="column is-10 is-offset-1">
+								<div className="columns is-centered">
+								<div className="column is-9">
 								<div className="field is-grouped is-grouped-centered">
 									Weight: 
 									<input 
@@ -509,7 +522,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 										data-entry-id={entry.id} 
 										data-entry-key-to-modify="weight" 
 										onChange={handleEntryInputChange}
-									/> on&nbsp;
+									/>&nbsp;on&nbsp;
 									<input 
 										type="datetime-local" 
 										className="input is-small"
@@ -530,8 +543,16 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 								</div>
 								</div> 
 								:
-								<span>({entry.id}) Weight: {entry.weight} @ {entry.date} {entry.draft ? '[draft]' : ''}</span>
+								<>
+		 						<p>{(new Date(entry.date)).toLocaleString()} {entry.draft ? '[draft]' : ''}</p>
+								<p><strong>ID:</strong> {entry.id}</p>
+								<p><strong>Weight:</strong> {entry.weight ? entry.weight : 'No weight defined.'}</p>
+								</>
 							}
+							</div>
+							</div>
+							<div className="columns is-centered">
+							<div className="column">
 							<div className="field is-grouped is-grouped-centered">
 								<div className="control">
 								<button 
@@ -585,6 +606,8 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 								</div>
 							</div>
 							{ getEntryValidationErrors(entry) }
+							</div>
+							</div>
 						</li>
 					)
 				}

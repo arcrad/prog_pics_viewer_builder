@@ -67,3 +67,7 @@
 +refine/refactor export component (very messy currently)
 
 +make duplicate feature of entry component also duplicate the alignedImage data 
+
++in entry component, improve handling of auto update of date
+	--when re-ordered, decided how to handle (auto seek to new page?)
+	--disable auto update and add save button? 

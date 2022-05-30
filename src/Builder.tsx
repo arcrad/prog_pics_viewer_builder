@@ -58,7 +58,9 @@ function Builder({
 						</div>
 					</div>
 				</nav>
-				<Outlet />
+				<div className="container">
+					<Outlet />
+				</div>
 				<SetupModal 
 						globalState={globalState} 
 						setGlobalState={setGlobalState} 
