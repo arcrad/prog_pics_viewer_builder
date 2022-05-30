@@ -411,7 +411,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 			|| entryDoesntHaveAlignedImageBlob
 		) {
 			return <div>
-				⚠️  Validation errors exist!
+				⚠️  This entry has validation errors!
 				<ul>
 					{ entryDoesntHaveImageBlob ? <li>❌ Entry is is missing image</li> : ''}
 					{ entryDoesntHaveWeight ? <li>❌ Entry is missing weight</li> : ''}
@@ -497,15 +497,15 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 				>
 				{
 					entries?.map( entry =>
-						<li key={entry.id}>
+						<li key={entry.id} className="box">
 							<div className="columns is-centered">
-							<div className="column is-2">
+							<div className="column is-narrow">
 							{ entryThumbnailImageUrls && entry.id && 
 								<div style={{
-									border: '1px solid #000',
+									border: '0px solid #000',
 									height: '7rem',
 									width: '7rem',
-									background: `url(${entryThumbnailImageUrls[entry.id]}) center / contain no-repeat`,
+									background: `url(${entryThumbnailImageUrls[entry.id]}) center / contain no-repeat #ded`,
 								}}></div>
 							}
 							</div>
@@ -550,11 +550,24 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 								</>
 							}
 							</div>
+							<div className="column is-narrow">
+							<div id={`entry-dropdown-${entry.id}`} className="dropdown is-right is-hoverable">
+							<div className="dropwdown-trigger">
+								<button className="button" aria-haspopup="true" aria-controls={`dropdown-entry-menu-${entry.id}`} onClick={
+									() => { 
+										const dropdownElement = document.querySelector(`#entry-dropdown-${entry.id}`);
+										dropdownElement?.classList.toggle('is-active');
+									}
+								}>
+									<span>Options</span>
+									<span className="icon is-small">
+										<i className="fas fa-angle-down" aria-hidden="true"></i>
+									</span>
+								</button>
 							</div>
-							<div className="columns is-centered">
-							<div className="column">
-							<div className="field is-grouped is-grouped-centered">
-								<div className="control">
+							<div className="dropdown-menu" id={`dropdown-entry-menu-${entry.id}`} role="menu">
+							<div className="dropdown-content">
+								<div className="dropdown-item">
 								<button 
 									type="button" 
 									className="button is-info is-small"
@@ -564,7 +577,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 									Edit Data
 								</button>
 								</div>
-								<div className="control">
+								<div className="dropdown-item">
 								<button 
 									type="button" 
 									className={`button ${entry.marks && Object.keys(entry.marks).length  == 3 ? 'is-success' : 'is-warning'} is-small`}
@@ -574,7 +587,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 									{ 'Mark (' + ( entry.marks ? Object.keys(entry.marks).length : 0) + ')'}
 								</button>
 								</div>
-								<div className="control">
+								<div className="dropdown-item">
 								<button 
 									type="button" 
 									className="button is-info is-small"
@@ -584,7 +597,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 									Change Image
 								</button>
 								</div>
-								<div className="control">
+								<div className="dropdown-item">
 								<button 
 									type="button" 
 									className="button is-danger is-small"
@@ -594,7 +607,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 									Delete
 								</button>
 								</div>
-								<div className="control">
+								<div className="dropdown-item">
 								<button 
 									type="button" 
 									className="button is-info is-small"
@@ -605,9 +618,11 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 								</button>
 								</div>
 							</div>
+							</div>
+							</div>
+							</div>
+							</div>
 							{ getEntryValidationErrors(entry) }
-							</div>
-							</div>
 						</li>
 					)
 				}
