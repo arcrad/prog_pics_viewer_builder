@@ -511,8 +511,6 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 							</div>
 							<div className="column">
 							{ ( entryIdBeingEdited === entry.id ) ? 
-								<div className="columns is-centered">
-								<div className="column is-9">
 								<div className="field is-grouped is-grouped-centered">
 									Weight: 
 									<input 
@@ -540,8 +538,6 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 										Close
 									</button>
 								</div>
-								</div>
-								</div> 
 								:
 								<>
 		 						<p>{(new Date(entry.date)).toLocaleString()} {entry.draft ? '[draft]' : ''}</p>
