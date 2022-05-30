@@ -71,3 +71,6 @@
 +in entry component, improve handling of auto update of date
 	--when re-ordered, decided how to handle (auto seek to new page?)
 	--disable auto update and add save button? 
+
++make the "add" functionality in entry component ensure that an image, marks, weight, and date are set before allowing it to be saved
+	--make it so that warnings are shown if trying to save before adding all required data
