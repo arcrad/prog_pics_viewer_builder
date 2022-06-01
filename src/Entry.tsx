@@ -424,19 +424,115 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 		}
 	}
 */
+
+	const getPagerPageLinks = (curPage:number, maxPages:number) => {
+		if(curPage < 3) {
+			return [1,2,3].map( (listOffset) => {
+					return <li 
+							className={`pagination-link ${pagerOffset/pagerLimit == (listOffset) ? 'is-current' : ''}`}
+							onClick={() => {
+								setPagerOffset((listOffset)*pagerLimit)
+							}}
+						>
+							{listOffset+1}
+						</li>
+			});
+		} else if (curPage > maxPages -3) {
+			return [maxPages-4,maxPages-3,maxPages-2].map( (listOffset) => {
+					return <li 
+							className={`pagination-link ${pagerOffset/pagerLimit == listOffset ? 'is-current' : ''}`}
+							onClick={() => {
+								setPagerOffset((listOffset)*pagerLimit)
+							}}
+						>
+							{listOffset+1}
+						</li>
+			});
+		} else {
+			return [-1,0,1].map( (listOffset) => {
+					return <li 
+							className={`pagination-link ${pagerOffset/pagerLimit == (curPage+listOffset) ? 'is-current' : ''}`}
+							onClick={() => {
+								setPagerOffset((curPage+listOffset)*pagerLimit)
+							}}
+						>
+							{curPage+listOffset+1}
+						</li>
+			});
+		}
+	}
+
 	return (
     <div className="columns is-centered">
 			<div className="column is-10-tablet is-6-desktop">
-				<h2>Entries</h2>
-				<div className="control">
-					<button 
-						ref={addEntryRef} 
-						type="button" 
-						className="button is-primary" 
-						onClick={handleAddEntry}>Add Entry</button>
+				<div className="section">
+					<div className="control">
+						<button 
+							ref={addEntryRef} 
+							type="button" 
+							className="button is-primary is-large" 
+							onClick={handleAddEntry}>
+								Create New Entry
+						</button>
+					</div>
 				</div>
-				<hr/>
 				{/*<button type="button" onClick={handleListRefresh}> Refresh List</button>*/}
+				<nav className="pagination" role="navigation" aria-label="pagination">
+					<a 
+						className="pagination-previous"
+						onClick={() => {
+							setPagerOffset( curOffset => {
+								return curOffset - pagerLimit >= 0 ? curOffset - pagerLimit : 0
+							})
+						}}
+					>
+						Previous
+					</a>
+					<a 
+						className="pagination-next"
+						onClick={() => {
+							setPagerOffset( curOffset => {
+								if(totalEntriesCount && curOffset < totalEntriesCount - pagerLimit) {
+									return curOffset + pagerLimit < totalEntriesCount ? curOffset + pagerLimit : totalEntriesCount - pagerLimit
+								}
+								return curOffset;
+							})
+						}}
+					>
+						Next
+					</a>
+					<ul className="pagination-list">
+						<li 
+							className={`pagination-link ${pagerOffset == 0 ? 'is-current' : ''}`}
+							onClick={() => {
+								setPagerOffset(0)
+							}}
+						>
+							1
+						</li>
+						<li className="pagination-ellipses">&hellip;</li>
+						{
+								getPagerPageLinks(pagerOffset/pagerLimit, totalEntriesCount ? Math.ceil((totalEntriesCount)/pagerLimit) : 0)
+						}
+						<li className="pagination-ellipses">&hellip;</li>
+						<li 
+							className={`pagination-link ${totalEntriesCount && pagerOffset/pagerLimit == Math.ceil((totalEntriesCount)/pagerLimit)-1 ? 'is-current' : ''}`}
+					onClick={() => {
+						if(totalEntriesCount) {
+							setPagerOffset(Math.floor((totalEntriesCount)/pagerLimit)*pagerLimit)
+						}
+					}}
+						>
+							{totalEntriesCount ? Math.ceil(totalEntriesCount/pagerLimit) : 'N/A'}
+						</li>
+					</ul>
+				</nav>
+
+
+				<p>pager offset = {pagerOffset} cur page = {(pagerOffset/pagerLimit)}, max page ={totalEntriesCount ? Math.floor(totalEntriesCount/pagerLimit) : 'N/A'}</p>
+
+
+
 				<div className="field is-grouped is-grouped-centered">
 				<div className="control">
 				<button
