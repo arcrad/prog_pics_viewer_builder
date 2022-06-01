@@ -25,6 +25,7 @@ import { GlobalState } from './App';
 import ChangeImageComponent from './ChangeImageComponent';
 import MarkImageComponent from './MarkImageComponent';
 import UpdateEntryDataComponent from './UpdateEntryDataComponent';
+import { getEntryValidationErrorsComponent } from './Common';
 
 import styles from './AddEntryModal.module.css';
 
@@ -50,7 +51,11 @@ function AddEntryModal({
 	const { entryId } = useParams();
 
 	const currentEntry = useLiveQuery(
-		() => db.entries.get(entryId || 0)
+		() => {
+			const sanitizedEntryId = parseInt(entryId || '0');
+			//console.log(`within useLiveQuery, entryId = ${sanitizedEntryId}`);
+			return db.entries.get(sanitizedEntryId)
+		}
 	, [entryId]);
 
 	
@@ -117,10 +122,17 @@ function AddEntryModal({
 	}, [isModalVisible]);*/
 	
 	useEffect( () => {
-		if(modalOverlayRef.current && !modalOverlayRef.current.open) {
-				modalOverlayRef.current.showModal();
+		if(modalOverlayRef.current) {
+				//modalOverlayRef.current.showModal();
+				modalOverlayRef.current.classList.add('is-active');
+				document.documentElement.classList.add('is-clipped');
 		}
 	}, []);
+
+	useEffect( () => {
+		console.warn('current entry has changed!');
+		console.dir(currentEntry);
+	}, [currentEntry]);
 
 /*	useEffect( () => {
 		if(modalOverlayRef.current) {
@@ -149,6 +161,8 @@ function AddEntryModal({
 
 	let closeModal = () => {
 		setIsLoaded(false);
+				modalOverlayRef.current.classList.remove('is-active');
+				document.documentElement.classList.remove('is-clipped');
 		navigate('/entry');
 	//	setIsModalVisible(false);
 	}
@@ -184,12 +198,19 @@ function AddEntryModal({
 		closeModal();
 	};
 
+	//console.warn('currentEntry = ');
+	//console.dir(currentEntry);
     //<dialog ref={modalOverlayRef} className="modalOverlay1" open={true}>
 	return (
-    <dialog ref={modalOverlayRef} className={styles.modalOverlay1}>
-			<div className={styles.addEntryContentContainer}>
-				<div className={styles.main}>
-					<h2>Add Entry</h2>
+    <div ref={modalOverlayRef} className="modal">
+			<div className="modal-background">
+			</div>
+			<div className="modal-card">
+				<div className={`modal-card-head`}>
+					<h1 className="modal-card-title">Add Entry</h1>
+				</div>
+				<div className={`modal-card-body ${styles.main}`}>
+					{/*<p>currentEntry = {JSON.stringify(currentEntry)}</p>*/}
 					<p>Updating entry with entryId = {entryId}</p>
 					<NavLink to="./image" className={styles.addEntryStepLink}>Change Image</NavLink>
 					&gt;
@@ -217,26 +238,30 @@ function AddEntryModal({
 							/>
 						} />
 					</Routes>
-				</div>
 				<hr/>
-				<div className="footer">
+					<div>
+						{currentEntry ? getEntryValidationErrorsComponent(currentEntry) : ''}
+					</div>
+				<hr/>
+				</div>
+				<div className="modal-card-foot">
 					<button 
 						type="button" 
-						className="saveButton"
+						className="button is-primary"
 						onClick={ handleSaveButton }
 					>
 							Save Entry
 					</button>
 					<button 
 						type="button" 
-						className="closeButton"
+						className="button"
 						onClick={ handleCancelButton }
 					>
 							Cancel
 					</button>
 				</div>
 			</div>
-    </dialog>
+    </div>
   );
 }
 

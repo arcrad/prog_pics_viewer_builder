@@ -23,7 +23,8 @@ import { GlobalState } from './App';
 import ChangeImageModal from './ChangeImageModal';
 import MarkImageModal from './MarkImageModal';
 import AddEntryModal from './AddEntryModal';
-
+import { getEntryValidationErrorsComponent } from './Common';
+ 
 type EntryAttributes = {
 	globalState: GlobalState,
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>
@@ -395,7 +396,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 //		}
 //	};
 	//}, [entries]);
-
+/*
 	const getEntryValidationErrors = (entry: Entry) => {
 		const entryHasAllMarks = entry.marks && Object.keys(entry.marks).length == 3; 
 		const entryDoesntHaveWeight = entry.weight == null || String(entry.weight) == '';
@@ -422,7 +423,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 			</div>
 		}
 	}
-
+*/
 	return (
     <div className="columns is-centered">
 			<div className="column is-10-tablet is-6-desktop">
@@ -618,7 +619,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 							</div>
 							</div>
 							</div>
-							{ getEntryValidationErrors(entry) }
+							{ getEntryValidationErrorsComponent(entry) }
 						</li>
 					)
 				}
