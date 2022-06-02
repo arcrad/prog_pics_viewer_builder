@@ -74,3 +74,5 @@
 
 +make the "add" functionality in entry component ensure that an image, marks, weight, and date are set before allowing it to be saved
 	--make it so that warnings are shown if trying to save before adding all required data
+
++ensure pagination on entry component can handle all cases with < 5 pages 

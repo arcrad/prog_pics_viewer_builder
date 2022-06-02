@@ -30,6 +30,80 @@ type EntryAttributes = {
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>
 };
 
+function getPagerMidPageLinks(
+	curPage:number, 
+	maxPage:number, 
+	pagerOffset:number, 
+	pagerLimit:number, 
+	setPagerOffset:Dispatch<SetStateAction<number>>
+) {
+	if(maxPage < 2) {
+		return;
+	} else if (maxPage < 5) {
+		return Array.from({length: maxPage-1}, (x, i) => i+1).map( (listOffset) => {
+			//[1,2].map( (listOffset) => {
+			return <li 
+					className={`pagination-link ${pagerOffset/pagerLimit == (listOffset) ? 'is-current' : ''}`}
+					onClick={() => {
+						setPagerOffset((listOffset)*pagerLimit)
+					}}
+				>
+					{listOffset+1}
+				</li>
+			})
+	}
+	if(curPage < 3) {
+		return <>
+			{
+				[1,2,3].map( (listOffset) => {
+				return <li 
+						className={`pagination-link ${pagerOffset/pagerLimit == (listOffset) ? 'is-current' : ''}`}
+						onClick={() => {
+							setPagerOffset((listOffset)*pagerLimit)
+						}}
+					>
+						{listOffset+1}
+					</li>
+				})
+			}
+			<li className="pagination-ellipses">&hellip;</li>
+		</>
+	} else if (curPage > maxPage-3) {
+		return <>
+			<li className="pagination-ellipses">&hellip;</li>
+			{
+				[maxPage-3,maxPage-2,maxPage-1].map( (listOffset) => {
+					return <li 
+						className={`pagination-link ${pagerOffset/pagerLimit == listOffset ? 'is-current' : ''}`}
+						onClick={() => {
+							setPagerOffset((listOffset)*pagerLimit)
+						}}
+					>
+						{listOffset+1}
+					</li>
+				})
+			}
+		</>
+	} else {
+		return <>
+			<li className="pagination-ellipses">&hellip;</li>
+			{
+				[-1,0,1].map( (listOffset) => {
+					return <li 
+						className={`pagination-link ${pagerOffset/pagerLimit == (curPage+listOffset) ? 'is-current' : ''}`}
+						onClick={() => {
+							setPagerOffset((curPage+listOffset)*pagerLimit)
+						}}
+					>
+						{curPage+listOffset+1}
+					</li>
+				})
+			}
+			<li className="pagination-ellipses">&hellip;</li>
+		</>
+	}
+}
+
 function EntryComponent({
 	globalState, 
 	setGlobalState
@@ -425,42 +499,6 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 	}
 */
 
-	const getPagerPageLinks = (curPage:number, maxPages:number) => {
-		if(curPage < 3) {
-			return [1,2,3].map( (listOffset) => {
-					return <li 
-							className={`pagination-link ${pagerOffset/pagerLimit == (listOffset) ? 'is-current' : ''}`}
-							onClick={() => {
-								setPagerOffset((listOffset)*pagerLimit)
-							}}
-						>
-							{listOffset+1}
-						</li>
-			});
-		} else if (curPage > maxPages -3) {
-			return [maxPages-4,maxPages-3,maxPages-2].map( (listOffset) => {
-					return <li 
-							className={`pagination-link ${pagerOffset/pagerLimit == listOffset ? 'is-current' : ''}`}
-							onClick={() => {
-								setPagerOffset((listOffset)*pagerLimit)
-							}}
-						>
-							{listOffset+1}
-						</li>
-			});
-		} else {
-			return [-1,0,1].map( (listOffset) => {
-					return <li 
-							className={`pagination-link ${pagerOffset/pagerLimit == (curPage+listOffset) ? 'is-current' : ''}`}
-							onClick={() => {
-								setPagerOffset((curPage+listOffset)*pagerLimit)
-							}}
-						>
-							{curPage+listOffset+1}
-						</li>
-			});
-		}
-	}
 
 	return (
     <div className="columns is-centered">
@@ -510,26 +548,35 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 						>
 							1
 						</li>
-						<li className="pagination-ellipses">&hellip;</li>
 						{
-								getPagerPageLinks(pagerOffset/pagerLimit, totalEntriesCount ? Math.ceil((totalEntriesCount)/pagerLimit) : 0)
+								getPagerMidPageLinks(
+									pagerOffset/pagerLimit, 
+									totalEntriesCount ? Math.floor((totalEntriesCount-1)/pagerLimit) : 0,
+									pagerOffset,
+									pagerLimit,
+									setPagerOffset
+								)
 						}
-						<li className="pagination-ellipses">&hellip;</li>
+						{
+							totalEntriesCount != null
+							&& Math.floor((totalEntriesCount-1)/pagerLimit) > 0
+							&&
 						<li 
 							className={`pagination-link ${totalEntriesCount && pagerOffset/pagerLimit == Math.ceil((totalEntriesCount)/pagerLimit)-1 ? 'is-current' : ''}`}
 					onClick={() => {
 						if(totalEntriesCount) {
-							setPagerOffset(Math.floor((totalEntriesCount)/pagerLimit)*pagerLimit)
+							setPagerOffset(Math.floor((totalEntriesCount-1)/pagerLimit)*pagerLimit)
 						}
 					}}
 						>
 							{totalEntriesCount ? Math.ceil(totalEntriesCount/pagerLimit) : 'N/A'}
 						</li>
+						}
 					</ul>
 				</nav>
 
-
-				<p>pager offset = {pagerOffset} cur page = {(pagerOffset/pagerLimit)}, max page ={totalEntriesCount ? Math.floor(totalEntriesCount/pagerLimit) : 'N/A'}</p>
+				{/*
+				<p>pager offset = {pagerOffset} cur page = {(pagerOffset/pagerLimit)}, max page ={totalEntriesCount ? Math.floor((totalEntriesCount-1)/pagerLimit) : 'N/A'}</p>
 
 
 
@@ -589,6 +636,8 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 				</button>
 				</div>
 				</div>
+				*/}
+
 				<ol 
 					start={pagerOffset+1}
 				>
