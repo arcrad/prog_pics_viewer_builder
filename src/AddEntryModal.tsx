@@ -124,7 +124,7 @@ function AddEntryModal({
 	useEffect( () => {
 		if(modalOverlayRef.current) {
 				//modalOverlayRef.current.showModal();
-				modalOverlayRef.current.classList.add('is-active');
+				//modalOverlayRef.current.classList.add('is-active');
 				document.documentElement.classList.add('is-clipped');
 		}
 	}, []);
@@ -161,7 +161,7 @@ function AddEntryModal({
 
 	let closeModal = () => {
 		setIsLoaded(false);
-				modalOverlayRef.current.classList.remove('is-active');
+			//	modalOverlayRef.current.classList.remove('is-active');
 				document.documentElement.classList.remove('is-clipped');
 		navigate('/entry');
 	//	setIsModalVisible(false);
@@ -202,7 +202,7 @@ function AddEntryModal({
 	//console.dir(currentEntry);
     //<dialog ref={modalOverlayRef} className="modalOverlay1" open={true}>
 	return (
-    <div ref={modalOverlayRef} className="modal">
+    <div ref={modalOverlayRef} className="modal is-active">
 			<div className="modal-background">
 			</div>
 			<div className="modal-card">
