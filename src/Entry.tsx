@@ -652,7 +652,9 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 									height: '7rem',
 									width: '7rem',
 									background: `url(${entryThumbnailImageUrls[entry.id]}) center / contain no-repeat #ded`,
-								}}></div>
+								}}>
+									{entryThumbnailImageUrls[entry.id] == null ? 'no image' : ''}
+								</div>
 							}
 							</div>
 							<div className="column">
