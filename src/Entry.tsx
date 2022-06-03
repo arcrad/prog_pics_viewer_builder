@@ -23,83 +23,8 @@ import { GlobalState } from './App';
 import ChangeImageModal from './ChangeImageModal';
 import MarkImageModal from './MarkImageModal';
 import AddEntryModal from './AddEntryModal';
-import { EntryValidationErrorsList } from './Common';
+import { EntryValidationErrorsList, PaginationControls } from './Common';
  
-
-function getPagerMidPageLinks(
-	curPage:number, 
-	maxPage:number, 
-	pagerOffset:number, 
-	pagerLimit:number, 
-	setPagerOffset:Dispatch<SetStateAction<number>>
-) {
-	if(maxPage < 2) {
-		return;
-	} else if (maxPage < 5) {
-		return Array.from({length: maxPage-1}, (x, i) => i+1).map( (listOffset) => {
-			//[1,2].map( (listOffset) => {
-			return <li 
-					className={`pagination-link ${pagerOffset/pagerLimit == (listOffset) ? 'is-current' : ''}`}
-					onClick={() => {
-						setPagerOffset((listOffset)*pagerLimit)
-					}}
-				>
-					{listOffset+1}
-				</li>
-			})
-	}
-	if(curPage < 3) {
-		return <>
-			{
-				[1,2,3].map( (listOffset) => {
-				return <li 
-						className={`pagination-link ${pagerOffset/pagerLimit == (listOffset) ? 'is-current' : ''}`}
-						onClick={() => {
-							setPagerOffset((listOffset)*pagerLimit)
-						}}
-					>
-						{listOffset+1}
-					</li>
-				})
-			}
-			<li className="pagination-ellipses">&hellip;</li>
-		</>
-	} else if (curPage > maxPage-3) {
-		return <>
-			<li className="pagination-ellipses">&hellip;</li>
-			{
-				[maxPage-3,maxPage-2,maxPage-1].map( (listOffset) => {
-					return <li 
-						className={`pagination-link ${pagerOffset/pagerLimit == listOffset ? 'is-current' : ''}`}
-						onClick={() => {
-							setPagerOffset((listOffset)*pagerLimit)
-						}}
-					>
-						{listOffset+1}
-					</li>
-				})
-			}
-		</>
-	} else {
-		return <>
-			<li className="pagination-ellipses">&hellip;</li>
-			{
-				[-1,0,1].map( (listOffset) => {
-					return <li 
-						className={`pagination-link ${pagerOffset/pagerLimit == (curPage+listOffset) ? 'is-current' : ''}`}
-						onClick={() => {
-							setPagerOffset((curPage+listOffset)*pagerLimit)
-						}}
-					>
-						{curPage+listOffset+1}
-					</li>
-				})
-			}
-			<li className="pagination-ellipses">&hellip;</li>
-		</>
-	}
-}
-
 type EntryAttributes = {
 	globalState: GlobalState,
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>
@@ -152,7 +77,9 @@ function EntryComponent({
 		if(entries) {
 			const entryThumbnailUrls = entries.reduce( (accumulator, currentEntry) => {
 				if(currentEntry.thumbImageBlob) {
-					let newData = {[currentEntry.id as number]: URL.createObjectURL(currentEntry.thumbImageBlob)};
+					let newData = {
+						[currentEntry.id as number]: URL.createObjectURL(currentEntry.thumbImageBlob)
+					};
 					return { ...accumulator, ...newData};
 				}
 				return accumulator;
@@ -161,45 +88,6 @@ function EntryComponent({
 			setEntryThumbnailImageUrls(entryThumbnailUrls);
 		}
 	}, [entries]);
-
-/*
-	const currentEntry = useLiveQuery(
-		() => db.entries.get(globalState.currentEntryId)
-	, [globalState]);
-
-	useEffect( () => {
-		setCurrentEntryWeight( c => currentEntry?.weight ? String(currentEntry.weight) : '');
-		setCurrentEntryDate( c => currentEntry?.date ? currentEntry.date : '');
-	}, [currentEntry]);
-	*/
-
-/*
-	let handleEntrySelectChange = (event:ChangeEvent<HTMLSelectElement>) => {
-		//console.dir(event);
-		let newEntryId = parseInt( (event.target as HTMLSelectElement).value );
-		//console.log('value=', newEntryId);
-		setGlobalState( (cs):GlobalState => {
-			let ns = { currentEntryId: newEntryId };
-			return { ...cs, ...ns }; 
-		});
-	};
-	*/
-
-	/*useEffect( () => {
-		let handleEntrySelectChange = (event:Event) => {
-			//console.dir(event);
-			let newEntryId = parseInt( (event.target as HTMLSelectElement).value );
-			//console.log('value=', newEntryId);
-			setGlobalState( (cs):GlobalState => {
-				let ns = { currentEntryId: newEntryId };
-				return { ...cs, ...ns }; 
-			});
-		};
-		entrySelectRef.current?.addEventListener('change', handleEntrySelectChange);
-		return (
-			() => entrySelectRef.current?.removeEventListener('change', handleEntrySelectChange)
-		);
-	}, []);*/
 
 	const addDbEntry = async (imageData:string) => {
 		console.log("adding db entry...");
@@ -219,67 +107,12 @@ function EntryComponent({
 				draft: true
 			});
 			console.log( 'new id =', id);
-			/*setGlobalState( (cs):GlobalState => {
-				console.log('inner id=',id);
-				let ns = { currentEntryId: id as number};
-				return { ...cs, ...ns };
-			});*/
 			setAddEntryModalIsVisible(true);
 			navigate(`./add/${id}/image`);
 		} catch(error) {
 			console.error(`failed to add db entry. ${error}`);
 		}
 	};
-/*
-	useEffect( () => {
-		const addDbEntry = async (imageData:string) => {
-			console.log("adding db entry...");
-			try {
-				const date = ((new Date()).toISOString()).substring(0, 16); //datetime needs to be more robust
-				const weight = parseFloat((Math.random()*200).toFixed(2));
-				const image = imageData;
-				const id = await db.entries.add({
-					date,
-					weight,
-					image
-				});
-			} catch(error) {
-				console.error(`failed to add db entry. ${error}`);
-			}
-		};
-
-		const addEntryHandler = () => {
-			//console.dir(imageUploadRef.current);
-			console.log("handle add entry..");
-			let selectedFile;
-			if(imageUploadRef.current && imageUploadRef.current.files) {
-				selectedFile = imageUploadRef.current.files[0];
-			}
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				if(event.target && event.target.result) {
-					console.log("result=", event.target.result);
-					if(typeof event.target.result === "string") {
-						addDbEntry(event.target.result);
-					}
-				}
-			};
-			if(selectedFile) {
-				//reader.readAsText(selectedFile);
-				reader.readAsDataURL(selectedFile);
-			}
-		};
-
-		if(addEntryRef.current) {
-			addEntryRef.current.addEventListener("click", storeImageHandler);
-		}
-
-		return () => {
-			if(addEntryRef.current) {
-				addEntryRef.current.removeEventListener("click", storeImageHandler);
-			}
-		}
-	}, []);*/
 
 	const handleDeleteEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log("handle delete entry...");
@@ -290,13 +123,6 @@ function EntryComponent({
 				const numberDeleted = await db.entries
 					.where("id").anyOf(parseInt(event.target.dataset.entryId))
 					.delete();
-				//let newState = { currentEntryId: parseInt(event.target.dataset.entryId)};
-			/*	db.entries.orderBy('date').reverse().toArray().then( (newEntries) => {
-					if(newEntries && newEntries[0] && newEntries[0].id) {
-						let newState = { currentEntryId: newEntries[0].id};
-						setGlobalState( (prevState):GlobalState => { return {...prevState, ...newState}});
-					}
-				});*/
 				console.log(`Successfully deleted ${numberDeleted} records.`);
 			} catch(error) {
 				console.error(`encountered error trying to delete record with id = ${event.target.dataset.entryId}`);
@@ -326,11 +152,6 @@ function EntryComponent({
 						marks: entryToDuplicate.marks
 					});
 					console.log( 'new id =', id);
-				/*	setGlobalState( (cs):GlobalState => {
-						console.log('inner id=',id);
-						let ns = { currentEntryId: id as number};
-						return { ...cs, ...ns };
-					});*/
 				} catch(error) {
 					console.error(`failed to duplicate db entry. ${error}`);
 				}
@@ -356,15 +177,6 @@ function EntryComponent({
 			&& event.target instanceof HTMLButtonElement
 			&& event.target.dataset.entryId
 		) {
-			/*setGlobalState( (cs):GlobalState =>{
-				let eventTargetElement = event.target as HTMLButtonElement;
-				if(eventTargetElement && eventTargetElement.dataset.entryId) {
-					let newCurrentEntryId = parseInt(eventTargetElement.dataset.entryId);
-					let ns = { currentEntryId: newCurrentEntryId };
-					return { ...cs, ...ns};
-				}
-				return cs;
-			});*/
 			let entryId = parseInt(event.target.dataset.entryId);
 			//setMarkImageModalIsVisible(true);
 			navigate(`./mark/${entryId}`);
@@ -378,15 +190,6 @@ function EntryComponent({
 			&& event.target instanceof HTMLButtonElement
 			&& event.target.dataset.entryId
 		) {
-			/*setGlobalState( (cs):GlobalState =>{
-				let eventTargetElement = event.target as HTMLButtonElement;
-				if(eventTargetElement && eventTargetElement.dataset.entryId) {
-					let newCurrentEntryId = parseInt(eventTargetElement.dataset.entryId);
-					let ns = { currentEntryId: newCurrentEntryId };
-					return { ...cs, ...ns};
-				}
-				return cs;
-			});*/
 			let entryId = parseInt(event.target.dataset.entryId);
 			//setChangeImageModalIsVisible(true);
 			navigate(`./change_image/${entryId}`);
@@ -427,81 +230,8 @@ function EntryComponent({
 		}
 	};
 
-	//<input ref={imageUploadRef} type="file" id="image_upload" name="image_upload"></input>
-	//generate blob urls 
-/*	const entriesImageUrls = useRef<{[key: string]: string}>({});
-
-async function verifyPermission(fileHandle: any, readWrite: boolean) {
-  const options: {mode?: string} = {};
-  if (readWrite) {
-    options.mode = 'readwrite';
-  }
-  // Check if permission was already granted. If so, return true.
-  if ((await fileHandle.queryPermission(options)) === 'granted') {
-    return true;
-  }
-  // Request permission. If the user grants permission, return true.
-  if ((await fileHandle.requestPermission(options)) === 'granted') {
-    return true;
-  }
-  // The user didn't grant permission, so return false.
-  return false;
-}	
-*/
-	//useEffect( () => {
-/*	const handleListRefresh = () => {
-		console.log('update entriesImageUrls');
-		if( entries ) {
-			entries.forEach( async (entry) => {
-				if( await verifyPermission(entry.imageFileHandle, false) ) {
-					entriesImageUrls.current[String(entry.id)] = URL.createObjectURL( await entry.imageFileHandle.getFile());
-				}
-			});
-	/*		Promise.all(fileHandlePermissionValidations).then( (results
-			let getFileRequests = entries.map( (entry) => {
-				return entry.imageFileHandle.getFile();
-			});
-			Promise.all(getFileRequests).then( (fileBlobs) => {
-				entriesImageUrls.current = fileBlobs.reduce( (accumulator, fileBlob, index) => {
-					return {...accumulator, ...{ [String(entries[index].id)]: URL.createObjectURL(fileBlob) } };
-				}, {});
-			});*/
-
-//			console.dir(entriesImageUrls.current);
-//		}
-//	};
-	//}, [entries]);
-/*
-	const getEntryValidationErrors = (entry: Entry) => {
-		const entryHasAllMarks = entry.marks && Object.keys(entry.marks).length == 3; 
-		const entryDoesntHaveWeight = entry.weight == null || String(entry.weight) == '';
-		const entryDoesntHaveDate = entry.date == null;
-		const entryDoesntHaveImageBlob = entry.imageBlob == null;
-		const entryDoesntHaveAlignedImageBlob = entry.alignedImageBlob == null;
-
-		if( 
-			!entryHasAllMarks 
-			|| entryDoesntHaveWeight 
-			|| entryDoesntHaveDate
-			|| entryDoesntHaveImageBlob
-			|| entryDoesntHaveAlignedImageBlob
-		) {
-			return <div>
-				⚠️  This entry has validation errors!
-				<ul>
-					{ entryDoesntHaveImageBlob ? <li>❌ Entry is is missing image</li> : ''}
-					{ entryDoesntHaveWeight ? <li>❌ Entry is missing weight</li> : ''}
-					{ entryHasAllMarks ? '' : <li>❌ Entry doesn't have all marks</li>}
-					{ entryDoesntHaveDate ? <li>❌ Entry is missing date</li> : ''}
-					{ entryDoesntHaveAlignedImageBlob ? <li>❌ Entry is missing an aligned image</li> : ''}
-				</ul>
-			</div>
-		}
-	}
-*/
-
-
 	return (
+		<>
     <div className="columns is-centered">
 			<div className="column is-10-tablet is-6-desktop">
 				<div className="section">
@@ -515,133 +245,16 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 						</button>
 					</div>
 				</div>
-				{/*<button type="button" onClick={handleListRefresh}> Refresh List</button>*/}
-				<nav className="pagination" role="navigation" aria-label="pagination">
-					<a 
-						className="pagination-previous"
-						onClick={() => {
-							setPagerOffset( curOffset => {
-								return curOffset - pagerLimit >= 0 ? curOffset - pagerLimit : 0
-							})
-						}}
-					>
-						Previous
-					</a>
-					<a 
-						className="pagination-next"
-						onClick={() => {
-							setPagerOffset( curOffset => {
-								if(totalEntriesCount && curOffset < totalEntriesCount - pagerLimit) {
-									return curOffset + pagerLimit < totalEntriesCount ? curOffset + pagerLimit : totalEntriesCount - pagerLimit
-								}
-								return curOffset;
-							})
-						}}
-					>
-						Next
-					</a>
-					<ul className="pagination-list">
-						<li 
-							className={`pagination-link ${pagerOffset == 0 ? 'is-current' : ''}`}
-							onClick={() => {
-								setPagerOffset(0)
-							}}
-						>
-							1
-						</li>
-						{
-								getPagerMidPageLinks(
-									pagerOffset/pagerLimit, 
-									totalEntriesCount ? Math.floor((totalEntriesCount-1)/pagerLimit) : 0,
-									pagerOffset,
-									pagerLimit,
-									setPagerOffset
-								)
-						}
-						{
-							totalEntriesCount != null
-							&& Math.floor((totalEntriesCount-1)/pagerLimit) > 0
-							&&
-						<li 
-							className={`pagination-link ${totalEntriesCount && pagerOffset/pagerLimit == Math.ceil((totalEntriesCount)/pagerLimit)-1 ? 'is-current' : ''}`}
-					onClick={() => {
-						if(totalEntriesCount) {
-							setPagerOffset(Math.floor((totalEntriesCount-1)/pagerLimit)*pagerLimit)
-						}
-					}}
-						>
-							{totalEntriesCount ? Math.ceil(totalEntriesCount/pagerLimit) : 'N/A'}
-						</li>
-						}
-					</ul>
-				</nav>
-
-				{/*
-				<p>pager offset = {pagerOffset} cur page = {(pagerOffset/pagerLimit)}, max page ={totalEntriesCount ? Math.floor((totalEntriesCount-1)/pagerLimit) : 'N/A'}</p>
-
-
-
-				<div className="field is-grouped is-grouped-centered">
-				<div className="control">
-				<button
-					type="button"
-					className="button is-info"
-					onClick={() => {
-						setPagerOffset(0)
-					}}
-				>
-					First
-				</button>
-				</div>
-				<div className="control">
-				<button
-					type="button"
-					className="button is-info"
-					onClick={() => {
-						setPagerOffset( curOffset => {
-							return curOffset - pagerLimit >= 0 ? curOffset - pagerLimit : 0
-						})
-					}}
-				>
-					Previous
-				</button>
-				</div>
-				<span> {pagerOffset+1} - {pagerOffset+pagerLimit} of {totalEntriesCount} ({pagerOffset/pagerLimit}) </span>
-				<div className="control">
-				<button
-					type="button"
-					className="button is-info"
-					onClick={() => {
-						setPagerOffset( curOffset => {
-							if(totalEntriesCount && curOffset < totalEntriesCount - pagerLimit) {
-								return curOffset + pagerLimit < totalEntriesCount ? curOffset + pagerLimit : totalEntriesCount - pagerLimit
-							}
-							return curOffset;
-						})
-					}}
-				>
-					Next
-				</button>
-				</div>
-				<div className="control">
-				<button
-					type="button"
-					className="button is-info"
-					onClick={() => {
-						if(totalEntriesCount) {
-							setPagerOffset(Math.floor((totalEntriesCount-1)/pagerLimit)*pagerLimit)
-						}
-					}}
-				>
-					Last
-				</button>
-				</div>
-				</div>
-				*/}
-
-				<ol 
-					start={pagerOffset+1}
-				>
+				<PaginationControls
+					curPage={pagerOffset/pagerLimit}
+					maxPage={totalEntriesCount ? Math.floor((totalEntriesCount-1)/pagerLimit) : 0} 
+					pagerOffset={pagerOffset}
+					pagerLimit={pagerLimit}
+					totalEntriesCount={totalEntriesCount || 0}
+					setPagerOffset={setPagerOffset}
+				/>
+				{ !entries || entries.length == 0 && <p>No entries yet...</p> }
+				<ol start={pagerOffset+1}>
 				{
 					entries?.map( entry =>
 						<li key={entry.id} className="box">
@@ -772,14 +385,8 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 					)
 				}
 				</ol>
-				{ 
-					/*entries?.map( entry => 
-						<div key={entry.id} style={{border: '1px solid black', padding: '1rem', margin: '1rem'}}>
-							<p>{entry.weight} @ {entry.date}</p>
-							<img src={entry.image} style={{maxWidth: '30rem'}}/>
-							<button type="button" data-entry-id={entry.id} onClick={handleDeleteEntry}>Delete</button>
-						</div> )*/
-				}
+			</div>
+    </div>
 				<Routes>
 				<Route 
 					path="/add/:entryId/*"
@@ -806,8 +413,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 					}
 				/>
 				</Routes>
-			</div>
-    </div>
+		</>
   );
 }
 
