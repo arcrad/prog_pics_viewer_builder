@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react';
+import React, { useEffect, useRef, Dispatch, SetStateAction, MouseEvent} from 'react';
 
 import { Entry } from './db';
 
@@ -176,3 +176,76 @@ export function PaginationControls({
 				</nav>
 	)
 }
+
+type EntryOptionsDropdownAttributes = {
+	entryId: string | number;
+}
+
+export function EntryOptionsDropdown({
+	entryId,
+	children
+}: React.PropsWithChildren<EntryOptionsDropdownAttributes>) {
+	const dropdownRef = useRef<HTMLDivElement>(null);
+	const triggerButtonRef = useRef<HTMLButtonElement>(null);
+
+	useEffect( () => {
+		//setup body listener for potential dropdown clicks
+		//this approach is wasteful as it creates a redundant listner for each dropdown
+		//while this encapsulates the functionality within the component, it could
+		//be better to create one global listener
+		function handleClickEvent(event: Event) {
+			if(!dropdownRef.current || !triggerButtonRef.current) {
+				return;
+			}
+			//recursively try to find the trigger button
+			let triggerButtonClicked = false;
+			let curElement = event.target;
+			while (curElement) {
+				if(curElement == triggerButtonRef.current) {
+					console.warn('triggerButton found');
+					triggerButtonClicked = true;
+					break;
+				}
+		    curElement = (curElement as HTMLElement).parentElement;
+			}
+			//if trigger button clicked then show menu, otherwise hide menu
+			if(triggerButtonClicked) {
+				dropdownRef.current.classList.add('is-active');
+			} else {
+				dropdownRef.current.classList.remove('is-active');
+			}
+		}
+		document.body.addEventListener('click', handleClickEvent);
+		return () => {
+			document.body.removeEventListener('click', handleClickEvent);
+		}
+	}, []);
+	
+	return (
+		<div 
+			ref={dropdownRef}
+			id={`entry-dropdown-${entryId}`} 
+			className="dropdown is-right"
+		>
+			<div className="dropwdown-trigger">
+				<button 
+					ref={triggerButtonRef}
+					className="button" 
+					aria-haspopup="true" 
+					aria-controls={`dropdown-entry-menu-${entryId}`} 
+				>
+					<span>Options</span>
+					<span className="icon is-small">
+						<i className="fas fa-angle-down" aria-hidden="true"></i>
+					</span>
+				</button>
+			</div>
+			<div className="dropdown-menu" id={`dropdown-entry-menu-${entryId}`} role="menu">
+				<div className="dropdown-content">
+					{children}
+				</div>
+			</div>
+		</div>
+	);
+}
+	

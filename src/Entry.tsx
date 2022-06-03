@@ -23,7 +23,11 @@ import { GlobalState } from './App';
 import ChangeImageModal from './ChangeImageModal';
 import MarkImageModal from './MarkImageModal';
 import AddEntryModal from './AddEntryModal';
-import { EntryValidationErrorsList, PaginationControls } from './Common';
+import { 
+	EntryValidationErrorsList, 
+	PaginationControls,
+	EntryOptionsDropdown
+} from './Common';
  
 type EntryAttributes = {
 	globalState: GlobalState,
@@ -309,22 +313,7 @@ function EntryComponent({
 							}
 							</div>
 							<div className="column is-narrow">
-							<div id={`entry-dropdown-${entry.id}`} className="dropdown is-right is-hoverable">
-							<div className="dropwdown-trigger">
-								<button className="button" aria-haspopup="true" aria-controls={`dropdown-entry-menu-${entry.id}`} onClick={
-									() => { 
-										const dropdownElement = document.querySelector(`#entry-dropdown-${entry.id}`);
-										dropdownElement?.classList.toggle('is-active');
-									}
-								}>
-									<span>Options</span>
-									<span className="icon is-small">
-										<i className="fas fa-angle-down" aria-hidden="true"></i>
-									</span>
-								</button>
-							</div>
-							<div className="dropdown-menu" id={`dropdown-entry-menu-${entry.id}`} role="menu">
-							<div className="dropdown-content">
+							<EntryOptionsDropdown entryId={entry.id || 0}>
 								<div className="dropdown-item">
 								<button 
 									type="button" 
@@ -375,9 +364,8 @@ function EntryComponent({
 									Duplicate
 								</button>
 								</div>
-							</div>
-							</div>
-							</div>
+							</EntryOptionsDropdown>
+							
 							</div>
 							</div>
 							<EntryValidationErrorsList entry={entry}/>
