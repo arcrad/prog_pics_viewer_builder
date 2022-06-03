@@ -57,21 +57,6 @@ function AddEntryModal({
 			return db.entries.get(sanitizedEntryId)
 		}
 	, [entryId]);
-
-	
-
-	/*
-	useEffect( () => {
-		function updateResizeCanary() {
-			setResizeCanary( (cs) => !cs );
-		}
-		window.addEventListener('resize', updateResizeCanary);
-		return( () => {
-			window.removeEventListener('resize', updateResizeCanary);
-		});
-
-	}, []);
-	*/
 	
 	const addEntry = async () => {
 		//console.dir(imageUploadRef.current);
@@ -93,39 +78,11 @@ function AddEntryModal({
 			console.error(`failed to add db entry. ${error}`);
 		}
 	};
-
-/*	useEffect( () => {
-		if(isModalVisible) {
-			addEntry();
-			navigate('/entry/add/image');
-		}
-	}, [isModalVisible]);
-*/
-
-/*
-	useEffect( () => {
-		if(modalOverlayRef.current.open) {
-			addEntry();
-			//navigate('/entry/add/image');
-		}
-	}, []);
-*/
-
-	/*useEffect( () => {
-		if(modalOverlayRef.current) {
-			isModalVisible ? 
-				modalOverlayRef.current.classList.add("modalVisible")
-				:
-				modalOverlayRef.current.classList.remove("modalVisible");
-		}
-
-	}, [isModalVisible]);*/
 	
 	useEffect( () => {
-		if(modalOverlayRef.current) {
-				//modalOverlayRef.current.showModal();
-				//modalOverlayRef.current.classList.add('is-active');
-				document.documentElement.classList.add('is-clipped');
+		document.documentElement.classList.add('is-clipped');
+		return () => {
+			document.documentElement.classList.remove('is-clipped');
 		}
 	}, []);
 
@@ -134,37 +91,10 @@ function AddEntryModal({
 		console.dir(currentEntry);
 	}, [currentEntry]);
 
-/*	useEffect( () => {
-		if(modalOverlayRef.current) {
-			isModalVisible ? 
-				//modalOverlayRef.current.classList.add("modalVisible")
-				modalOverlayRef.current.showModal()
-				:
-				modalOverlayRef.current.close();
-				//modalOverlayRef.current.classList.remove("modalVisible");
-		}
-	}, [isModalVisible]);
-	*/
-
-	useEffect( () => {
-		if(modalOverlayRef.current) {
-			modalOverlayRef.current.addEventListener('close', handleCancelButton);
-			modalOverlayRef.current.addEventListener('cancel', handleCancelButton);
-		}
-		return () => {
-			if(modalOverlayRef.current) {
-				modalOverlayRef.current.removeEventListener('close', handleCancelButton);
-				modalOverlayRef.current.removeEventListener('cancel', handleCancelButton);
-			}
-		}
-	}, []);
 
 	let closeModal = () => {
 		setIsLoaded(false);
-			//	modalOverlayRef.current.classList.remove('is-active');
-				document.documentElement.classList.remove('is-clipped');
 		navigate('/entry');
-	//	setIsModalVisible(false);
 	}
 
 	let handleCancelButton = async () => {
@@ -198,9 +128,6 @@ function AddEntryModal({
 		closeModal();
 	};
 
-	//console.warn('currentEntry = ');
-	//console.dir(currentEntry);
-    //<dialog ref={modalOverlayRef} className="modalOverlay1" open={true}>
 	return (
     <div ref={modalOverlayRef} className="modal is-active">
 			<div className="modal-background">
