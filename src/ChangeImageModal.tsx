@@ -62,24 +62,12 @@ function ChangeImageModal({
 	}, [isModalVisible]);*/
 	
 	useEffect( () => {
-		if(modalOverlayRef.current && !modalOverlayRef.current.open) {
-				modalOverlayRef.current.showModal();
+		document.documentElement.classList.add('is-clipped');
+		return () => {
+			document.documentElement.classList.remove('is-clipped');
 		}
 	}, []);
 	
-	useEffect( () => {
-		if(modalOverlayRef.current) {
-			modalOverlayRef.current.addEventListener('close', handleCloseButton);
-			modalOverlayRef.current.addEventListener('cancel', handleCloseButton);
-		}
-		return () => {
-			if(modalOverlayRef.current) {
-				modalOverlayRef.current.removeEventListener('close', handleCloseButton);
-				modalOverlayRef.current.removeEventListener('cancel', handleCloseButton);
-			}
-		}
-	}, []);
-
 	let handleCloseButton = () => {
 			console.log('handleCloseButton()');
 			navigate('../');
@@ -88,15 +76,29 @@ function ChangeImageModal({
 	};
 
 	return (
-    <dialog ref={modalOverlayRef} className={styles.modalOverlay1}>
-			<div className={styles.controlsContainer}>
-				<h2>Change Image</h2>
-				<ChangeImageComponent
-					closeModalOnLoad={true}
-				/>
-				<button type="button" onClick={handleCloseButton}>Cancel</button>
+    <div ref={modalOverlayRef} className="modal is-active">
+			<div className="modal-background">
 			</div>
-    </dialog>
+			<div className="modal-card">
+				<div className={`modal-card-head`}>
+					<h1 className="modal-card-title">Change Image</h1>
+				</div>
+				<div className={`modal-card-body ${styles.main}`}>
+					<ChangeImageComponent
+						closeModalOnLoad={true}
+					/>
+				</div>
+				<div className="modal-card-foot">
+					<button 
+						type="button" 
+						className="button"
+						onClick={ handleCloseButton }
+					>
+							Close
+					</button>
+				</div>
+			</div>
+    </div>
   );
 }
 

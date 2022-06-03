@@ -94,7 +94,7 @@ function AddEntryModal({
 
 	let closeModal = () => {
 		setIsLoaded(false);
-		navigate('/entry');
+		navigate('..');
 	}
 
 	let handleCancelButton = async () => {
