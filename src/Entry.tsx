@@ -23,12 +23,8 @@ import { GlobalState } from './App';
 import ChangeImageModal from './ChangeImageModal';
 import MarkImageModal from './MarkImageModal';
 import AddEntryModal from './AddEntryModal';
-import { getEntryValidationErrorsComponent } from './Common';
+import { EntryValidationErrorsList } from './Common';
  
-type EntryAttributes = {
-	globalState: GlobalState,
-	setGlobalState: Dispatch<SetStateAction<GlobalState>>
-};
 
 function getPagerMidPageLinks(
 	curPage:number, 
@@ -103,6 +99,11 @@ function getPagerMidPageLinks(
 		</>
 	}
 }
+
+type EntryAttributes = {
+	globalState: GlobalState,
+	setGlobalState: Dispatch<SetStateAction<GlobalState>>
+};
 
 function EntryComponent({
 	globalState, 
@@ -766,7 +767,7 @@ async function verifyPermission(fileHandle: any, readWrite: boolean) {
 							</div>
 							</div>
 							</div>
-							{ getEntryValidationErrorsComponent(entry) }
+							<EntryValidationErrorsList entry={entry}/>
 						</li>
 					)
 				}

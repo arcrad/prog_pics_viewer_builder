@@ -25,7 +25,7 @@ import { GlobalState } from './App';
 import ChangeImageComponent from './ChangeImageComponent';
 import MarkImageComponent from './MarkImageComponent';
 import UpdateEntryDataComponent from './UpdateEntryDataComponent';
-import { getEntryValidationErrorsComponent } from './Common';
+import { EntryValidationErrorsList } from './Common';
 
 import styles from './AddEntryModal.module.css';
 
@@ -240,7 +240,7 @@ function AddEntryModal({
 					</Routes>
 				<hr/>
 					<div>
-						{currentEntry ? getEntryValidationErrorsComponent(currentEntry) : ''}
+						{ currentEntry ? <EntryValidationErrorsList entry={currentEntry}/> : '' }
 					</div>
 				<hr/>
 				</div>

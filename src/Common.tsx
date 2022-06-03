@@ -1,11 +1,18 @@
 import { Entry } from './db';
 
-export const getEntryValidationErrorsComponent = (entry: Entry) => {
+type EntryValidationErrorsListAttributes = {
+	entry: Entry;
+}
+
+export function EntryValidationErrorsList({
+	entry
+}: EntryValidationErrorsListAttributes) {
 	const entryHasAllMarks = entry.marks && Object.keys(entry.marks).length == 3; 
 	const entryDoesntHaveWeight = entry.weight == null || String(entry.weight) == '';
 	const entryDoesntHaveDate = entry.date == null;
 	const entryDoesntHaveImageBlob = entry.imageBlob == null;
 	const entryDoesntHaveAlignedImageBlob = entry.alignedImageBlob == null;
+	let validationErrorsListContent;
 	if( 
 		!entryHasAllMarks 
 		|| entryDoesntHaveWeight 
@@ -13,7 +20,7 @@ export const getEntryValidationErrorsComponent = (entry: Entry) => {
 		|| entryDoesntHaveImageBlob
 		|| entryDoesntHaveAlignedImageBlob
 	) {
-		return <div>
+		validationErrorsListContent = <div>
 			⚠️  This entry has validation errors!
 			<ul>
 				{ entryDoesntHaveImageBlob ? <li>❌ Entry is is missing image</li> : ''}
@@ -24,4 +31,7 @@ export const getEntryValidationErrorsComponent = (entry: Entry) => {
 			</ul>
 		</div>
 	}
+	return <>
+		{ validationErrorsListContent } 
+	</>;
 }
