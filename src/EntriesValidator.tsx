@@ -21,6 +21,7 @@ import { GlobalState } from './App';
 
 export type ValidationResults = {
 	[key: string]: boolean;
+	moreThanZeroEntries: boolean;
 	allEntriesHaveImageBlob: boolean;
 	allEntriesHaveThumbImageBlob: boolean;
 	allEntriesHaveAlignedImageBlob: boolean;
@@ -31,6 +32,7 @@ export type ValidationResults = {
 };
 
 export const defaultValidationResults:ValidationResults = {
+	moreThanZeroEntries: false,
 	allEntriesHaveImageBlob: false,
 	allEntriesHaveThumbImageBlob: false,
 	allEntriesHaveAlignedImageBlob: false,
@@ -41,6 +43,7 @@ export const defaultValidationResults:ValidationResults = {
 };
 
 const validationResultsDisplayNameMap:{[key: string]: string} = {
+	moreThanZeroEntries: 'There is at least one entry?',
 	allEntriesHaveImageBlob: 'All Entries have an Image?',
 	allEntriesHaveThumbImageBlob: 'All Entries have a Thumbnail?',
 	allEntriesHaveAlignedImageBlob: 'All Entries have an aligned image?',
@@ -54,13 +57,15 @@ type EntriesValidatorAttributes= {
 	validationResults: ValidationResults;
 	setValidationResults: Dispatch<SetStateAction<ValidationResults>>;
 	showOnlyErrors?: boolean;
+	displayOnlyTheseValidations?: string[];
 };
 
 
 function EntriesValidator({
 	validationResults,
 	setValidationResults,
-	showOnlyErrors
+	showOnlyErrors,
+	displayOnlyTheseValidations
 } : EntriesValidatorAttributes ) {
 	let [statusMessages, setStatusMessages] = useState<string[]>([]);
 	
@@ -71,88 +76,103 @@ function EntriesValidator({
 	);
 	
 	useEffect( () => {
-		console.log('do validation, entries updated');
-		let newValidationResults:ValidationResults = {
-			allEntriesHaveImageBlob: true,
-			allEntriesHaveThumbImageBlob: true,
-			allEntriesHaveAlignedImageBlob: true,
-			allEntriesHaveDate: true,
-			allEntriesHaveWeight: true,
-			allEntriesHaveAllMarks: true,
-			adjustmentImageCropAndScalingChosen: true,
-		};
-
-		if(entries) {
-			//check for base images
-			for(const entry of entries) {
-				if(entry.imageBlob == null) {
-					newValidationResults.allEntriesHaveImageBlob = false;
-					break;
-				}
-			}
+		async function doValidations() {
+			console.log('do validation, entries updated');
+			let newValidationResults:ValidationResults = {
+				moreThanZeroEntries: true,
+				allEntriesHaveImageBlob: true,
+				allEntriesHaveThumbImageBlob: true,
+				allEntriesHaveAlignedImageBlob: true,
+				allEntriesHaveDate: true,
+				allEntriesHaveWeight: true,
+				allEntriesHaveAllMarks: true,
+				adjustmentImageCropAndScalingChosen: true,
+			};
 	
-			//check for thumb images
-			for(const entry of entries) {
-				if(entry.thumbImageBlob == null) {
-					newValidationResults.allEntriesHaveThumbImageBlob = false;
-					break;
-				}
-			}
-			
-			//check for aligned images
-			for(const entry of entries) {
-				if(entry.alignedImageBlob == null) {
-					newValidationResults.allEntriesHaveAlignedImageBlob = false;
-					break;
-				}
-			}
 	
-			//check for date 
-			for(const entry of entries) {
-				if(entry.date == null) {
-					newValidationResults.allEntriesHaveDate = false;
-					break;
+			if(entries) {
+				//check entry count 
+				if(entries.length == 0) {
+					newValidationResults.moreThanZeroEntries = false;
+				}
+				//check for base images
+				for(const entry of entries) {
+					if(entry.imageBlob == null) {
+						newValidationResults.allEntriesHaveImageBlob = false;
+						break;
+					}
+				}
+				//check for thumb images
+				for(const entry of entries) {
+					if(entry.thumbImageBlob == null) {
+						newValidationResults.allEntriesHaveThumbImageBlob = false;
+						break;
+					}
+				}
+				//check for aligned images
+				for(const entry of entries) {
+					if(entry.alignedImageBlob == null) {
+						newValidationResults.allEntriesHaveAlignedImageBlob = false;
+						break;
+					}
+				}
+				//check for date 
+				for(const entry of entries) {
+					if(entry.date == null) {
+						newValidationResults.allEntriesHaveDate = false;
+						break;
+					}
+				}
+				//check for weight
+				for(const entry of entries) {
+					if(entry.weight == null) {
+						newValidationResults.allEntriesHaveWeight = false;
+						break;
+					}
+				}
+				//check for marks
+				for(const entry of entries) {
+					if(entry.marks == null || Object.keys(entry.marks).length != 3) {
+						newValidationResults.allEntriesHaveAllMarks = false;
+						break;
+					}
 				}
 			}
-			
-			//check for weight
-			for(const entry of entries) {
-				if(entry.weight == null) {
-					newValidationResults.allEntriesHaveWeight = false;
-					break;
-				}
-			}
-			
-			//check for marks
-			for(const entry of entries) {
-				if(entry.marks == null || Object.keys(entry.marks).length != 3) {
-					newValidationResults.allEntriesHaveAllMarks = false;
-					break;
-				}
-			}
-			
 			//check for crop/scaling image chosen 
-			/*
-			for(const entry of entries) {
-				if(entry.marks == null || Object.keys(entry.marks).length != 3) {
-					newValidationResults.allEntriesHaveAllMarks = false;
-					break;
+			await db.settings.get('chosenEntryIdForAdjustments').then((_chosenEntryIdForAdjustments) => {
+				if(_chosenEntryIdForAdjustments == null) {
+				console.warn(`validation: _chosenEntryIdForAdjustments = ${_chosenEntryIdForAdjustments}`);
+					newValidationResults.adjustmentImageCropAndScalingChosen = false;
 				}
-			}
-			*/
-			
+			});
 			setValidationResults(newValidationResults);
+			console.dir(newValidationResults);
+			console.warn('setvalidationresults');
 		}
+		doValidations();
 	}, [entries]);
 
-	const filteredValidationResultsKeys = showOnlyErrors ? 
+	let filteredValidationResultsKeys = displayOnlyTheseValidations != null ? 
 		Object.keys(validationResults).filter( (key) => {
-			return !validationResults[key];
+			return displayOnlyTheseValidations.includes(key);
 		})
 		:
 		Object.keys(validationResults);
+	
+		
+	filteredValidationResultsKeys = showOnlyErrors ? 
+		filteredValidationResultsKeys.filter( (key) => {
+			return !validationResults[key];
+		})
+		:
+		filteredValidationResultsKeys;
 
 	return (
+		<>
+		{
+			filteredValidationResultsKeys.length == 0 ?
+			<></>
+			:
 			<div style={{
 				border: '1px solid black', 
 				padding: '1rem', 
@@ -172,6 +192,8 @@ function EntriesValidator({
 					</ul>
 				}
 			</div>
+		}
+		</>
   );
 }
 

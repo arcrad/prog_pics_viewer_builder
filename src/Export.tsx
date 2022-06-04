@@ -670,140 +670,163 @@ function Export({
 		}
 	}
 
+	const allRelevantValidationsPassed = 
+		validationResults.moreThanZeroEntries
+		&& validationResults.allEntriesHaveImageBlob
+		&& validationResults.allEntriesHaveAlignedImageBlob 
+		&& validationResults.allEntriesHaveDate
+		&& validationResults.allEntriesHaveWeight
+		&& validationResults.allEntriesHaveAllMarks
+		&& validationResults.adjustmentImageCropAndScalingChosen;
+
 	return (
   	<div>
-    	<h2>Export Video Locally (Experimental)</h2>
-			<p>Exports video of progress pictures completely in-browser and local to your device. Currently not very consistent at low frame durations (faster timelapse). Export occurs in real-time.</p>
-			{ !loadedInitialData && <>
-				<p>Loading...</p>
-			</>}
-			{ loadedInitialData && <>
+    	<h2>Export Time-lapse</h2>
+			<p>Multiple options for exporting the final time-lapse.</p>
 			<EntriesValidator
 				validationResults={validationResults}
 				setValidationResults={setValidationResults}
-				showOnlyErrors={false}
+				showOnlyErrors={true}
 			/>
-			<label> Frame Duration (ms):
-			<input
-				ref={frameDurationInputRef}
-				type="number"
-				value={frameDuration}
-				onChange={handleInputChange}
-				data-settings-key-to-modify="exportFrameDuration" 
-				max={MAX_FRAME_DURATION_MS}
-				min={MIN_FRAME_DURATION_MS}
-			/>
-			</label><br/>
-			
-			
-			<label>Hold First Frame?:
-			<input
-				ref={holdFirstFrameInputRef}
-				type="checkbox"
-				value="true"
-				checked={holdFirstFrameIsChecked}
-				onChange={handleInputChange}
-				data-settings-key-to-modify="exportHoldFirstFrame" 
-			/>
-			</label>
-			<label> First Frame Hold Duration (ms):
-			<input
-				ref={firstFrameHoldDurationInputRef}
-				type="number"
-				value={firstFrameHoldDuration}
-				onChange={handleInputChange}
-				data-settings-key-to-modify="exportFirstFrameHoldDuration" 
-				max={MAX_FRAME_DURATION_MS}
-				min={MIN_FRAME_DURATION_MS}
-			/>
-			</label><br/>
-			<label>Hold Last Frame?:
-			<input
-				ref={holdLastFrameInputRef}
-				type="checkbox"
-				value="true"
-				checked={holdLastFrameIsChecked}
-				onChange={handleInputChange}
-				data-settings-key-to-modify="exportHoldLastFrame" 
-			/>
-			</label>
-			<label> Last Frame Hold Duration (ms):
-			<input
-				ref={lastFrameHoldDurationInputRef}
-				type="number"
-				value={lastFrameHoldDuration}
-				onChange={handleInputChange}
-				data-settings-key-to-modify="exportLastFrameHoldDuration" 
-				max={MAX_FRAME_DURATION_MS}
-				min={MIN_FRAME_DURATION_MS}
-			/>
-			</label><br/>
-			<label>Overlay Frame Number?:
-			<input
-				ref={overlayFrameNumberInputRef}
-				type="checkbox"
-				value="true"
-				checked={overlayFrameNumberIsChecked}
-				onChange={handleInputChange}
-				data-settings-key-to-modify="exportOverlayFrameNumber" 
-			/>
-			</label><br/>
-			<label>Overlay Entry Information?:
-			<input
-				ref={overlayEntryInfoInputRef}
-				type="checkbox"
-				value="true"
-				checked={overlayEntryInfoIsChecked}
-				onChange={handleInputChange}
-				data-settings-key-to-modify="exportOverlayEntryInfo" 
-			/>
-			</label><br/>
-			<p>Estimated video duration: {estimatedVideoDurationString}</p>
-			<button
-				type="button"
-				onClick={handleExportVideo}
-			>
-				Export Video
-			</button><br/>
-			<label>Progress&nbsp;
-				<progress max={entries?.length} value={entriesProcessed}>
-					{entriesProcessed} entries processed out of {entries?.length}
-				</progress>
-			</label>
-			<p>Status:</p>
-			<div style={{
-				border: '1px solid black',
-				padding: '0rem',
-				height: '5rem',
-				overflow: 'auto scroll'
-			}}>
-				<ul>
-				{
-					statusMessages?.slice(0).reverse().map( (message, index) => {
-						return <li key={index}>{message}</li>
-					})
-				}
-				</ul>
-			</div>
-			<hr/>
-			<h2>Output Video</h2>
-			<video 
-				ref={videoElementRef} 
-				controls 
-				width="350"
-				style={{
-					visibility: (videoIsReady ? 'visible' : 'hidden'),
-					height: (videoIsReady ? 'auto' : '0px')
-				}}
-			> 
-			</video>
-			<hr/>
-			<h2>Export Video Server-side</h2>
-			<p><i>Not yet implemented.</i></p>
-			<hr/>
-			<h2>Upload Interactive Viewer</h2>
-			<p><i>Not yet implemented.</i></p>
-			</>}
+			{
+				!allRelevantValidationsPassed && 
+				<p>There are validation errors that must be fixed before a timelapse can be exported.</p>
+			}
+			{
+				allRelevantValidationsPassed && 
+				!loadedInitialData && 
+				<>
+					<p>Loading...</p>
+				</>
+			}
+			{ 
+				allRelevantValidationsPassed && 
+				loadedInitialData && 
+				<>
+    			<h2>Export Video Locally (Experimental)</h2>
+					<p>Exports video of progress pictures completely in-browser and local to your device. Currently not very consistent at low frame durations (faster timelapse). Export occurs in real-time.</p>
+					<label> Frame Duration (ms):
+					<input
+						ref={frameDurationInputRef}
+						type="number"
+						value={frameDuration}
+						onChange={handleInputChange}
+						data-settings-key-to-modify="exportFrameDuration" 
+						max={MAX_FRAME_DURATION_MS}
+						min={MIN_FRAME_DURATION_MS}
+					/>
+					</label><br/>
+					
+					
+					<label>Hold First Frame?:
+					<input
+						ref={holdFirstFrameInputRef}
+						type="checkbox"
+						value="true"
+						checked={holdFirstFrameIsChecked}
+						onChange={handleInputChange}
+						data-settings-key-to-modify="exportHoldFirstFrame" 
+					/>
+					</label>
+					<label> First Frame Hold Duration (ms):
+					<input
+						ref={firstFrameHoldDurationInputRef}
+						type="number"
+						value={firstFrameHoldDuration}
+						onChange={handleInputChange}
+						data-settings-key-to-modify="exportFirstFrameHoldDuration" 
+						max={MAX_FRAME_DURATION_MS}
+						min={MIN_FRAME_DURATION_MS}
+					/>
+					</label><br/>
+					<label>Hold Last Frame?:
+					<input
+						ref={holdLastFrameInputRef}
+						type="checkbox"
+						value="true"
+						checked={holdLastFrameIsChecked}
+						onChange={handleInputChange}
+						data-settings-key-to-modify="exportHoldLastFrame" 
+					/>
+					</label>
+					<label> Last Frame Hold Duration (ms):
+					<input
+						ref={lastFrameHoldDurationInputRef}
+						type="number"
+						value={lastFrameHoldDuration}
+						onChange={handleInputChange}
+						data-settings-key-to-modify="exportLastFrameHoldDuration" 
+						max={MAX_FRAME_DURATION_MS}
+						min={MIN_FRAME_DURATION_MS}
+					/>
+					</label><br/>
+					<label>Overlay Frame Number?:
+					<input
+						ref={overlayFrameNumberInputRef}
+						type="checkbox"
+						value="true"
+						checked={overlayFrameNumberIsChecked}
+						onChange={handleInputChange}
+						data-settings-key-to-modify="exportOverlayFrameNumber" 
+					/>
+					</label><br/>
+					<label>Overlay Entry Information?:
+					<input
+						ref={overlayEntryInfoInputRef}
+						type="checkbox"
+						value="true"
+						checked={overlayEntryInfoIsChecked}
+						onChange={handleInputChange}
+						data-settings-key-to-modify="exportOverlayEntryInfo" 
+					/>
+					</label><br/>
+					<p>Estimated video duration: {estimatedVideoDurationString}</p>
+					<button
+						type="button"
+						onClick={handleExportVideo}
+					>
+						Export Video
+					</button><br/>
+					<label>Progress&nbsp;
+						<progress max={entries?.length} value={entriesProcessed}>
+							{entriesProcessed} entries processed out of {entries?.length}
+						</progress>
+					</label>
+					<p>Status:</p>
+					<div style={{
+						border: '1px solid black',
+						padding: '0rem',
+						height: '5rem',
+						overflow: 'auto scroll'
+					}}>
+						<ul>
+						{
+							statusMessages?.slice(0).reverse().map( (message, index) => {
+								return <li key={index}>{message}</li>
+							})
+						}
+						</ul>
+					</div>
+					<hr/>
+					<h2>Output Video</h2>
+					<video 
+						ref={videoElementRef} 
+						controls 
+						width="350"
+						style={{
+							visibility: (videoIsReady ? 'visible' : 'hidden'),
+							height: (videoIsReady ? 'auto' : '0px')
+						}}
+					> 
+					</video>
+					<hr/>
+					<h2>Export Video Server-side</h2>
+					<p><i>Not yet implemented.</i></p>
+					<hr/>
+					<h2>Upload Interactive Viewer</h2>
+					<p><i>Not yet implemented.</i></p>
+				</>
+			}
 		</div>
   );
 }

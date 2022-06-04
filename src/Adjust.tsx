@@ -14,6 +14,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry, Setting } from './db';
 import { GlobalState  } from './App';
+import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
 
 import styles from './Adjust.module.css';
 
@@ -31,6 +32,7 @@ function Adjust({
 	globalState,
 	setGlobalState
 }:AdjustAttributes) {
+	let [loadedInitialData, setLoadedInitialData] = useState(false);
 	let [cropAdjustActive, setCropAdjustActive] = useState(false);
 	let [currentSelectValue, setCurrentSelectValue] = useState(-1);
 	let [scaleWidth, setScaleWidth] = useState('0');
@@ -38,11 +40,9 @@ function Adjust({
 	let [resizeCanary, setResizeCanary] = useState(0);
 	let [renderTrigger, setRenderTrigger] = useState(Date.now());
 	let [cropCornerCoordinatesInitialized, setCropCornerCoordinatesInitialized] = useState(false);
-	//let [chosenImageData, setChosenImageData] = useState("");
 	let [scaledImageData, setScaledImageData] = useState<Blob | null>(null);
 	let [scaledImageDataUrl, setScaledImageDataUrl] = useState<string>('');
-	//let [initialized, setInitialized] = useState(false);
-	let [isLoaded, setIsLoaded] = useState(false);
+	let [validationResults, setValidationResults] = useState<ValidationResults>(defaultValidationResults);
 
 	let topLeftCornerCoordinateRef
 		= useRef<Coordinate>({// x: 25, y: 25});
@@ -405,7 +405,7 @@ function Adjust({
 				_scaleHeightSetting,
 				_chosenEntryIdForAdjustments
 			]) => {*/
-				if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments) {
+				if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
 					await scaleChosenImage(_scaleWidthSetting, _scaleHeightSetting, _chosenEntryIdForAdjustments);
 					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(_scaleWidthSetting.value as number, _scaleHeightSetting.value as number);
 				}
@@ -436,7 +436,7 @@ function Adjust({
 
 	let currentEntry = useLiveQuery(
 		() => {
-			if(chosenEntryIdForAdjustments) {
+			if(chosenEntryIdForAdjustments && chosenEntryIdForAdjustments.value) {
 				console.log('setting currentEntry');
 				return db.entries.get( parseInt(chosenEntryIdForAdjustments.value as string) );
 			}
@@ -540,10 +540,11 @@ function Adjust({
 				currentEntry = _currentEntry;
 				*/
 				//setIsLoaded(true);
-		if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments) {
+		if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
 			scaleChosenImage(_scaleWidthSetting, _scaleHeightSetting, _chosenEntryIdForAdjustments);
 		}
 				console.groupEnd();
+				setLoadedInitialData(true);
 			});
 		//});
 	}, [initialized.current]);
@@ -782,7 +783,12 @@ function Adjust({
 	*/
 	const scaleChosenImage = async (scaleWidthSetting:Setting, scaleHeightSetting:Setting, chosenEntryIdForAdjustments:Setting) => {
 		console.group('scaledChosenImage() called');
-		if(scaleWidthSetting && parseFloat(scaleWidthSetting.value as string) > 0 && scaleHeightSetting && parseFloat(scaleHeightSetting.value as string) > 0 && chosenEntryIdForAdjustments) {
+		if(
+			scaleWidthSetting 
+			&& parseFloat(scaleWidthSetting.value as string) > 0 
+			&& scaleHeightSetting && parseFloat(scaleHeightSetting.value as string) > 0 
+			&& chosenEntryIdForAdjustments
+		) {
 			console.warn('update chosen image scaling...');
 			const _currentEntry = await db.entries.get( parseInt(chosenEntryIdForAdjustments.value as string));
 			console.log('after await db: chosenEntryIdForAdjustments = ',chosenEntryIdForAdjustments);
@@ -890,11 +896,40 @@ function Adjust({
 
 	
 	//console.log('RENDER!');
+	const allRelevantValidationsPassed = 
+		validationResults.moreThanZeroEntries
+		&& validationResults.allEntriesHaveImageBlob;
+		/*
+		&& validationResults.allEntriesHaveAlignedImageBlob 
+		&& validationResults.allEntriesHaveDate
+		&& validationResults.allEntriesHaveWeight
+		&& validationResults.allEntriesHaveAllMarks
+		&& validationResults.adjustmentImageCropAndScalingChosen;
+		*/
  
 	return (
     <div>
     	<h2>Adjust ( chosenEntryIdForAdjustments = {chosenEntryIdForAdjustments?.value} )</h2>
 			<p>All images must be cropped and/or scaled to be the same size. On this page, configure the desired size and, if needed, cropping.</p>
+			<EntriesValidator
+				validationResults={validationResults}
+				setValidationResults={setValidationResults}
+				showOnlyErrors={true}
+				displayOnlyTheseValidations={['moreThanZeroEntries','allEntriesHaveImageBlob']}
+			/>
+			{
+				!allRelevantValidationsPassed &&
+				<p>There are validation errors that must be fixed before a base image for adjustments can be chosen.</p>
+			}
+			{
+				!loadedInitialData &&
+				allRelevantValidationsPassed &&
+				<p>Loading...</p>
+			}
+			{ 
+				loadedInitialData && 
+				allRelevantValidationsPassed &&
+				<>
 			<select 
 				ref={imageSelectRef} 
 				value={currentSelectValue} 
@@ -955,7 +990,7 @@ function Adjust({
 						style={{
 							fontSize: '2rem',
 							fontWeight: 'bold',
-					}}>LOADING...</p>
+					}}>LOADING IMAGE...</p>
 				</div>
 				<div 
 					ref={currentCropImageContainerRef}
@@ -1053,6 +1088,8 @@ function Adjust({
 				</div>
 				<p>{currentEntry?.id} date = {currentEntry?.date}</p>
 			</div>
+			</>
+			}
 		</div>
   );
 }

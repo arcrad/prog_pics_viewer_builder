@@ -58,6 +58,11 @@ function Viewer({
 		console.log('fetch all initial data and then set loadedData flag');
 		initializedRef.current = true;
 		db.settings.get('chosenEntryIdForAdjustments').then((_chosenEntryIdForAdjustments) => {
+			if(!_chosenEntryIdForAdjustments) {
+				console.log(`_chosenEntryIdForAdjustments = ${_chosenEntryIdForAdjustments}`);
+				console.warn('No entry is selected as a base for adjustments.')
+				return;
+			}
 			Promise.all([
 				db.settings.get('topLeftCornerCropCoordinateX'),
 				db.settings.get('topLeftCornerCropCoordinateY'),
@@ -141,8 +146,12 @@ function Viewer({
 				console.log(`scaleWidth=${scaleWidthSettingRef.current} scaleHeight=${scaleHeightSettingRef.current}`);
 				setTotalEntries(sortedEntriesRef.current.length);
 				setLoadedData(true);
+			}).catch( error => {
+				console.error(error);
 			});
-		});
+		}).catch( error => {
+			console.error(error)
+		});;
 	}, []);
 
 	
@@ -355,87 +364,120 @@ function Viewer({
 		}
 //	}
 
+	const allRelevantValidationsPassed = 
+		validationResults.moreThanZeroEntries
+		&& validationResults.allEntriesHaveImageBlob
+		&& validationResults.allEntriesHaveThumbImageBlob
+		&& validationResults.allEntriesHaveAllMarks
+		&& validationResults.adjustmentImageCropAndScalingChosen;
+
 	return (
     <div>
     	<h2>Process Entries</h2>
 			<p>Generate scaled, cropped, and aligned images from base images.</p>
-			{ !loadedData && <div>
-				<h1>LOADING...</h1>
-			</div> }
-			
-			{ loadedData && <div>
-				<EntriesValidator
-					validationResults={validationResults}
-					setValidationResults={setValidationResults}
-					showOnlyErrors={false}
-				/>
-				<button
-					type="button"
-					onClick={handleProcessAllEntries}
-				>
-					Process All Entries
-				</button><button
-					type="button"
-					onClick={handleProcessUnprocessedEntries}
-					disabled={ entriesWithAlignedImageCount === totalEntries ? true : false}
-				>
-					Process Only Unprocessed Entries
-				</button><br/>
-				<label>Entries Processed
-					<progress 
-						max={totalEntries} 
-						value={entriesProcessed}
-						style={{
-							display: 'block',
-							width: '70vw',
-							maxWidth: '65rem',
-							margin: '1rem auto'
-						}}
-					>
-						{entriesProcessed} entries processed out of {totalEntries} total entries.
-					</progress>
-				</label>
-				<p>
-					{entriesProcessed} entries processed out of {totalEntries} total entries.
-				</p>
-				<p>
-					Processing: {processingState}
-				</p>
-				<hr/>
-				<h2>Processed Entries Preview</h2>
-				<p>
-					{entriesWithAlignedImageCount} of {totalEntries} entries have an aligned image.
-				</p>
-				<p>
-					Do all entries have an aligned image?  
-					{allEntriesHaveAlignedImage ? ' Yes' : <> No (Click <b>Process Entries</b> button)</>}
-				</p>
-				{ entries.length == 0 && <p>Currently no processed images...</p> }
-				{/*
-				<ol>
-				{
-					entries.map( entry =>
-						<li key={entry.id}>
-							<span>{entry.id}</span>
-							<img src={entry.image} style={{maxWidth: "6rem"}} />
-							{'==>'}
-							<img src={entry.alignedImage} style={{maxWidth: "6rem"}} />
-						</li>
-					)
-				}
-				</ol>
-				*/}
-				<img src={currentImage} style={{maxWidth: '50rem', maxHeight: '75vh'}}/>
+			<EntriesValidator
+				validationResults={validationResults}
+				setValidationResults={setValidationResults}
+				showOnlyErrors={true}
+				displayOnlyTheseValidations={[
+					'moreThanZeroEntries',
+					'allEntriesHaveImageBlob',
+					'allEntriesHaveThumbImageBlob',
+					'allEntriesHaveAllMarks',
+					'adjustmentImageCropAndScalingChosen'
+				]}
+			/>
+			{ 
+			/*	!validationResults.moreThanZeroEntries &&
+				<p>You must have at least one entry to process.</p>*/
+			}
+			{
+				/*validationResults.moreThanZeroEntries &&
+				!validationResults.adjustmentImageCropAndScalingChosen &&
+				<p>You must select an entry as the base for scaling and cropping.</p>*/
+			}
+			{
+				!allRelevantValidationsPassed &&
+				<p>There are validation errors that must be fixed before processing can occur.</p>
+			}
+			{ 
+				allRelevantValidationsPassed &&
+				!loadedData && 
 				<div>
-					<button type="button" onClick={ () => {
-						setCurrentEntry( (cs) => cs > 0 ? cs-1 : entries.length-1)
-					}}>Prev</button>
-					<button type="button" onClick={() => {
-						setCurrentEntry( (cs) => cs < entries.length-1 ? cs+1 : 0)
-					}}>Next</button>
+					<h1>LOADING...</h1>
+				</div> 
+			}
+			{ 
+				allRelevantValidationsPassed &&
+				loadedData && 
+				<div>
+					<button
+						type="button"
+						onClick={handleProcessAllEntries}
+					>
+						Process All Entries
+					</button><button
+						type="button"
+						onClick={handleProcessUnprocessedEntries}
+						disabled={ entriesWithAlignedImageCount === totalEntries ? true : false}
+					>
+						Process Only Unprocessed Entries
+					</button><br/>
+					<label>Entries Processed
+						<progress 
+							max={totalEntries} 
+							value={entriesProcessed}
+							style={{
+								display: 'block',
+								width: '70vw',
+								maxWidth: '65rem',
+								margin: '1rem auto'
+							}}
+						>
+							{entriesProcessed} entries processed out of {totalEntries} total entries.
+						</progress>
+					</label>
+					<p>
+						{entriesProcessed} entries processed out of {totalEntries} total entries.
+					</p>
+					<p>
+						Processing: {processingState}
+					</p>
+					<hr/>
+					<h2>Processed Entries Preview</h2>
+					<p>
+						{entriesWithAlignedImageCount} of {totalEntries} entries have an aligned image.
+					</p>
+					<p>
+						Do all entries have an aligned image?  
+						{allEntriesHaveAlignedImage ? ' Yes' : <> No (Click <b>Process Entries</b> button)</>}
+					</p>
+					{ entries.length == 0 && <p>Currently no processed images...</p> }
+					{/*
+					<ol>
+					{
+						entries.map( entry =>
+							<li key={entry.id}>
+								<span>{entry.id}</span>
+								<img src={entry.image} style={{maxWidth: "6rem"}} />
+								{'==>'}
+								<img src={entry.alignedImage} style={{maxWidth: "6rem"}} />
+							</li>
+						)
+					}
+					</ol>
+					*/}
+					<img src={currentImage} style={{maxWidth: '50rem', maxHeight: '75vh'}}/>
+					<div>
+						<button type="button" onClick={ () => {
+							setCurrentEntry( (cs) => cs > 0 ? cs-1 : entries.length-1)
+						}}>Prev</button>
+						<button type="button" onClick={() => {
+							setCurrentEntry( (cs) => cs < entries.length-1 ? cs+1 : 0)
+						}}>Next</button>
+					</div>
 				</div>
-			</div>}
-			
+			}			
 		</div>
   );
 }
