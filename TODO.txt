@@ -78,3 +78,5 @@
 +ensure pagination on entry component can handle all cases with < 5 pages 
 
 +extract modal component and add 508 functionality such as focus trapping, virtual cursor traping, multiple exit methods, setting focus on open, and focus saving/reset on close
+
++update adjust component so that it warns if current chosenEntryIdForAdjustments value is invalid (not an existing entry id)
