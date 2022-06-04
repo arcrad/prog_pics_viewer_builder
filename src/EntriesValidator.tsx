@@ -173,24 +173,28 @@ function EntriesValidator({
 			filteredValidationResultsKeys.length == 0 ?
 			<></>
 			:
-			<div style={{
-				border: '1px solid black', 
-				padding: '1rem', 
-				margin: '1rem'
-			}}>
-				<p>Validation Results</p>
-				{ entries == null && <p>Validating entries...</p>}
-				{ entries && 
-					<ul>
-					{
-						filteredValidationResultsKeys.map( (key, index) => {
-							return <li key={index}>
-								{validationResultsDisplayNameMap[key]} {validationResults[key] ? '✅' : '❌'}
-							</li>
-						})
-					}
-					</ul>
-				}
+			<div className="columns is-centered">
+				<div className="column is-8-tablet is-6-desktop">
+					<article className="message is-warning">
+		  			<div className="message-header">
+							<p>Validation Results</p>
+						</div>
+						<div className="message-body">
+							{ entries == null && <p>Validating entries...</p>}
+							{ entries && 
+								<ul>
+								{
+									filteredValidationResultsKeys.map( (key, index) => {
+										return <li key={index}>
+											{validationResultsDisplayNameMap[key]} {validationResults[key] ? '✅' : '❌'}
+										</li>
+									})
+								}
+								</ul>
+							}
+						</div>
+					</article>
+				</div>
 			</div>
 		}
 		</>
