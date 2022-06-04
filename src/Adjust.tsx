@@ -166,22 +166,23 @@ function Adjust({
 		if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
 			//console.log('currentCropImageContainerRef.current = ');
 			//console.dir(currentCropImageRef.current);
-			console.log(`offsetLeft = ${currentCropImageContainerRef.current.offsetLeft}, offsetTop = ${currentCropImageContainerRef.current.offsetTop}`);
+			const boundingRect = currentCropImageContainerRef.current.getBoundingClientRect();
+			console.log(`boundRect.left = ${boundingRect.left}, boundingRect.top = ${boundingRect.top}`);
 			imageTopLeftCoordinateRef.current = {
-				x: currentCropImageContainerRef.current.offsetLeft,
-				y: currentCropImageContainerRef.current.offsetTop
+				x: boundingRect.left,
+				y: boundingRect.top
 			};
 			imageTopRightCoordinateRef.current = {
-				x: currentCropImageContainerRef.current.offsetLeft + currentCropImageRef.current.clientWidth,
-				y: currentCropImageContainerRef.current.offsetTop
+				x: boundingRect.left + currentCropImageRef.current.clientWidth,
+				y: boundingRect.top
 			};
 			imageBottomRightCoordinateRef.current = {
-				x: currentCropImageContainerRef.current.offsetLeft + currentCropImageRef.current.clientWidth,
-				y: currentCropImageContainerRef.current.offsetTop + currentCropImageRef.current.clientHeight
+				x: boundingRect.left + currentCropImageRef.current.clientWidth,
+				y: boundingRect.top + currentCropImageRef.current.clientHeight
 			};
 			imageBottomLeftCoordinateRef.current = {
-				x: currentCropImageContainerRef.current.offsetLeft,
-				y: currentCropImageContainerRef.current.offsetTop + currentCropImageRef.current.clientHeight
+				x: boundingRect.left,
+				y: boundingRect.top + currentCropImageRef.current.clientHeight
 			};
 		}
 		console.groupEnd();
@@ -701,9 +702,10 @@ function Adjust({
 		const handleMouseMove = (event: any) => {
 			//console.dir(event);
 			if(currentCropImageContainerRef.current) {
+				const boundingRect = currentCropImageContainerRef.current.getBoundingClientRect();
 				const newCoordinate = getCoordinateBoundToImage({
-						x: event.pageX - currentCropImageContainerRef.current.offsetLeft, 
-						y: event.pageY - currentCropImageContainerRef.current.offsetTop
+						x: event.pageX - boundingRect.left, 
+						y: event.pageY - boundingRect.top
 					});
 				if(activeCornerControlRef.current === 'topLeft') {
 					const boundCoordinate = getBoundTopLeftCornerCoordinate(newCoordinate);
@@ -874,22 +876,23 @@ function Adjust({
 	const setCropCoordinatesToImageCorners = () => {
 			console.warn('setCropCoordinatesToImageCorners() called');
 			if(currentCropImageContainerRef.current) {
-			console.warn('setCropCoordinatesToImageCorners first condition');
+				console.warn('setCropCoordinatesToImageCorners first condition');
+				const boundingRect = currentCropImageContainerRef.current.getBoundingClientRect();
 				topLeftCornerCoordinateRef.current = {
-					x: imageTopLeftCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
-					y: imageTopLeftCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
+					x: imageTopLeftCoordinateRef.current.x - boundingRect.left,
+					y: imageTopLeftCoordinateRef.current.y - boundingRect.top
 				};
 				topRightCornerCoordinateRef.current = {
-					x: imageTopRightCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
-					y: imageTopRightCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
+					x: imageTopRightCoordinateRef.current.x - boundingRect.left,
+					y: imageTopRightCoordinateRef.current.y - boundingRect.top
 				};
 				bottomRightCornerCoordinateRef.current = {
-					x: imageBottomRightCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
-					y: imageBottomRightCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
+					x: imageBottomRightCoordinateRef.current.x - boundingRect.left,
+					y: imageBottomRightCoordinateRef.current.y - boundingRect.top
 				};
 				bottomLeftCornerCoordinateRef.current = {
-					x: imageBottomLeftCoordinateRef.current.x - currentCropImageContainerRef.current.offsetLeft,
-					y: imageBottomLeftCoordinateRef.current.y - currentCropImageContainerRef.current.offsetTop
+					x: imageBottomLeftCoordinateRef.current.x - boundingRect.left,
+					y: imageBottomLeftCoordinateRef.current.y - boundingRect.top
 				};
 			}
 	};
