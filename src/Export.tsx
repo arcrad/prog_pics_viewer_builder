@@ -687,6 +687,15 @@ function Export({
 				validationResults={validationResults}
 				setValidationResults={setValidationResults}
 				showOnlyErrors={true}
+				displayOnlyTheseValidations={[
+					'moreThanZeroEntries',
+					'allEntriesHaveImageBlob',
+					'allEntriesHaveAlignedImageBlob',
+					'allEntriesHaveDate',
+					'allEntriesHaveWeight',
+					'allEntriesHaveAllMarks',
+					'adjustmentImageCropAndScalingChosen'
+				]}
 			/>
 			{
 				!allRelevantValidationsPassed && 

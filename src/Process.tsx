@@ -367,7 +367,6 @@ function Viewer({
 	const allRelevantValidationsPassed = 
 		validationResults.moreThanZeroEntries
 		&& validationResults.allEntriesHaveImageBlob
-		&& validationResults.allEntriesHaveThumbImageBlob
 		&& validationResults.allEntriesHaveAllMarks
 		&& validationResults.adjustmentImageCropAndScalingChosen;
 
@@ -382,7 +381,6 @@ function Viewer({
 				displayOnlyTheseValidations={[
 					'moreThanZeroEntries',
 					'allEntriesHaveImageBlob',
-					'allEntriesHaveThumbImageBlob',
 					'allEntriesHaveAllMarks',
 					'adjustmentImageCropAndScalingChosen'
 				]}
