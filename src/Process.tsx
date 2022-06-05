@@ -371,9 +371,19 @@ function Viewer({
 		&& validationResults.adjustmentImageCropAndScalingChosen;
 
 	return (
-    <div>
-    	<h2>Process Entries</h2>
-			<p>Generate scaled, cropped, and aligned images from base images.</p>
+		<>
+		<div className="columns is-mobile is-centered">
+			<div className="column is-12">
+				<div className="hero is-small is-primary">
+					<div className="hero-body">
+    				<h2 className="title">Process Entries</h2>
+						<p className="subtitle">Generate scaled, cropped, and aligned images from base images.</p>
+					</div>
+				</div>
+			</div>
+			</div>
+			<div className="columns is-mobile is-centered">
+				<div className="column is-10-mobile is-8-tablet is-4-desktop">
 			<EntriesValidator
 				validationResults={validationResults}
 				setValidationResults={setValidationResults}
@@ -385,6 +395,10 @@ function Viewer({
 					'adjustmentImageCropAndScalingChosen'
 				]}
 			/>
+				</div>
+			</div>
+		<div className="columns is-mobile is-centered">
+			<div className="column is-11-mobile is-10-tablet is-8-desktop">
 			{ 
 			/*	!validationResults.moreThanZeroEntries &&
 				<p>You must have at least one entry to process.</p>*/
@@ -396,7 +410,12 @@ function Viewer({
 			}
 			{
 				!allRelevantValidationsPassed &&
-				<p>There are validation errors that must be fixed before processing can occur.</p>
+				<div className="message is-danger">
+					<div className="message-body">
+						<p>There are validation errors that must be fixed before processing can occur.</p>
+					</div>
+				</div>
+				
 			}
 			{
 				allRelevantValidationsPassed &&
@@ -477,6 +496,8 @@ function Viewer({
 				</div>
 			}			
 		</div>
+		</div>
+		</>
   );
 }
 

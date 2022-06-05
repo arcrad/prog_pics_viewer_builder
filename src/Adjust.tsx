@@ -918,20 +918,20 @@ function Adjust({
 			<div className="column is-12">
 			<div className="hero is-small is-primary">
 				<div className="hero-body">
-    		<p className="title">Adjust</p>
+    		<h2 className="title">Adjust</h2>
 				<p className="subtitle">All images must be cropped and/or scaled to be the same size. On this page, configure the desired size and, if needed, cropping. Current chosenEntryIdForAdjustments = {chosenEntryIdForAdjustments?.value}</p>
 				</div>
 			</div>
 			</div>
 		</div>
-				<div className="columns is-mobile is-centered">
-					<div className="column is-10-mobile is-8-tablet is-6-desktop">
-						<EntriesValidator
-							validationResults={validationResults}
-							setValidationResults={setValidationResults}
-							showOnlyErrors={true}
-							displayOnlyTheseValidations={['moreThanZeroEntries','allEntriesHaveImageBlob']}
-						/>
+			<div className="columns is-mobile is-centered">
+				<div className="column is-10-mobile is-8-tablet is-4-desktop">
+					<EntriesValidator
+						validationResults={validationResults}
+						setValidationResults={setValidationResults}
+						showOnlyErrors={true}
+						displayOnlyTheseValidations={['moreThanZeroEntries','allEntriesHaveImageBlob']}
+					/>
 				</div>
 			</div>
 		<div className="columns is-mobile is-centered">
