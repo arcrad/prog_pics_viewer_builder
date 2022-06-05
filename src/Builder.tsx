@@ -58,7 +58,7 @@ function Builder({
 						</div>
 					</div>
 				</nav>
-				<div className="container">
+				<div>
 					<Outlet />
 				</div>
 				<SetupModal 

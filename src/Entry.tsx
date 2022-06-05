@@ -236,10 +236,10 @@ function EntryComponent({
 
 	return (
 		<>
-    <div className="columns is-centered">
-			<div className="column is-10-tablet is-6-desktop">
+    <div className="columns is-mobile is-centered">
+			<div className="column is-11-mobile is-10-tablet is-6-desktop">
 				<div className="section">
-					<div className="control">
+					<div className="control has-text-centered	">
 						<button 
 							ref={addEntryRef} 
 							type="button" 

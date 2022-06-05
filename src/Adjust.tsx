@@ -911,22 +911,36 @@ function Adjust({
 		*/
  
 	return (
-    <div>
-    	<h2>Adjust ( chosenEntryIdForAdjustments = {chosenEntryIdForAdjustments?.value} )</h2>
-			<p>All images must be cropped and/or scaled to be the same size. On this page, configure the desired size and, if needed, cropping.</p>
-			<div className="columns is-centered">
-				<div className="column is-11-tablet is-6-desktop">
-					<EntriesValidator
-						validationResults={validationResults}
-						setValidationResults={setValidationResults}
-						showOnlyErrors={true}
-						displayOnlyTheseValidations={['moreThanZeroEntries','allEntriesHaveImageBlob']}
-					/>
+		<>
+		<div className="columns is-mobile is-centered">
+			<div className="column is-12">
+			<div className="hero is-small is-primary">
+				<div className="hero-body">
+    		<p className="title">Adjust</p>
+				<p className="subtitle">All images must be cropped and/or scaled to be the same size. On this page, configure the desired size and, if needed, cropping. Current chosenEntryIdForAdjustments = {chosenEntryIdForAdjustments?.value}</p>
 				</div>
 			</div>
+			</div>
+		</div>
+				<div className="columns is-mobile is-centered">
+					<div className="column is-10-mobile is-8-tablet is-6-desktop">
+						<EntriesValidator
+							validationResults={validationResults}
+							setValidationResults={setValidationResults}
+							showOnlyErrors={true}
+							displayOnlyTheseValidations={['moreThanZeroEntries','allEntriesHaveImageBlob']}
+						/>
+				</div>
+			</div>
+		<div className="columns is-mobile is-centered">
+			<div className="column is-11-mobile is-10-tablet is-8-desktop">
 			{
 				!allRelevantValidationsPassed &&
-				<p>There are validation errors that must be fixed before a base image for adjustments can be chosen.</p>
+				<div className="message is-danger">
+					<div className="message-body">
+						<p>There are validation errors that must be fixed before a base image for adjustments can be chosen.</p>
+					</div>
+				</div>
 			}
 			{
 				!loadedInitialData &&
@@ -1097,7 +1111,9 @@ function Adjust({
 			</div>
 			</>
 			}
+			</div>
 		</div>
+		</>
   );
 }
 

@@ -20,7 +20,7 @@ code {
 
 /*make navbar display at full size at all break points*/
 $navbar-breakpoint: 0px;
-$tablet: 350px;
+/*$tablet: 350px;*/
 
 @import "../node_modules/bulma/sass/utilities/_all.sass";
 @import "../node_modules/bulma/sass/base/_all.sass";
@@ -39,3 +39,5 @@ $tablet: 350px;
 @import "../node_modules/bulma/sass/components/message.sass";
 @import "../node_modules/bulma/sass/layout/hero.sass";
 @import "../node_modules/bulma/sass/layout/section.sass";
+/*@import "../node_modules/bulma/sass/helpers/flexbox.sass";*/
+@import "../node_modules/bulma/sass/helpers/typography.sass";
