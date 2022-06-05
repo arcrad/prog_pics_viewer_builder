@@ -701,11 +701,13 @@ function Adjust({
 		
 		const handleMouseMove = (event: any) => {
 			//console.dir(event);
+			//console.log(`pageX=${event.pageX}, pageY=${event.pageY}`);
+			//console.log(`screenX=${event.screenX}, screenY=${event.screenY}`);
 			if(currentCropImageContainerRef.current) {
 				const boundingRect = currentCropImageContainerRef.current.getBoundingClientRect();
 				const newCoordinate = getCoordinateBoundToImage({
-						x: event.pageX - boundingRect.left, 
-						y: event.pageY - boundingRect.top
+						x: event.pageX - boundingRect.left - window.scrollX, 
+						y: event.pageY - boundingRect.top - window.scrollY
 					});
 				if(activeCornerControlRef.current === 'topLeft') {
 					const boundCoordinate = getBoundTopLeftCornerCoordinate(newCoordinate);
