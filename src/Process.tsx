@@ -398,7 +398,7 @@ function Viewer({
 				!allRelevantValidationsPassed &&
 				<p>There are validation errors that must be fixed before processing can occur.</p>
 			}
-			{ 
+			{
 				allRelevantValidationsPassed &&
 				!loadedData && 
 				<div>

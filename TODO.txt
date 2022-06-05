@@ -80,3 +80,5 @@
 +extract modal component and add 508 functionality such as focus trapping, virtual cursor traping, multiple exit methods, setting focus on open, and focus saving/reset on close
 
 +update adjust component so that it warns if current chosenEntryIdForAdjustments value is invalid (not an existing entry id)
+
++fix jank when loading EntriesValidator component before validations finish and/or during transition from loading to finished

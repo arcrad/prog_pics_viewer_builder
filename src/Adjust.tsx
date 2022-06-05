@@ -914,12 +914,16 @@ function Adjust({
     <div>
     	<h2>Adjust ( chosenEntryIdForAdjustments = {chosenEntryIdForAdjustments?.value} )</h2>
 			<p>All images must be cropped and/or scaled to be the same size. On this page, configure the desired size and, if needed, cropping.</p>
-			<EntriesValidator
-				validationResults={validationResults}
-				setValidationResults={setValidationResults}
-				showOnlyErrors={true}
-				displayOnlyTheseValidations={['moreThanZeroEntries','allEntriesHaveImageBlob']}
-			/>
+			<div className="columns is-centered">
+				<div className="column is-11-tablet is-6-desktop">
+					<EntriesValidator
+						validationResults={validationResults}
+						setValidationResults={setValidationResults}
+						showOnlyErrors={true}
+						displayOnlyTheseValidations={['moreThanZeroEntries','allEntriesHaveImageBlob']}
+					/>
+				</div>
+			</div>
 			{
 				!allRelevantValidationsPassed &&
 				<p>There are validation errors that must be fixed before a base image for adjustments can be chosen.</p>

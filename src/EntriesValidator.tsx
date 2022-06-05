@@ -137,29 +137,30 @@ function EntriesValidator({
 						break;
 					}
 				}
+				//check for crop/scaling image chosen 
+				await db.settings.get('chosenEntryIdForAdjustments').then((_chosenEntryIdForAdjustments) => {
+					if(_chosenEntryIdForAdjustments == null) {
+					console.warn(`validation: _chosenEntryIdForAdjustments = ${_chosenEntryIdForAdjustments}`);
+						newValidationResults.adjustmentImageCropAndScalingChosen = false;
+					}
+				});
+				setValidationResults(newValidationResults);
+				console.dir(newValidationResults);
+				console.warn('setvalidationresults');
 			}
-			//check for crop/scaling image chosen 
-			await db.settings.get('chosenEntryIdForAdjustments').then((_chosenEntryIdForAdjustments) => {
-				if(_chosenEntryIdForAdjustments == null) {
-				console.warn(`validation: _chosenEntryIdForAdjustments = ${_chosenEntryIdForAdjustments}`);
-					newValidationResults.adjustmentImageCropAndScalingChosen = false;
-				}
-			});
-			setValidationResults(newValidationResults);
-			console.dir(newValidationResults);
-			console.warn('setvalidationresults');
 		}
 		doValidations();
 	}, [entries]);
 
+	//if needed, get subset of validations
 	let filteredValidationResultsKeys = displayOnlyTheseValidations != null ? 
 		Object.keys(validationResults).filter( (key) => {
 			return displayOnlyTheseValidations.includes(key);
 		})
 		:
 		Object.keys(validationResults);
-	
 		
+	//if needed, filter out any non-errors
 	filteredValidationResultsKeys = showOnlyErrors ? 
 		filteredValidationResultsKeys.filter( (key) => {
 			return !validationResults[key];
@@ -170,32 +171,28 @@ function EntriesValidator({
 	return (
 		<>
 		{
-			filteredValidationResultsKeys.length == 0 ?
-			<></>
-			:
-			<div className="columns is-centered">
-				<div className="column is-8-tablet is-6-desktop">
-					<article className="message is-warning">
-		  			<div className="message-header">
-							<p>Validation Results</p>
-						</div>
-						<div className="message-body">
-							{ entries == null && <p>Validating entries...</p>}
-							{ entries && 
-								<ul>
-								{
-									filteredValidationResultsKeys.map( (key, index) => {
-										return <li key={index}>
-											{validationResultsDisplayNameMap[key]} {validationResults[key] ? '✅' : '❌'}
-										</li>
-									})
-								}
-								</ul>
-							}
-						</div>
-					</article>
+			entries && filteredValidationResultsKeys.length > 0 ?
+			<article className="message is-warning">
+  			<div className="message-header">
+					<p>Validation Results</p>
 				</div>
-			</div>
+				<div className="message-body">
+					{ entries == null && <p>Validating entries...</p>}
+					{ entries && 
+						<ul>
+						{
+							filteredValidationResultsKeys.map( (key, index) => {
+								return <li key={index}>
+									{validationResultsDisplayNameMap[key]} {validationResults[key] ? '✅' : '❌'}
+								</li>
+							})
+						}
+						</ul>
+					}
+				</div>
+			</article>
+			:
+			<></>
 		}
 		</>
   );
