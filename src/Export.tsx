@@ -797,8 +797,8 @@ function Export({
 						Export Video
 					</button><br/>
 					<label>Progress&nbsp;
-						<progress max={entries?.length} value={entriesProcessed}>
-							{entriesProcessed} entries processed out of {entries?.length}
+						<progress max={entries ? entries?.length-1 : 0} value={entriesProcessed}>
+							{entriesProcessed} entries processed out of {entries ? entries?.length-1 : 0}
 						</progress>
 					</label>
 					<p>Status:</p>
