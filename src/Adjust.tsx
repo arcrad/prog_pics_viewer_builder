@@ -952,7 +952,8 @@ function Adjust({
 			{ 
 				loadedInitialData && 
 				allRelevantValidationsPassed &&
-				<>
+				<div className="has-text-centered	">
+					<div className="box">
 			<select 
 				ref={imageSelectRef} 
 				value={currentSelectValue} 
@@ -1040,7 +1041,7 @@ function Adjust({
 							//setIsLoaded(true);
 						}}
 						style={{ 
-							maxWidth: '90vw', 
+							maxWidth: '100%', 
 							maxHeight: '90vh',
 							position: 'absolute',
 							opacity: 0.2,
@@ -1052,7 +1053,7 @@ function Adjust({
 						src={ scaledImageDataUrl }
 						data-render-trigger={renderTrigger}
 						style={{ 
-							maxWidth: '90vw', 
+							maxWidth: '100%', 
 							maxHeight: '90vh',
 							clipPath: `inset(${topLeftCornerCoordinateRef.current.y}px ${(currentCropImageRef?.current?.clientWidth || 0) - topRightCornerCoordinateRef.current.x}px ${(currentCropImageRef?.current?.clientHeight || 0 ) - bottomRightCornerCoordinateRef.current.y}px ${bottomLeftCornerCoordinateRef.current.x}px)`
 						}}/>
@@ -1111,7 +1112,8 @@ function Adjust({
 				</div>
 				<p>{currentEntry?.id} date = {currentEntry?.date}</p>
 			</div>
-			</>
+			</div>
+			</div>
 			}
 			</div>
 		</div>
