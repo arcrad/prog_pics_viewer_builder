@@ -26,11 +26,14 @@ $navbar-breakpoint: 0px;
 @import "../node_modules/bulma/sass/base/_all.sass";
 @import "../node_modules/bulma/sass/grid/_all.sass";
 @import "../node_modules/bulma/sass/helpers/overflow.sass";
+/*@import "../node_modules/bulma/sass/helpers/flexbossass";*/
+@import "../node_modules/bulma/sass/helpers/typography.sass";
 @import "../node_modules/bulma/sass/elements/button.sass";
 @import "../node_modules/bulma/sass/elements/box.sass";
 @import "../node_modules/bulma/sass/elements/other.sass";
 @import "../node_modules/bulma/sass/elements/container.sass";
 @import "../node_modules/bulma/sass/elements/title.sass";
+@import "../node_modules/bulma/sass/elements/progress.sass";
 @import "../node_modules/bulma/sass/form/_all.sass";
 @import "../node_modules/bulma/sass/components/navbar.sass";
 @import "../node_modules/bulma/sass/components/dropdown.sass";
@@ -39,5 +42,3 @@ $navbar-breakpoint: 0px;
 @import "../node_modules/bulma/sass/components/message.sass";
 @import "../node_modules/bulma/sass/layout/hero.sass";
 @import "../node_modules/bulma/sass/layout/section.sass";
-/*@import "../node_modules/bulma/sass/helpers/flexbox.sass";*/
-@import "../node_modules/bulma/sass/helpers/typography.sass";

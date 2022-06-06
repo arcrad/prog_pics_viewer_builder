@@ -5,6 +5,12 @@ import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
 import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
 
+const processingStateMap:{[key:string]:string} = {
+	'unstarted': 'Not Started',
+	'started': 'Started',
+	'complete': 'Complete'
+}
+
 type ViewerAttributes = {
 	globalState: GlobalState;
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
@@ -427,41 +433,58 @@ function Viewer({
 			{ 
 				allRelevantValidationsPassed &&
 				loadedData && 
-				<div>
-					<button
-						type="button"
-						onClick={handleProcessAllEntries}
-					>
-						Process All Entries
-					</button><button
-						type="button"
-						onClick={handleProcessUnprocessedEntries}
-						disabled={ entriesWithAlignedImageCount === totalEntries ? true : false}
-					>
-						Process Only Unprocessed Entries
-					</button><br/>
-					<label>Entries Processed
+				<div className="has-text-centered	">
+					<div className="box">
+					<div className="field is-grouped is-grouped-centered">
+						<div className="control">
+							<button
+								type="button"
+								className="button is-primary"
+								onClick={handleProcessAllEntries}
+							>
+								Process All Entries
+							</button>
+						</div>
+						<div className="control">
+							<button
+								type="button"
+								className="button"
+								onClick={handleProcessUnprocessedEntries}
+								disabled={ entriesWithAlignedImageCount === totalEntries ? true : false}
+							>
+								Process Only Unprocessed Entries
+							</button>
+						</div>
+					</div>
+					<div className="block">
+					<p className="is-size-4">
+						Processing Status: { processingStateMap[processingState] }
+					</p>
+					</div>
+					<div className="block">
+					<div className="field">
+						<div className="label">
+							<label>
+								{entriesProcessed} entries processed out of {totalEntries} total entries.
+							</label>
+						</div>
+						<div className="control">
 						<progress 
 							max={totalEntries} 
 							value={entriesProcessed}
-							style={{
-								display: 'block',
-								width: '70vw',
-								maxWidth: '65rem',
-								margin: '1rem auto'
-							}}
+							className="progress is-info"
 						>
 							{entriesProcessed} entries processed out of {totalEntries} total entries.
 						</progress>
-					</label>
-					<p>
-						{entriesProcessed} entries processed out of {totalEntries} total entries.
-					</p>
-					<p>
-						Processing: {processingState}
-					</p>
-					<hr/>
-					<h2>Processed Entries Preview</h2>
+						</div>
+						<div className="help">
+							<p>
+							</p>
+						</div>
+					</div>
+					</div>
+					<div className="block">
+					<h2 className="title is-4">Processed Entries Preview</h2>
 					<p>
 						{entriesWithAlignedImageCount} of {totalEntries} entries have an aligned image.
 					</p>
@@ -484,14 +507,34 @@ function Viewer({
 					}
 					</ol>
 					*/}
-					<img src={currentImage} style={{maxWidth: '50rem', maxHeight: '75vh'}}/>
-					<div>
-						<button type="button" onClick={ () => {
-							setCurrentEntry( (cs) => cs > 0 ? cs-1 : entries.length-1)
-						}}>Prev</button>
-						<button type="button" onClick={() => {
-							setCurrentEntry( (cs) => cs < entries.length-1 ? cs+1 : 0)
-						}}>Next</button>
+					</div>
+					<div className="block">
+					<img src={currentImage} style={{maxWidth: '50%', maxHeight: '75vh'}}/>
+					<div className="field has-addons has-addons-centered">
+						<div className="control">
+							<button 
+								type="button" 
+								className="button"
+								onClick={ () => {
+									setCurrentEntry( (cs) => cs > 0 ? cs-1 : entries.length-1)
+								}}
+							>
+								Previous
+							</button>
+						</div>
+						<div className="control">
+							<button
+								type="button" 
+								className="button"
+								onClick={() => {
+									setCurrentEntry( (cs) => cs < entries.length-1 ? cs+1 : 0)
+								}}
+							>
+								Next
+							</button>
+						</div>
+					</div>
+					</div>
 					</div>
 				</div>
 			}			
