@@ -29,6 +29,7 @@ export type ValidationResults = {
 	allEntriesHaveWeight: boolean;
 	allEntriesHaveAllMarks: boolean;
 	adjustmentImageCropAndScalingChosen: boolean;
+	adjustmentImageCropAndScalingIsValid: boolean;
 };
 
 export const defaultValidationResults:ValidationResults = {
@@ -40,6 +41,7 @@ export const defaultValidationResults:ValidationResults = {
 	allEntriesHaveWeight: false,
 	allEntriesHaveAllMarks: false,
 	adjustmentImageCropAndScalingChosen: false,
+	adjustmentImageCropAndScalingIsValid: false,
 };
 
 const validationResultsDisplayNameMap:{[key: string]: string} = {
@@ -51,6 +53,7 @@ const validationResultsDisplayNameMap:{[key: string]: string} = {
 	allEntriesHaveWeight: 'All Entries have a weight?',
 	allEntriesHaveAllMarks: 'All Entries have three marks?',
 	adjustmentImageCropAndScalingChosen: 'A crop/scaling image was chosen?',
+	djustmentImageCropAndScalingIsValid: 'The crop/scalimg image chosen is valid?',
 };
 
 type EntriesValidatorAttributes= {
@@ -75,6 +78,10 @@ function EntriesValidator({
 		() => db.entries.toArray()
 	);
 	
+	const settings = useLiveQuery(
+		() => db.settings.toArray()
+	);
+	
 	useEffect( () => {
 		async function doValidations() {
 			console.log('do validation, entries updated');
@@ -87,6 +94,7 @@ function EntriesValidator({
 				allEntriesHaveWeight: true,
 				allEntriesHaveAllMarks: true,
 				adjustmentImageCropAndScalingChosen: true,
+				adjustmentImageCropAndScalingIsValid: true,
 			};
 	
 	
@@ -138,10 +146,21 @@ function EntriesValidator({
 					}
 				}
 				//check for crop/scaling image chosen 
-				await db.settings.get('chosenEntryIdForAdjustments').then((_chosenEntryIdForAdjustments) => {
+				await db.settings.get('chosenEntryIdForAdjustments').then( async (_chosenEntryIdForAdjustments) => {
 					if(_chosenEntryIdForAdjustments == null) {
 					console.warn(`validation: _chosenEntryIdForAdjustments = ${_chosenEntryIdForAdjustments}`);
 						newValidationResults.adjustmentImageCropAndScalingChosen = false;
+					}
+					if(_chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
+						await db.entries.get(parseInt(_chosenEntryIdForAdjustments.value)).then( (potentialChosenEntry) => {
+								console.log('potentialChosenEntry = ');
+								console.dir(potentialChosenEntry);
+								if(potentialChosenEntry != null) {
+									newValidationResults.adjustmentImageCropAndScalingIsValid = true;
+								} else {
+									newValidationResults.adjustmentImageCropAndScalingIsValid = false;
+								}						
+						});
 					}
 				});
 				setValidationResults(newValidationResults);
@@ -150,7 +169,7 @@ function EntriesValidator({
 			}
 		}
 		doValidations();
-	}, [entries]);
+	}, [entries, settings]);
 
 	//if needed, get subset of validations
 	let filteredValidationResultsKeys = displayOnlyTheseValidations != null ? 

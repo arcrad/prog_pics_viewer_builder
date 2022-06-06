@@ -33,6 +33,7 @@ function Adjust({
 	setGlobalState
 }:AdjustAttributes) {
 	let [loadedInitialData, setLoadedInitialData] = useState(false);
+	let [chosenEntryIdIsValid, setChosenEntryIdIsValid] = useState(false);
 	let [cropAdjustActive, setCropAdjustActive] = useState(false);
 	let [currentSelectValue, setCurrentSelectValue] = useState(-1);
 	let [scaleWidth, setScaleWidth] = useState('0');
@@ -540,6 +541,30 @@ function Adjust({
 				scaleHeightSetting = _scaleHeightSetting;
 				currentEntry = _currentEntry;
 				*/
+				//validate chosenEntryIdForAdjustments
+				/*
+				async function isChosenEntryIdForAdjustmentsValid() {
+					if(_chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
+						const potentialChosenEntry = await db.entries.get(parseInt(_chosenEntryIdForAdjustments.value));
+						if(potentialChosenEntry != null) {
+							return true;
+						}
+					}
+					return false;
+				}*/
+			/*	if(_chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
+					db.entries.get(parseInt(_chosenEntryIdForAdjustments.value)).then( (potentialChosenEntry) => {
+							console.log('potentialChosenEntry = ');
+							console.dir(potentialChosenEntry);
+							if(potentialChosenEntry != null) {
+								setChosenEntryIdIsValid(true);
+							} else {
+								setChosenEntryIdIsValid(false);
+							}						
+					});
+				}*/
+				//setChosenEntryIdIsValid(isChosenEntryIdForAdjustmentsValid());
+
 				//setIsLoaded(true);
 		if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
 			scaleChosenImage(_scaleWidthSetting, _scaleHeightSetting, _chosenEntryIdForAdjustments);
@@ -954,28 +979,51 @@ function Adjust({
 				allRelevantValidationsPassed &&
 				<div className="has-text-centered	">
 					<div className="box">
-			<select 
-				ref={imageSelectRef} 
-				value={currentSelectValue} 
-				onChange={handleSelectOnChange}
-			>
-				{
-					entries?.map( (entry) => 
-						<option 
-							key={entry.id} 
-							value={entry.id}
-						>{entry.id}: {entry.date}
-						</option>
-					)
-				}
-			</select>
-			<button
-				type="button"
-				onClick={handleSelectImage}
-			>
-				Select Image as Base for Adjustments
-			</button>
+				<p>chosenEntryIdIsValid = {chosenEntryIdIsValid ? 'true' : 'false' }</p>
+				<p>adjustmentImageCropAndScalingIsValid = {validationResults.adjustmentImageCropAndScalingIsValid  ? 'true' : 'false'}</p>
+			<div className="field has-addons has-addons-centered">
+				<div className="control">
+					<div className="select">
+						<select 
+							ref={imageSelectRef} 
+							value={currentSelectValue} 
+							onChange={handleSelectOnChange}
+						>
+							<option value="-1">Select an entry...</option>
+							{
+								entries?.map( (entry) => 
+									<option 
+										key={entry.id} 
+										value={entry.id}
+									>{entry.id}: {entry.date}
+									</option>
+								)
+							}
+						</select>
+					</div>
+				</div>
+				<div className="control">
+					<button
+						type="button"
+						className="button is-primary"
+						onClick={handleSelectImage}
+					>
+						Set Entry as Base for Adjustments
+					</button>
+				</div>
+			</div>
 			<hr/>
+			{
+				!validationResults.adjustmentImageCropAndScalingIsValid &&
+				<div className="message is-info">
+					<div className="message-body">
+						<p>Select an entry as the base for adjustments.</p>
+					</div>
+				</div>
+			}
+			{
+				validationResults.adjustmentImageCropAndScalingIsValid && 
+			<>
 			<button
 				type="button"
 				onClick={handleAdjustCropping}
@@ -1112,6 +1160,8 @@ function Adjust({
 				</div>
 				<p>{currentEntry?.id} date = {currentEntry?.date}</p>
 			</div>
+				</>
+				}
 			</div>
 			</div>
 			}
