@@ -1024,30 +1024,44 @@ function Adjust({
 			{
 				validationResults.adjustmentImageCropAndScalingIsValid && 
 			<>
-			<button
-				type="button"
-				onClick={handleAdjustCropping}
-			>
-				Adjust Cropping { cropAdjustActive ? 'Y' : 'N' }
-			</button>
-			<label>
-				Width:
-				<input 
-					type="number" 
-					value={scaleWidth} 
-					data-settings-key-to-modify="scaleWidth" 
-					onChange={handleInputChange} 
-				/>
-			</label>
-			<label>
-				Height:
+			<div className="field is-horizontal">
+				<div className="field-label">
+					<label>
+						Width:
+					</label>
+				</div>
+				<div className="field-body">
+				<div className="control">
+						<input 
+							type="number" 
+							value={scaleWidth} 
+							data-settings-key-to-modify="scaleWidth" 
+							onChange={handleInputChange} 
+						/>
+				</div>
+				</div>
+			</div>
+			<div className="field is-horizontal">
+				<div className="label">
+					<label>
+						Height:
+					</label>
+				</div>
+				<div className="control">
 				<input 
 					type="number" 
 					value={scaleHeight} 
 					data-settings-key-to-modify="scaleHeight" 
 					onChange={handleInputChange} 
 				/>
-			</label>
+				</div>
+			</div>
+			<button
+				type="button"
+				onClick={handleAdjustCropping}
+			>
+				Adjust Cropping { cropAdjustActive ? 'Y' : 'N' }
+			</button>
 			<button
 				type="button"
 				onClick={handleSetCropToCorners}
