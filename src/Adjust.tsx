@@ -11,11 +11,12 @@ import
 	}
 from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCropSimple, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons'
 
 import { db, Entry, Setting } from './db';
 import { GlobalState  } from './App';
 import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
-
 import styles from './Adjust.module.css';
 
 type AdjustAttributes = {
@@ -44,7 +45,10 @@ function Adjust({
 	let [scaledImageData, setScaledImageData] = useState<Blob | null>(null);
 	let [scaledImageDataUrl, setScaledImageDataUrl] = useState<string>('');
 	let [validationResults, setValidationResults] = useState<ValidationResults>(defaultValidationResults);
-
+	let [aspectRatioIsLocked, setAspectRatioIsLocked] = useState(true);
+	let [selectedImageOriginalWidth, setSelectedImageOriginalWidth] = useState(0);
+	let [selectedImageOriginalHeight, setSelectedImageOriginalHeight] = useState(0);
+	
 	let topLeftCornerCoordinateRef
 		= useRef<Coordinate>({// x: 25, y: 25});
 				x: globalState.settings.topLeftCornerCropCoordinateX as number,
@@ -328,6 +332,8 @@ function Adjust({
 				//console.dir(image);
 				image.onload = async () => {
 					console.log('image width = ',image.naturalWidth, 'image height = ', image.naturalHeight);
+					setSelectedImageOriginalWidth(image.naturalWidth);
+					setSelectedImageOriginalHeight(image.naturalHeight);
 					try {
 						const id = await db.settings.put(
 							{ key: "scaleWidth", value: image.naturalWidth }
@@ -380,19 +386,48 @@ function Adjust({
 		) {
 			let settingsKeyToModify = event.target.dataset.settingsKeyToModify;
 			let newValue = event.target.value;
+			let newScaleWidthDbValue = scaleWidth;
+			let newScaleHeightDbValue = scaleHeight;
 			console.log('settingsKeyToModify = ', settingsKeyToModify);
 			console.log('value = ', newValue);
+			console.log('aspectRatioIsLocked = ',aspectRatioIsLocked);
 			if(event.target.dataset.settingsKeyToModify === 'scaleWidth') {
+				console.log('prev scaleWidth = ', scaleWidth);
+				const widthRatio = selectedImageOriginalWidth/parseFloat(newValue);
+				console.warn('widthRatio = ', widthRatio);
+				if(!isNaN(widthRatio) && aspectRatioIsLocked) {
+					const newScaleHeight = selectedImageOriginalHeight/widthRatio;
+					if(!isNaN(newScaleHeight)) {
+						setScaleHeight(String(newScaleHeight));
+						newScaleHeightDbValue = String(newScaleHeight);
+					}
+				}
 				setScaleWidth(newValue);
+				newScaleWidthDbValue = String(newValue);
 			} else if(event.target.dataset.settingsKeyToModify === 'scaleHeight') {
+				console.log('prev scaleHeight = ', scaleHeight);
+				const heightRatio = selectedImageOriginalHeight/parseFloat(newValue);
+				console.warn('heightRatio = ', heightRatio);
+				if(!isNaN(heightRatio) && aspectRatioIsLocked) {
+					const newScaleWidth = selectedImageOriginalWidth/heightRatio;
+					if(!isNaN(newScaleWidth)) {
+						setScaleWidth(String(newScaleWidth));
+						newScaleWidthDbValue = String(newScaleWidth);
+					}
+				}
 				setScaleHeight(newValue);
+				newScaleHeightDbValue = String(newValue);
 			}
 			clearTimeout(debounceInputTimeout.current);
 			let modifyDbValueHandler = async () => {
 					console.log('fire update db with new input', newValue, settingsKeyToModify);
 						try {
-							const id = await db.settings.put(
-								{ key: settingsKeyToModify, value: newValue }, 
+							let id = await db.settings.put(
+								{ key: 'scaleWidth', value: newScaleWidthDbValue }, 
+							);
+							console.log('new id =', id);
+							id = await db.settings.put(
+								{ key: 'scaleHeight', value: newScaleHeightDbValue }, 
 							);
 							console.log('new id =', id);
 						} catch(error) {
@@ -977,10 +1012,9 @@ function Adjust({
 			{ 
 				loadedInitialData && 
 				allRelevantValidationsPassed &&
-				<div className="has-text-centered	">
+				<div className="has-text-centered-">
 					<div className="box">
-				<p>chosenEntryIdIsValid = {chosenEntryIdIsValid ? 'true' : 'false' }</p>
-				<p>adjustmentImageCropAndScalingIsValid = {validationResults.adjustmentImageCropAndScalingIsValid  ? 'true' : 'false'}</p>
+				<p className="my-4">The selected entry will be used as the basis for scaling and cropping all the other entries. Additionally, all entries will aligned to the selected entry.</p>
 			<div className="field has-addons has-addons-centered">
 				<div className="control">
 					<div className="select">
@@ -1024,50 +1058,102 @@ function Adjust({
 			{
 				validationResults.adjustmentImageCropAndScalingIsValid && 
 			<>
+			<h3 className="title is-5">Scaling</h3>
+			<div className="field is-grouped is-grouped-centered">
 			<div className="field is-horizontal">
 				<div className="field-label">
-					<label>
+					<label className="label">
 						Width:
 					</label>
 				</div>
 				<div className="field-body">
-				<div className="control">
-						<input 
-							type="number" 
-							value={scaleWidth} 
-							data-settings-key-to-modify="scaleWidth" 
-							onChange={handleInputChange} 
-						/>
-				</div>
+					<div className="field">
+						<div className="control">
+							<input 
+								type="number" 
+								className="input"
+								value={scaleWidth} 
+								data-settings-key-to-modify="scaleWidth" 
+								onChange={handleInputChange} 
+							/>
+						</div>
+					</div>
 				</div>
 			</div>
+			<div className="control">
+				<button
+					type="button"
+					className={`button ${ aspectRatioIsLocked ? 'is-success' : 'is-black'} is-outlined`}
+					aria-label={ aspectRatioIsLocked ? 'Aspect ratio locked.' : 'Aspect Ratio unlockd' }
+					onClick={ () => {
+						setAspectRatioIsLocked((currentValue) => {
+								console.warn('UPDATING  ORIGINAL DIMENSIONS!');
+								const parsedScaleWidth = parseFloat(scaleWidth);
+								const parsedScaleHeight = parseFloat(scaleHeight);
+								console.warn(`parsedScaleWidth = ${parsedScaleWidth}, parsedScaleHeight = ${parsedScaleHeight}`);
+								if(!isNaN(parsedScaleWidth)) {
+									setSelectedImageOriginalWidth(parseFloat(scaleWidth));
+								}
+								if(!isNaN(parsedScaleHeight)) {
+									setSelectedImageOriginalHeight(parseFloat(scaleHeight));
+								}
+							return !currentValue
+						})	
+					}}
+				>
+					{ 
+						aspectRatioIsLocked ? 
+						<FontAwesomeIcon icon={faLock} />
+						: 
+						<FontAwesomeIcon icon={faLockOpen} />
+					}
+				</button>
+			</div>
 			<div className="field is-horizontal">
-				<div className="label">
-					<label>
+				<div className="field-label">
+					<label className="label">
 						Height:
 					</label>
 				</div>
+				<div className="field-body">
+				<div className="field">
 				<div className="control">
 				<input 
 					type="number" 
+					className="input"
 					value={scaleHeight} 
 					data-settings-key-to-modify="scaleHeight" 
 					onChange={handleInputChange} 
 				/>
 				</div>
+				</div>
+				</div>
 			</div>
+			</div>
+			
+			<div className="field is-grouped is-grouped-centered">
+			<div className="control has-icons-right">
 			<button
 				type="button"
+				className={`button ${cropAdjustActive ? 'is-success' : ''}`}
 				onClick={handleAdjustCropping}
 			>
-				Adjust Cropping { cropAdjustActive ? 'Y' : 'N' }
+				<FontAwesomeIcon icon={faCropSimple} />&nbsp;
+				Adjust Cropping 
 			</button>
+			</div>
+			
+			<div className="control">
 			<button
 				type="button"
+				className="button"
 				onClick={handleSetCropToCorners}
 			>
 				Reset Crop to Corners
 			</button>
+			</div>
+			</div>
+
 			<div className={styles.cropImageArea}>
 				<div
 					ref={loadingIndicatorRef} 
@@ -1176,6 +1262,8 @@ function Adjust({
 			</div>
 				</>
 				}
+				<p>chosenEntryIdIsValid = {chosenEntryIdIsValid ? 'true' : 'false' }</p>
+				<p>adjustmentImageCropAndScalingIsValid = {validationResults.adjustmentImageCropAndScalingIsValid  ? 'true' : 'false'}</p>
 			</div>
 			</div>
 			}
