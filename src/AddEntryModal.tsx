@@ -19,6 +19,15 @@ import {
 	useParams
 } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+	fa1,
+	fa2,
+	fa3,
+	faSquare,
+	faCircle,
+} from '@fortawesome/free-solid-svg-icons'
+
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
@@ -27,7 +36,7 @@ import MarkImageComponent from './MarkImageComponent';
 import UpdateEntryDataComponent from './UpdateEntryDataComponent';
 import { EntryValidationErrorsList } from './Common';
 
-import styles from './AddEntryModal.module.css';
+import styles from './AddEntryModal.module.scss';
 
 type AddEntryModalAttributes = {
 	globalState: GlobalState,
@@ -138,12 +147,35 @@ function AddEntryModal({
 				</div>
 				<div className={`modal-card-body ${styles.main}`}>
 					{/*<p>currentEntry = {JSON.stringify(currentEntry)}</p>*/}
-					<p>Updating entry with entryId = {entryId}</p>
-					<NavLink to="./image" className={styles.addEntryStepLink}>Change Image</NavLink>
-					&gt;
-					<NavLink to="./mark" className={styles.addEntryStepLink}>Mark Image</NavLink>
-					&gt;
-					<NavLink to="./updateinfo" className={styles.addEntryStepLink}>Update Data</NavLink>
+					{/*<p>Updating entry with entryId = {entryId}</p>*/}
+					<div className="tabs is-centered is-toggle is-toggle-rounded is-boxed">
+					  <ul>
+							<li>
+								<NavLink to="./image" className={styles.addEntryStepLink}>
+									<span className="icon">
+										<FontAwesomeIcon icon={fa1}/>
+									</span>
+									<span>Change Image</span>
+								</NavLink>
+							</li>
+							<li>
+								<NavLink to="./mark" className={styles.addEntryStepLink}>
+									<span className="icon">
+										<FontAwesomeIcon icon={fa2}/>
+									</span>
+									<span>Mark Image</span>
+								</NavLink>
+							</li>
+							<li>
+								<NavLink to="./updateinfo" className={styles.addEntryStepLink}>
+									<span className="icon">
+										<FontAwesomeIcon icon={fa3}/>
+									</span>
+									<span>Update Data</span>
+								</NavLink>
+							</li>
+						</ul>
+					</div>
 					<Routes>
 						<Route path="/image" element={
 							<ChangeImageComponent
