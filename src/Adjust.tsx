@@ -12,7 +12,13 @@ import
 from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCropSimple, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons'
+import { 
+	faCropSimple, 
+	faLock, 
+	faUnlock ,
+	faArrowLeftLong,
+	faArrowRightLong,
+} from '@fortawesome/free-solid-svg-icons'
 
 import { db, Entry, Setting } from './db';
 import { GlobalState  } from './App';
@@ -34,7 +40,6 @@ function Adjust({
 	setGlobalState
 }:AdjustAttributes) {
 	let [loadedInitialData, setLoadedInitialData] = useState(false);
-	let [chosenEntryIdIsValid, setChosenEntryIdIsValid] = useState(false);
 	let [cropAdjustActive, setCropAdjustActive] = useState(false);
 	let [currentSelectValue, setCurrentSelectValue] = useState(-1);
 	let [scaleWidth, setScaleWidth] = useState('0');
@@ -48,7 +53,8 @@ function Adjust({
 	let [aspectRatioIsLocked, setAspectRatioIsLocked] = useState(true);
 	let [selectedImageBaseWidth, setSelectedImageBaseWidth] = useState(0);
 	let [selectedImageBaseHeight, setSelectedImageBaseHeight] = useState(0);
-	
+	let [selectedEntryHasImage, setSelectedEntryHasImage] = useState(false);
+
 	let topLeftCornerCoordinateRef
 		= useRef<Coordinate>({// x: 25, y: 25});
 				x: globalState.settings.topLeftCornerCropCoordinateX as number,
@@ -323,41 +329,42 @@ function Adjust({
 			const newEntry = await db.entries.get( parseInt(imageSelectRef.current.value) );
 			//console.log('newEntry = ');
 			//console.dir(newEntry);
-			if(newEntry && newEntry.imageBlob) {
-				//setIsLoaded(false);
-				/*const chosenCropImageDataId = await db.settings.put(
-					{ key: "chosenCropImageData", value: newEntry.image }
-				);*/
-				let image = new Image();
-				//console.dir(image);
-				image.onload = async () => {
-					console.log('image width = ',image.naturalWidth, 'image height = ', image.naturalHeight);
-					setSelectedImageBaseWidth(image.naturalWidth);
-					setSelectedImageBaseHeight(image.naturalHeight);
-					try {
-						const id = await db.settings.put(
-							{ key: "scaleWidth", value: image.naturalWidth }
+			if(newEntry) {
+				if(newEntry.imageBlob) {
+					setSelectedEntryHasImage(true);
+					let image = new Image();
+					//console.dir(image);
+					image.onload = async () => {
+						console.log('image width = ',image.naturalWidth, 'image height = ', image.naturalHeight);
+						setSelectedImageBaseWidth(image.naturalWidth);
+						setSelectedImageBaseHeight(image.naturalHeight);
+						try {
+							const id = await db.settings.put(
+								{ key: "scaleWidth", value: image.naturalWidth }
+							);
+							const id2 = await db.settings.put(
+								{ key: "scaleHeight", value: image.naturalHeight }
+							);
+							console.log('new id1 =', id, 'new id2 = ', id2);
+						} catch(error) {
+							console.error(`failed to add db entry. ${error}`);
+						}
+						let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(
+							image.naturalWidth, 
+							image.naturalHeight
 						);
-						const id2 = await db.settings.put(
-							{ key: "scaleHeight", value: image.naturalHeight }
-						);
-						console.log('new id1 =', id, 'new id2 = ', id2);
-					} catch(error) {
-						console.error(`failed to add db entry. ${error}`);
+						if(newEntry && newEntry.imageBlob) {
+							//setScaledImageData(newEntry.image);
+							setScaledImageData(newEntry.imageBlob);
+							setScaledImageDataUrl(newEntry.imageBlob ? URL.createObjectURL(newEntry.imageBlob) : '');
+						}
+						initialized.current = false;
 					}
-					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(
-						image.naturalWidth, 
-						image.naturalHeight
-					);
-					if(newEntry && newEntry.imageBlob) {
-						//setScaledImageData(newEntry.image);
-						setScaledImageData(newEntry.imageBlob);
-						setScaledImageDataUrl(newEntry.imageBlob ? URL.createObjectURL(newEntry.imageBlob) : '');
-					}
-					initialized.current = false;
+					//image.src = newEntry.image;
+					image.src = URL.createObjectURL(newEntry.imageBlob);
+				} else {
+					setSelectedEntryHasImage(false);
 				}
-				//image.src = newEntry.image;
-				image.src = URL.createObjectURL(newEntry.imageBlob);
 			}
 		}
 		console.groupEnd();
@@ -953,7 +960,6 @@ function Adjust({
 	//console.log('RENDER!');
 	const allRelevantValidationsPassed = 
 		validationResults.moreThanZeroEntries
-		&& validationResults.allEntriesHaveImageBlob;
 		/*
 		&& validationResults.allEntriesHaveAlignedImageBlob 
 		&& validationResults.allEntriesHaveDate
@@ -980,7 +986,7 @@ function Adjust({
 						validationResults={validationResults}
 						setValidationResults={setValidationResults}
 						showOnlyErrors={true}
-						displayOnlyTheseValidations={['moreThanZeroEntries','allEntriesHaveImageBlob']}
+						displayOnlyTheseValidations={['moreThanZeroEntries']}
 					/>
 				</div>
 			</div>
@@ -1004,8 +1010,9 @@ function Adjust({
 				allRelevantValidationsPassed &&
 				<div className="has-text-centered-">
 					<div className="box">
-				<p className="my-4">The selected entry will be used as the basis for scaling and cropping all the other entries. Additionally, all entries will aligned to the selected entry.</p>
-			<div className="field has-addons has-addons-centered">
+					<h3 className="title is-5">Selected Entry as Base For Adjustments</h3>
+				<p className="mb-4">The selected entry will be used as the basis for scaling and cropping all the other entries. Additionally, all entries will aligned to the selected entry.</p>
+			<div className="field has-addons">
 				<div className="control">
 					<div className="select">
 						<select 
@@ -1032,7 +1039,7 @@ function Adjust({
 						className="button is-primary"
 						onClick={handleSelectImage}
 					>
-						Set Entry as Base for Adjustments
+						Select Entry
 					</button>
 				</div>
 			</div>
@@ -1048,16 +1055,10 @@ function Adjust({
 			{
 				validationResults.adjustmentImageCropAndScalingIsValid && 
 			<>
-			<h3 className="title is-5">Scaling</h3>
-			<div className="field is-grouped is-grouped-centered">
-			<div className="field is-horizontal">
-				<div className="field-label">
-					<label className="label">
-						Width:
-					</label>
-				</div>
-				<div className="field-body">
-					<div className="field">
+			<h3 className="title is-5">Scale & Crop Image From Selected Entry</h3>
+			<div className="field">
+			<label className="label">Scale Width & Height</label>
+			<div className="field has-addons">
 						<div className="control">
 							<input 
 								type="number" 
@@ -1067,14 +1068,11 @@ function Adjust({
 								onChange={handleScaleDimensionInputChange} 
 							/>
 						</div>
-					</div>
-				</div>
-			</div>
 			<div className="control">
 				<button
 					type="button"
-					className={`button ${ aspectRatioIsLocked ? 'is-success' : 'is-black'} is-outlined`}
-					aria-label={ aspectRatioIsLocked ? 'Aspect ratio locked.' : 'Aspect Ratio unlockd' }
+					className={`button ${ aspectRatioIsLocked ? 'is-success' : 'is-dark'}`}
+					aria-label={ aspectRatioIsLocked ? 'Aspect ratio locked' : 'Aspect ratio unlockd' }
 					onClick={ () => {
 						setAspectRatioIsLocked((currentValue) => {
 							console.log('Updating original image dimensions');
@@ -1092,22 +1090,16 @@ function Adjust({
 						})	
 					}}
 				>
+					<FontAwesomeIcon icon={faArrowLeftLong} />
 					{ 
 						aspectRatioIsLocked ? 
 						<FontAwesomeIcon icon={faLock} />
 						: 
-						<FontAwesomeIcon icon={faLockOpen} />
+						<FontAwesomeIcon icon={faUnlock} />
 					}
+					<FontAwesomeIcon icon={faArrowRightLong} />
 				</button>
 			</div>
-			<div className="field is-horizontal">
-				<div className="field-label">
-					<label className="label">
-						Height:
-					</label>
-				</div>
-				<div className="field-body">
-				<div className="field">
 				<div className="control">
 				<input 
 					type="number" 
@@ -1117,12 +1109,12 @@ function Adjust({
 					onChange={handleScaleDimensionInputChange} 
 				/>
 				</div>
-				</div>
-				</div>
 			</div>
 			</div>
-			
-			<div className="field is-grouped is-grouped-centered">
+		
+			<div className="field">
+			<label className="label">Cropping</label>	
+			<div className="field is-grouped">
 			<div className="control has-icons-right">
 			<button
 				type="button"
@@ -1144,6 +1136,7 @@ function Adjust({
 			</button>
 			</div>
 			</div>
+			</div>
 
 			<div className={styles.cropImageArea}>
 				<div
@@ -1153,7 +1146,13 @@ function Adjust({
 						style={{
 							fontSize: '2rem',
 							fontWeight: 'bold',
-					}}>LOADING IMAGE...</p>
+					}}>
+						{ selectedEntryHasImage ?
+								'LOADING IMAGE...'
+								:
+								'Selected entry doesn\'t doesnt have an image'
+						}
+						</p>
 				</div>
 				<div 
 					ref={currentCropImageContainerRef}
@@ -1249,12 +1248,10 @@ function Adjust({
 					>
 					</div>
 				</div>
-				<p>{currentEntry?.id} date = {currentEntry?.date}</p>
+				<p className="is-italic">Entry Id = '{currentEntry?.id}' Date = '{currentEntry?.date}'</p>
 			</div>
 				</>
 				}
-				<p>chosenEntryIdIsValid = {chosenEntryIdIsValid ? 'true' : 'false' }</p>
-				<p>adjustmentImageCropAndScalingIsValid = {validationResults.adjustmentImageCropAndScalingIsValid  ? 'true' : 'false'}</p>
 			</div>
 			</div>
 			}
