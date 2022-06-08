@@ -46,8 +46,8 @@ function Adjust({
 	let [scaledImageDataUrl, setScaledImageDataUrl] = useState<string>('');
 	let [validationResults, setValidationResults] = useState<ValidationResults>(defaultValidationResults);
 	let [aspectRatioIsLocked, setAspectRatioIsLocked] = useState(true);
-	let [selectedImageOriginalWidth, setSelectedImageOriginalWidth] = useState(0);
-	let [selectedImageOriginalHeight, setSelectedImageOriginalHeight] = useState(0);
+	let [selectedImageBaseWidth, setSelectedImageBaseWidth] = useState(0);
+	let [selectedImageBaseHeight, setSelectedImageBaseHeight] = useState(0);
 	
 	let topLeftCornerCoordinateRef
 		= useRef<Coordinate>({// x: 25, y: 25});
@@ -332,8 +332,8 @@ function Adjust({
 				//console.dir(image);
 				image.onload = async () => {
 					console.log('image width = ',image.naturalWidth, 'image height = ', image.naturalHeight);
-					setSelectedImageOriginalWidth(image.naturalWidth);
-					setSelectedImageOriginalHeight(image.naturalHeight);
+					setSelectedImageBaseWidth(image.naturalWidth);
+					setSelectedImageBaseHeight(image.naturalHeight);
 					try {
 						const id = await db.settings.put(
 							{ key: "scaleWidth", value: image.naturalWidth }
@@ -342,28 +342,19 @@ function Adjust({
 							{ key: "scaleHeight", value: image.naturalHeight }
 						);
 						console.log('new id1 =', id, 'new id2 = ', id2);
-						//activeCornerControlRef.current = 'all';
-						//updateAdjustmentImageCornerCoordinates();
-						//setCropCoordinatesToImageCorners();
-						//setRenderTrigger(Date.now());
-
 					} catch(error) {
 						console.error(`failed to add db entry. ${error}`);
 					}
-					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(image.naturalWidth, image.naturalHeight);
+					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(
+						image.naturalWidth, 
+						image.naturalHeight
+					);
 					if(newEntry && newEntry.imageBlob) {
 						//setScaledImageData(newEntry.image);
 						setScaledImageData(newEntry.imageBlob);
 						setScaledImageDataUrl(newEntry.imageBlob ? URL.createObjectURL(newEntry.imageBlob) : '');
 					}
 					initialized.current = false;
-					/*
- 					activeCornerControlRef.current = 'all';
-					updateAdjustmentImageCornerCoordinates();
-					setCropCoordinatesToImageCorners();
-					setRenderTrigger(Date.now());
-					needToResetCornerCoordinatesRef.current = true;
-					*/
 				}
 				//image.src = newEntry.image;
 				image.src = URL.createObjectURL(newEntry.imageBlob);
@@ -377,8 +368,8 @@ function Adjust({
 	};
 	
 	let debounceInputTimeout = useRef(0);
-	const handleInputChange = async (event:ChangeEvent<HTMLInputElement>) => {
-		console.group('handleInputChange() called');
+	const handleScaleDimensionInputChange = async (event:ChangeEvent<HTMLInputElement>) => {
+		console.group('handleScaleDimensionInputChange() called');
 		if(
 			event.target
 			&& event.target instanceof HTMLInputElement
@@ -388,15 +379,15 @@ function Adjust({
 			let newValue = event.target.value;
 			let newScaleWidthDbValue = scaleWidth;
 			let newScaleHeightDbValue = scaleHeight;
-			console.log('settingsKeyToModify = ', settingsKeyToModify);
-			console.log('value = ', newValue);
-			console.log('aspectRatioIsLocked = ',aspectRatioIsLocked);
+			//console.log('settingsKeyToModify = ', settingsKeyToModify);
+			//console.log('value = ', newValue);
+			//console.log('aspectRatioIsLocked = ',aspectRatioIsLocked);
 			if(event.target.dataset.settingsKeyToModify === 'scaleWidth') {
-				console.log('prev scaleWidth = ', scaleWidth);
-				const widthRatio = selectedImageOriginalWidth/parseFloat(newValue);
-				console.warn('widthRatio = ', widthRatio);
+				//console.log('prev scaleWidth = ', scaleWidth);
+				const widthRatio = selectedImageBaseWidth/parseFloat(newValue);
+				//console.warn('widthRatio = ', widthRatio);
 				if(!isNaN(widthRatio) && aspectRatioIsLocked) {
-					const newScaleHeight = selectedImageOriginalHeight/widthRatio;
+					const newScaleHeight = selectedImageBaseHeight/widthRatio;
 					if(!isNaN(newScaleHeight)) {
 						setScaleHeight(String(newScaleHeight));
 						newScaleHeightDbValue = String(newScaleHeight);
@@ -405,11 +396,11 @@ function Adjust({
 				setScaleWidth(newValue);
 				newScaleWidthDbValue = String(newValue);
 			} else if(event.target.dataset.settingsKeyToModify === 'scaleHeight') {
-				console.log('prev scaleHeight = ', scaleHeight);
-				const heightRatio = selectedImageOriginalHeight/parseFloat(newValue);
-				console.warn('heightRatio = ', heightRatio);
+				//console.log('prev scaleHeight = ', scaleHeight);
+				const heightRatio = selectedImageBaseHeight/parseFloat(newValue);
+				//console.warn('heightRatio = ', heightRatio);
 				if(!isNaN(heightRatio) && aspectRatioIsLocked) {
-					const newScaleWidth = selectedImageOriginalWidth/heightRatio;
+					const newScaleWidth = selectedImageBaseWidth/heightRatio;
 					if(!isNaN(newScaleWidth)) {
 						setScaleWidth(String(newScaleWidth));
 						newScaleWidthDbValue = String(newScaleWidth);
@@ -419,38 +410,37 @@ function Adjust({
 				newScaleHeightDbValue = String(newValue);
 			}
 			clearTimeout(debounceInputTimeout.current);
-			let modifyDbValueHandler = async () => {
-					console.log('fire update db with new input', newValue, settingsKeyToModify);
-						try {
-							let id = await db.settings.put(
-								{ key: 'scaleWidth', value: newScaleWidthDbValue }, 
-							);
-							console.log('new id =', id);
-							id = await db.settings.put(
-								{ key: 'scaleHeight', value: newScaleHeightDbValue }, 
-							);
-							console.log('new id =', id);
-						} catch(error) {
-							console.error(`failed to add db entry. ${error}`);
-						}
-			//Promise.all([
+			const modifyDbValueHandler = async () => {
+				console.log('fire update db with new input', newValue, settingsKeyToModify);
+				try {
+					let id = await db.settings.put(
+						{ key: 'scaleWidth', value: newScaleWidthDbValue }, 
+					);
+					console.log('new id =', id);
+					id = await db.settings.put(
+						{ key: 'scaleHeight', value: newScaleHeightDbValue }, 
+					);
+					console.log('new id =', id);
+				} catch(error) {
+					console.error(`failed to add db entry. ${error}`);
+				}
 				let _scaleWidthSetting = await db.settings.get('scaleWidth');
 				let _scaleHeightSetting = await db.settings.get('scaleHeight');
 				let _chosenEntryIdForAdjustments = await db.settings.get('chosenEntryIdForAdjustments');
-			/*]).then(([
-				_scaleWidthSetting,
-				_scaleHeightSetting,
-				_chosenEntryIdForAdjustments
-			]) => {*/
-				if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
+				if(
+					_scaleWidthSetting 
+					&& _scaleHeightSetting 
+					&& _chosenEntryIdForAdjustments 
+					&& _chosenEntryIdForAdjustments.value
+				) {
 					await scaleChosenImage(_scaleWidthSetting, _scaleHeightSetting, _chosenEntryIdForAdjustments);
-					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(_scaleWidthSetting.value as number, _scaleHeightSetting.value as number);
+					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(
+						_scaleWidthSetting.value as number, 
+						_scaleHeightSetting.value as number
+					);
 				}
-			//});
 			};
-
-
-			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);
+			debounceInputTimeout.current = window.setTimeout(modifyDbValueHandler, 500);
 		}
 		console.groupEnd();
 	};
@@ -1074,7 +1064,7 @@ function Adjust({
 								className="input"
 								value={scaleWidth} 
 								data-settings-key-to-modify="scaleWidth" 
-								onChange={handleInputChange} 
+								onChange={handleScaleDimensionInputChange} 
 							/>
 						</div>
 					</div>
@@ -1087,16 +1077,17 @@ function Adjust({
 					aria-label={ aspectRatioIsLocked ? 'Aspect ratio locked.' : 'Aspect Ratio unlockd' }
 					onClick={ () => {
 						setAspectRatioIsLocked((currentValue) => {
-								console.warn('UPDATING  ORIGINAL DIMENSIONS!');
-								const parsedScaleWidth = parseFloat(scaleWidth);
-								const parsedScaleHeight = parseFloat(scaleHeight);
-								console.warn(`parsedScaleWidth = ${parsedScaleWidth}, parsedScaleHeight = ${parsedScaleHeight}`);
-								if(!isNaN(parsedScaleWidth)) {
-									setSelectedImageOriginalWidth(parseFloat(scaleWidth));
-								}
-								if(!isNaN(parsedScaleHeight)) {
-									setSelectedImageOriginalHeight(parseFloat(scaleHeight));
-								}
+							console.log('Updating original image dimensions');
+							const parsedScaleWidth = parseFloat(scaleWidth);
+							const parsedScaleHeight = parseFloat(scaleHeight);
+							console.log(`parsedScaleWidth = ${parsedScaleWidth}`);
+							console.log(`parsedScaleHeight = ${parsedScaleHeight}`);
+							if(!isNaN(parsedScaleWidth)) {
+								setSelectedImageBaseWidth(parseFloat(scaleWidth));
+							}
+							if(!isNaN(parsedScaleHeight)) {
+								setSelectedImageBaseHeight(parseFloat(scaleHeight));
+							}
 							return !currentValue
 						})	
 					}}
@@ -1123,7 +1114,7 @@ function Adjust({
 					className="input"
 					value={scaleHeight} 
 					data-settings-key-to-modify="scaleHeight" 
-					onChange={handleInputChange} 
+					onChange={handleScaleDimensionInputChange} 
 				/>
 				</div>
 				</div>
