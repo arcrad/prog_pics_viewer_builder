@@ -93,7 +93,7 @@ function Export({
 	let [videoIsReady, setVideoIsReady] = useState<boolean>(false);
 	let [entries, setEntries] = useState<Entry[]|null>(null);
 	let [entriesProcessed, setEntriesProcessed] = useState(0);
-	let [validationResults, setValidationResults] = useState<ValidationResults>(defaultValidationResults);
+	let [validationResults, setValidationResults] = useState<ValidationResults>({});
 	let [frameDuration, setFrameDuration] = useState<number>(150);
 	let [overlayFrameNumberIsChecked, setOverlayFrameNumberIsChecked] = useState<boolean>(false);
 	let [overlayEntryInfoIsChecked, setOverlayEntryInfoIsChecked] = useState<boolean>(false);
@@ -698,6 +698,7 @@ function Export({
 				]}
 			/>
 			{
+				Object.keys(validationResults).length > 0 &&
 				!allRelevantValidationsPassed && 
 				<p>There are validation errors that must be fixed before a timelapse can be exported.</p>
 			}

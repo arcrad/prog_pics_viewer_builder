@@ -49,7 +49,7 @@ function Adjust({
 	let [cropCornerCoordinatesInitialized, setCropCornerCoordinatesInitialized] = useState(false);
 	let [scaledImageData, setScaledImageData] = useState<Blob | null>(null);
 	let [scaledImageDataUrl, setScaledImageDataUrl] = useState<string>('');
-	let [validationResults, setValidationResults] = useState<ValidationResults>(defaultValidationResults);
+	let [validationResults, setValidationResults] = useState<ValidationResults>({});
 	let [aspectRatioIsLocked, setAspectRatioIsLocked] = useState(true);
 	let [selectedImageBaseWidth, setSelectedImageBaseWidth] = useState(0);
 	let [selectedImageBaseHeight, setSelectedImageBaseHeight] = useState(0);
@@ -993,6 +993,7 @@ function Adjust({
 		<div className="columns is-mobile is-centered">
 			<div className="column is-11-mobile is-10-tablet is-8-desktop">
 			{
+				Object.keys(validationResults).length > 0 && 
 				!allRelevantValidationsPassed &&
 				<div className="message is-danger">
 					<div className="message-body">

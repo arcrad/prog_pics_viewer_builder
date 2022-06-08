@@ -20,16 +20,16 @@ import { GlobalState } from './App';
 //import './EntriesValidator.css';
 
 export type ValidationResults = {
-	[key: string]: boolean;
-	moreThanZeroEntries: boolean;
-	allEntriesHaveImageBlob: boolean;
-	allEntriesHaveThumbImageBlob: boolean;
-	allEntriesHaveAlignedImageBlob: boolean;
-	allEntriesHaveDate: boolean;
-	allEntriesHaveWeight: boolean;
-	allEntriesHaveAllMarks: boolean;
-	adjustmentImageCropAndScalingChosen: boolean;
-	adjustmentImageCropAndScalingIsValid: boolean;
+	[key: string]: boolean|undefined;
+	moreThanZeroEntries?: boolean;
+	allEntriesHaveImageBlob?: boolean;
+	allEntriesHaveThumbImageBlob?: boolean;
+	allEntriesHaveAlignedImageBlob?: boolean;
+	allEntriesHaveDate?: boolean;
+	allEntriesHaveWeight?: boolean;
+	allEntriesHaveAllMarks?: boolean;
+	adjustmentImageCropAndScalingChosen?: boolean;
+	adjustmentImageCropAndScalingIsValid?: boolean;
 };
 
 export const defaultValidationResults:ValidationResults = {

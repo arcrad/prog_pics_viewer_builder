@@ -29,7 +29,7 @@ function Viewer({
 	let [allEntriesHaveAlignedImage, setAllEntriesHaveAlignedImage] = useState(false);
 	let [entriesWithAlignedImageCount, setEntriesWithAlignedImageCount] = useState(0);
 	let [cancelProcessingRequested, setCancelProcessingRequested] = useState(false);
-	let [validationResults, setValidationResults] = useState<ValidationResults>(defaultValidationResults);
+	let [validationResults, setValidationResults] = useState<ValidationResults>({});
 
 	const initializedRef = useRef(false);
 	const originalCoordinatesFromDbRef = useRef<any[]>([]);
@@ -415,6 +415,7 @@ function Viewer({
 				<p>You must select an entry as the base for scaling and cropping.</p>*/
 			}
 			{
+				Object.keys(validationResults).length > 0 &&
 				!allRelevantValidationsPassed &&
 				<div className="message is-danger">
 					<div className="message-body">
