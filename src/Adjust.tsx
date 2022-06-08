@@ -478,6 +478,14 @@ function Adjust({
 	, [chosenEntryIdForAdjustments]);
 
 	useEffect( () => {
+		if(currentEntry && currentEntry.imageBlob) {
+			setSelectedEntryHasImage(true);
+		} else {
+			setSelectedEntryHasImage(false);
+		}
+	}, [currentEntry]);
+
+	useEffect( () => {
 		//fetch all initial data and then set intializedData flag 	
 		console.warn('INITIALIZER FIRED!');
 		if(initialized.current) {
@@ -975,7 +983,7 @@ function Adjust({
 			<div className="hero is-small is-primary">
 				<div className="hero-body">
     		<h2 className="title">Adjust</h2>
-				<p className="subtitle">All images must be cropped and/or scaled to be the same size. On this page, configure the desired size and, if needed, cropping. Current chosenEntryIdForAdjustments = {chosenEntryIdForAdjustments?.value}</p>
+				<p className="subtitle">All images must be cropped and/or scaled to be the same size. On this page, configure the desired size and, if needed, cropping.</p>
 				</div>
 			</div>
 			</div>
@@ -1143,13 +1151,9 @@ function Adjust({
 				<div
 					ref={loadingIndicatorRef} 
 				>
-					<p
-						style={{
-							fontSize: '2rem',
-							fontWeight: 'bold',
-					}}>
+					<p className="is-size-3">
 						{ selectedEntryHasImage ?
-								'LOADING IMAGE...'
+								'Loading image...'
 								:
 								'Selected entry doesn\'t doesnt have an image'
 						}
@@ -1163,18 +1167,18 @@ function Adjust({
 					}}
 				>
 					<img 
-						src={ scaledImageDataUrl }
+						src={scaledImageDataUrl}
 						ref={currentCropImageRef}
 						onLoad={ () => {
 							console.log('img onload fired!');
-				//			updateScaledCornerCropCoordinates();
-				loadCropCoordinatesFromDb().then( () => {
-					console.log('after loadCropCordinates resolves');
-					updateAdjustmentImageCornerCoordinates();
-					updateScaledCornerCropCoordinates();
-					setRenderTrigger(Date.now());
-					resizeDebounceTimeoutId.current = 0;
-				});
+							//updateScaledCornerCropCoordinates();
+							loadCropCoordinatesFromDb().then( () => {
+								console.log('after loadCropCordinates resolves');
+								updateAdjustmentImageCornerCoordinates();
+								updateScaledCornerCropCoordinates();
+								setRenderTrigger(Date.now());
+								resizeDebounceTimeoutId.current = 0;
+							});
 							currentCropImageContainerRef.current?.classList.remove(styles.notVisible);
 							loadingIndicatorRef.current?.classList.add(styles.displayNone);
 							//setIsLoaded(true);
@@ -1250,6 +1254,7 @@ function Adjust({
 					</div>
 				</div>
 				<p className="is-italic">Entry Id = '{currentEntry?.id}' Date = '{currentEntry?.date}'</p>
+				<p className="is-italic">chosenEntryIdForAdjustments = {chosenEntryIdForAdjustments?.value}</p>
 			</div>
 				</>
 				}
