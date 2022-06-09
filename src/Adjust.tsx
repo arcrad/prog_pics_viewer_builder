@@ -1019,7 +1019,7 @@ function Adjust({
 				allRelevantValidationsPassed &&
 				<div className="has-text-centered-">
 					<div className="box">
-					<h3 className="title is-5">Selected Entry as Base For Adjustments</h3>
+					<h2 className="title is-5">Selected Entry as Base For Adjustments</h2>
 				<p className="mb-4">The selected entry will be used as the basis for scaling and cropping all the other entries. Additionally, all entries will aligned to the selected entry.</p>
 			<div className="field has-addons">
 				<div className="control">
@@ -1064,7 +1064,7 @@ function Adjust({
 			{
 				validationResults.adjustmentImageCropAndScalingIsValid && 
 			<>
-			<h3 className="title is-5">Scale & Crop Image From Selected Entry</h3>
+			<h2 className="title is-5">Scale & Crop Image From Selected Entry</h2>
 			<div className="field">
 			<label className="label">Scale Width & Height</label>
 			<div className="field has-addons">

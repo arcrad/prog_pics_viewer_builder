@@ -82,3 +82,5 @@
 +update adjust component so that it warns if current chosenEntryIdForAdjustments value is invalid (not an existing entry id)
 
 +fix jank when loading EntriesValidator component before validations finish and/or during transition from loading to finished
+
++ensure label elements are attached to the fields they label (aria)

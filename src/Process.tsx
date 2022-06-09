@@ -434,9 +434,9 @@ function Viewer({
 			{ 
 				allRelevantValidationsPassed &&
 				loadedData && 
-				<div className="has-text-centered	">
+				<div>
 					<div className="box">
-					<div className="field is-grouped is-grouped-centered is-flex-direction-column-mobile">
+					<div className="field is-grouped is-flex-direction-column-mobile">
 						<div className="control">
 							<button
 								type="button"
@@ -485,7 +485,7 @@ function Viewer({
 					</div>
 					</div>
 					<div className="block">
-					<h2 className="title is-4">Processed Entries Preview</h2>
+					<h2 className="title is-5">Processed Entries Preview</h2>
 					<p>
 						{entriesWithAlignedImageCount} of {totalEntries} entries have an aligned image.
 					</p>
@@ -514,7 +514,7 @@ function Viewer({
 						<div className="block">
 							<img src={currentImage} style={{maxWidth: '50%', maxHeight: '75vh'}}/>
 							<p className="mb-2">#{entries[currentEntry].id}: {(new Date(entries[currentEntry].date)).toLocaleString()}</p>
-							<div className="field has-addons has-addons-centered">
+							<div className="field has-addons">
 								<div className="control">
 									<button 
 										type="button" 

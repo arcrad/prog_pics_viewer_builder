@@ -680,96 +680,142 @@ function Export({
 		&& validationResults.adjustmentImageCropAndScalingChosen;
 
 	return (
-  	<div>
-    	<h2>Export Time-lapse</h2>
-			<p>Multiple options for exporting the final time-lapse.</p>
-			<EntriesValidator
-				validationResults={validationResults}
-				setValidationResults={setValidationResults}
-				showOnlyErrors={true}
-				displayOnlyTheseValidations={[
-					'moreThanZeroEntries',
-					'allEntriesHaveImageBlob',
-					'allEntriesHaveAlignedImageBlob',
-					'allEntriesHaveDate',
-					'allEntriesHaveWeight',
-					'allEntriesHaveAllMarks',
-					'adjustmentImageCropAndScalingChosen'
-				]}
-			/>
-			{
-				Object.keys(validationResults).length > 0 &&
-				!allRelevantValidationsPassed && 
-				<p>There are validation errors that must be fixed before a timelapse can be exported.</p>
-			}
-			{
-				allRelevantValidationsPassed && 
-				!loadedInitialData && 
-				<>
-					<p>Loading...</p>
-				</>
-			}
-			{ 
-				allRelevantValidationsPassed && 
-				loadedInitialData && 
-				<>
-    			<h2>Export Video Locally (Experimental)</h2>
-					<p>Exports video of progress pictures completely in-browser and local to your device. Currently not very consistent at low frame durations (faster timelapse). Export occurs in real-time.</p>
-					<label> Frame Duration (ms):
-					<input
-						ref={frameDurationInputRef}
-						type="number"
-						value={frameDuration}
-						onChange={handleInputChange}
-						data-settings-key-to-modify="exportFrameDuration" 
-						max={MAX_FRAME_DURATION_MS}
-						min={MIN_FRAME_DURATION_MS}
+		<>
+			<div className="columns is-mobile is-centered">
+				<div className="column is-12">
+					<div className="hero is-small is-primary">
+						<div className="hero-body">
+    					<h2 className="title">Export Time-lapse</h2>
+							<p className="subtitle">Multiple options for exporting the final time-lapse.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="columns is-mobile is-centered">
+				<div className="column is-10-mobile is-8-tablet is-4-desktop">
+					<EntriesValidator
+						validationResults={validationResults}
+						setValidationResults={setValidationResults}
+						showOnlyErrors={true}
+						displayOnlyTheseValidations={[
+							'moreThanZeroEntries',
+							'allEntriesHaveImageBlob',
+							'allEntriesHaveAlignedImageBlob',
+							'allEntriesHaveDate',
+							'allEntriesHaveWeight',
+							'allEntriesHaveAllMarks',
+							'adjustmentImageCropAndScalingChosen'
+						]}
 					/>
-					</label><br/>
-					
-					
-					<label>Hold First Frame?:
-					<input
-						ref={holdFirstFrameInputRef}
-						type="checkbox"
-						value="true"
-						checked={holdFirstFrameIsChecked}
-						onChange={handleInputChange}
-						data-settings-key-to-modify="exportHoldFirstFrame" 
-					/>
-					</label>
-					<label> First Frame Hold Duration (ms):
-					<input
-						ref={firstFrameHoldDurationInputRef}
-						type="number"
-						value={firstFrameHoldDuration}
-						onChange={handleInputChange}
-						data-settings-key-to-modify="exportFirstFrameHoldDuration" 
-						max={MAX_FRAME_DURATION_MS}
-						min={MIN_FRAME_DURATION_MS}
-					/>
-					</label><br/>
-					<label>Hold Last Frame?:
-					<input
-						ref={holdLastFrameInputRef}
-						type="checkbox"
-						value="true"
-						checked={holdLastFrameIsChecked}
-						onChange={handleInputChange}
-						data-settings-key-to-modify="exportHoldLastFrame" 
-					/>
-					</label>
-					<label> Last Frame Hold Duration (ms):
-					<input
-						ref={lastFrameHoldDurationInputRef}
-						type="number"
-						value={lastFrameHoldDuration}
-						onChange={handleInputChange}
-						data-settings-key-to-modify="exportLastFrameHoldDuration" 
-						max={MAX_FRAME_DURATION_MS}
-						min={MIN_FRAME_DURATION_MS}
-					/>
-					</label><br/>
+				</div>
+			</div>
+			<div className="columns is-mobile is-centered">
+				<div className="column is-11-mobile is-10-tablet is-8-desktop">
+  				<div>
+						{
+							Object.keys(validationResults).length > 0 &&
+							!allRelevantValidationsPassed && 
+							<p>There are validation errors that must be fixed before a timelapse can be exported.</p>
+						}
+						{
+							allRelevantValidationsPassed && 
+							!loadedInitialData && 
+							<>
+								<p>Loading...</p>
+							</>
+						}
+						{ 
+							allRelevantValidationsPassed && 
+							loadedInitialData && 
+							<>
+							<div className="box">
+								<h2 className="title is-5">Export Video Locally (Experimental)</h2>
+								<p className="mb-5">Exports video of progress pictures completely in-browser and local to your device. Currently not very consistent at low frame durations (faster timelapse). Export occurs in real-time.</p>
+							<div className="field">
+								<label className="label">Frame Duration (ms):</label>
+								<div className="control">
+									<input
+										ref={frameDurationInputRef}
+										type="number"
+										className="input"
+										value={frameDuration}
+										onChange={handleInputChange}
+										data-settings-key-to-modify="exportFrameDuration" 
+										max={MAX_FRAME_DURATION_MS}
+										min={MIN_FRAME_DURATION_MS}
+									/>
+								</div>
+							</div>
+							<div className="field is-grouped">	
+								<div className="control">
+									<div className="field">
+										<label className="label">Hold First Frame?</label>
+											<div className="control">
+												<input
+													ref={holdFirstFrameInputRef}
+													type="checkbox"
+													value="true"
+													checked={holdFirstFrameIsChecked}
+													onChange={handleInputChange}
+													data-settings-key-to-modify="exportHoldFirstFrame" 
+												/>
+											</div>
+										</div>
+								</div>
+								<div className="control">
+									<div className="field">
+										<label className="label">First Frame Hold Duration (ms):</label>
+											<div className="control">
+												<input
+													ref={firstFrameHoldDurationInputRef}
+													type="number"
+													className="input"
+													value={firstFrameHoldDuration}
+													onChange={handleInputChange}
+													data-settings-key-to-modify="exportFirstFrameHoldDuration" 
+													max={MAX_FRAME_DURATION_MS}
+													min={MIN_FRAME_DURATION_MS}
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
+
+							<div className="field is-grouped">	
+								<div className="control">
+									<div className="field">
+										<label className="label">Hold Last Frame?</label>
+											<div className="control">
+												<input
+													ref={holdLastFrameInputRef}
+													type="checkbox"
+													value="true"
+													checked={holdLastFrameIsChecked}
+													onChange={handleInputChange}
+													data-settings-key-to-modify="exportHoldLastFrame" 
+												/>
+											</div>
+										</div>
+								</div>
+								<div className="control">
+									<div className="field">
+										<label className="label">Last Frame Hold Duration (ms):</label>
+											<div className="control">
+												<input
+													ref={lastFrameHoldDurationInputRef}
+													type="number"
+													className="input"
+													value={lastFrameHoldDuration}
+													onChange={handleInputChange}
+													data-settings-key-to-modify="exportLastFrameHoldDuration" 
+													max={MAX_FRAME_DURATION_MS}
+													min={MIN_FRAME_DURATION_MS}
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
+
 					<label>Overlay Frame Number?:
 					<input
 						ref={overlayFrameNumberInputRef}
@@ -793,32 +839,31 @@ function Export({
 					<p>Estimated video duration: {estimatedVideoDurationString}</p>
 					<button
 						type="button"
+						className="button is-primary"
 						onClick={handleExportVideo}
 					>
 						Export Video
 					</button><br/>
-					<label>Progress&nbsp;
-						<progress max={entries ? entries?.length-1 : 0} value={entriesProcessed}>
+					<label>Export Progress
+						<progress 
+							className="progress"
+							max={entries ? entries?.length-1 : 0} value={entriesProcessed}
+						>
 							{entriesProcessed} entries processed out of {entries ? entries?.length-1 : 0}
 						</progress>
 					</label>
-					<p>Status:</p>
-					<div style={{
-						border: '1px solid black',
-						padding: '0rem',
-						height: '5rem',
-						overflow: 'auto scroll'
-					}}>
-						<ul>
-						{
-							statusMessages?.slice(0).reverse().map( (message, index) => {
-								return <li key={index}>{message}</li>
-							})
+					<p>Export Log</p>
+					<textarea
+						className="textarea"
+						value={
+							statusMessages?.slice(0).reverse().reduce( (accumulator, curMessage) => {
+								return accumulator + curMessage + '\n';
+							}, '')
 						}
-						</ul>
-					</div>
+					>
+					</textarea>
 					<hr/>
-					<h2>Output Video</h2>
+					<h2 className="title is-5">Output Video</h2>
 					<video 
 						ref={videoElementRef} 
 						controls 
@@ -829,15 +874,21 @@ function Export({
 						}}
 					> 
 					</video>
-					<hr/>
-					<h2>Export Video Server-side</h2>
+				</div>
+				<div className="box">
+					<h2 className="title is-5">Export Video Server-side</h2>
 					<p><i>Not yet implemented.</i></p>
-					<hr/>
-					<h2>Upload Interactive Viewer</h2>
+				</div>
+				<div className="box">
+					<h2 className="title is-5">Upload Interactive Viewer</h2>
 					<p><i>Not yet implemented.</i></p>
+				</div>
 				</>
 			}
 		</div>
+		</div>
+		</div>
+		</>
   );
 }
 
