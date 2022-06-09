@@ -1,3 +1,4 @@
+@import "../node_modules/bulma/sass/utilities/derived-variables.sass";
 
 /*.modalOverlay {
 	background: rgba(0,0,0,0.5);
@@ -44,7 +45,6 @@
 }
 
 .addEntryStepLink[class~="active"] {
-/*	background: black;
+	background: $info;
 	color: #fff;
-	padding: 0.5rem;*/
 }

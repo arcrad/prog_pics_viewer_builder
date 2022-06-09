@@ -1,7 +1,19 @@
+@use "sass:map";
+@import "../node_modules/bulma/sass/utilities/initial-variables.sass";
+@import "../node_modules/bulma/sass/utilities/_all.sass";
+@import "../node_modules/bulma/sass/helpers/spacing.sass";
+
 :root {
 	background: #eff;
 }
 
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -15,20 +27,27 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+*/
 
-@import "../node_modules/bulma/sass/utilities/initial-variables.sass";
+/*crudely making up for deficiencies in standard bulma classes*/
+@include mobile {
+	.button.mt-2-mobile {
+		margin-top: map.get($spacing-values, "2");
+		border:1px solid red;
+	}
+	.is-flex-direction-column-mobile {
+		flex-direction: column;
+	}
+}
 
 /*make navbar display at full size at all break points*/
 $navbar-breakpoint: 0px;
-/*$tablet: 350px;*/
 
-@import "../node_modules/bulma/sass/utilities/_all.sass";
 @import "../node_modules/bulma/sass/base/_all.sass";
 @import "../node_modules/bulma/sass/grid/_all.sass";
 @import "../node_modules/bulma/sass/helpers/overflow.sass";
-/*@import "../node_modules/bulma/sass/helpers/flexbossass";*/
+@import "../node_modules/bulma/sass/helpers/flexbox.sass";
 @import "../node_modules/bulma/sass/helpers/typography.sass";
-@import "../node_modules/bulma/sass/helpers/spacing.sass";
 @import "../node_modules/bulma/sass/elements/button.sass";
 @import "../node_modules/bulma/sass/elements/box.sass";
 @import "../node_modules/bulma/sass/elements/other.sass";
@@ -44,3 +63,5 @@ $navbar-breakpoint: 0px;
 @import "../node_modules/bulma/sass/components/tabs.sass";
 @import "../node_modules/bulma/sass/layout/hero.sass";
 @import "../node_modules/bulma/sass/layout/section.sass";
+
+

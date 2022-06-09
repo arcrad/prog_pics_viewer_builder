@@ -436,7 +436,7 @@ function Viewer({
 				loadedData && 
 				<div className="has-text-centered	">
 					<div className="box">
-					<div className="field is-grouped is-grouped-centered">
+					<div className="field is-grouped is-grouped-centered is-flex-direction-column-mobile">
 						<div className="control">
 							<button
 								type="button"
@@ -449,7 +449,7 @@ function Viewer({
 						<div className="control">
 							<button
 								type="button"
-								className="button"
+								className="button mt-2-mobile"
 								onClick={handleProcessUnprocessedEntries}
 								disabled={ entriesWithAlignedImageCount === totalEntries ? true : false}
 							>
@@ -510,31 +510,32 @@ function Viewer({
 					*/}
 					</div>
 					<div className="block">
-					<img src={currentImage} style={{maxWidth: '50%', maxHeight: '75vh'}}/>
-					<div className="field has-addons has-addons-centered">
-						<div className="control">
-							<button 
-								type="button" 
-								className="button"
-								onClick={ () => {
-									setCurrentEntry( (cs) => cs > 0 ? cs-1 : entries.length-1)
-								}}
-							>
-								Previous
-							</button>
+						<img src={currentImage} style={{maxWidth: '50%', maxHeight: '75vh'}}/>
+						<p className="mb-2">#1234{entries[currentEntry].id}: {(new Date(entries[currentEntry].date)).toLocaleString()}</p>
+						<div className="field has-addons has-addons-centered">
+							<div className="control">
+								<button 
+									type="button" 
+									className="button"
+									onClick={ () => {
+										setCurrentEntry( (cs) => cs > 0 ? cs-1 : entries.length-1)
+									}}
+								>
+									Previous
+								</button>
+							</div>
+							<div className="control">
+								<button
+									type="button" 
+									className="button"
+									onClick={() => {
+										setCurrentEntry( (cs) => cs < entries.length-1 ? cs+1 : 0)
+									}}
+								>
+									Next
+								</button>
+							</div>
 						</div>
-						<div className="control">
-							<button
-								type="button" 
-								className="button"
-								onClick={() => {
-									setCurrentEntry( (cs) => cs < entries.length-1 ? cs+1 : 0)
-								}}
-							>
-								Next
-							</button>
-						</div>
-					</div>
 					</div>
 					</div>
 				</div>
