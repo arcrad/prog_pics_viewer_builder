@@ -846,7 +846,7 @@ function Export({
 					</button><br/>
 					<label>Export Progress
 						<progress 
-							className="progress"
+							className="progress is-info"
 							max={entries ? entries?.length-1 : 0} value={entriesProcessed}
 						>
 							{entriesProcessed} entries processed out of {entries ? entries?.length-1 : 0}
