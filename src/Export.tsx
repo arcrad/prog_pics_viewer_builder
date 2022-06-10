@@ -715,7 +715,11 @@ function Export({
 						{
 							Object.keys(validationResults).length > 0 &&
 							!allRelevantValidationsPassed && 
+				<div className="message is-danger">
+					<div className="message-body">
 							<p>There are validation errors that must be fixed before a timelapse can be exported.</p>
+						</div>
+						</div>
 						}
 						{
 							allRelevantValidationsPassed && 
@@ -731,26 +735,35 @@ function Export({
 							<div className="box">
 								<h2 className="title is-5">Export Video Locally (Experimental)</h2>
 								<p className="mb-5">Exports video of progress pictures completely in-browser and local to your device. Currently not very consistent at low frame durations (faster timelapse). Export occurs in real-time.</p>
-							<div className="field">
-								<label className="label">Frame Duration (ms):</label>
-								<div className="control">
-									<input
-										ref={frameDurationInputRef}
-										type="number"
-										className="input"
-										value={frameDuration}
-										onChange={handleInputChange}
-										data-settings-key-to-modify="exportFrameDuration" 
-										max={MAX_FRAME_DURATION_MS}
-										min={MIN_FRAME_DURATION_MS}
-									/>
+							<div>
+							<div className="columns">
+								<div className="column is-12">
+									<div className="field">
+										<label className="label">Frame Duration (ms)</label>
+										<div className="control">
+											<input
+												ref={frameDurationInputRef}
+												type="number"
+												className="input"
+												value={frameDuration}
+												onChange={handleInputChange}
+												data-settings-key-to-modify="exportFrameDuration" 
+												max={MAX_FRAME_DURATION_MS}
+												min={MIN_FRAME_DURATION_MS}
+											/>
+										</div>
+									</div>
 								</div>
 							</div>
-							<div className="field is-grouped">	
-								<div className="control">
+							<div className="columns is-multiline">
+								<div className="column is-narrow">
+							
+							<div className="columns is-mobile">
+								<div className="column is-narrow">
 									<div className="field">
 										<label className="label">Hold First Frame?</label>
-											<div className="control">
+										<div className="control">
+											<div className="checkbox">
 												<input
 													ref={holdFirstFrameInputRef}
 													type="checkbox"
@@ -761,31 +774,36 @@ function Export({
 												/>
 											</div>
 										</div>
+									</div>
 								</div>
-								<div className="control">
+								<div className="column">
 									<div className="field">
-										<label className="label">First Frame Hold Duration (ms):</label>
-											<div className="control">
-												<input
-													ref={firstFrameHoldDurationInputRef}
-													type="number"
-													className="input"
-													value={firstFrameHoldDuration}
-													onChange={handleInputChange}
-													data-settings-key-to-modify="exportFirstFrameHoldDuration" 
-													max={MAX_FRAME_DURATION_MS}
-													min={MIN_FRAME_DURATION_MS}
-												/>
-											</div>
+										<label className="label">First Frame Hold Duration (ms)</label>
+										<div className="control">
+											<input
+												ref={firstFrameHoldDurationInputRef}
+												type="number"
+												className="input"
+												value={firstFrameHoldDuration}
+												onChange={handleInputChange}
+												data-settings-key-to-modify="exportFirstFrameHoldDuration" 
+												max={MAX_FRAME_DURATION_MS}
+												min={MIN_FRAME_DURATION_MS}
+											/>
 										</div>
 									</div>
 								</div>
+							</div>
 
-							<div className="field is-grouped">	
-								<div className="control">
+						</div>
+								<div className="column is-narrow">
+
+							<div className="columns is-mobile">
+								<div className="column is-narrow">
 									<div className="field">
 										<label className="label">Hold Last Frame?</label>
-											<div className="control">
+										<div className="control">
+											<div className="checkbox">
 												<input
 													ref={holdLastFrameInputRef}
 													type="checkbox"
@@ -796,63 +814,109 @@ function Export({
 												/>
 											</div>
 										</div>
+									</div>
 								</div>
-								<div className="control">
+								<div className="column">
 									<div className="field">
 										<label className="label">Last Frame Hold Duration (ms):</label>
-											<div className="control">
+										<div className="control">
+											<input
+												ref={lastFrameHoldDurationInputRef}
+												type="number"
+												className="input"
+												value={lastFrameHoldDuration}
+												onChange={handleInputChange}
+												data-settings-key-to-modify="exportLastFrameHoldDuration" 
+												max={MAX_FRAME_DURATION_MS}
+												min={MIN_FRAME_DURATION_MS}
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+					</div>
+
+					</div>
+					</div>
+
+							<div className="columns is-mobile">
+								<div className="column is-narrow">
+									<div className="field">
+										<label className="label">Overlay Frame Number?</label>
+										<div className="control">
+											<div className="checkbox">		
 												<input
-													ref={lastFrameHoldDurationInputRef}
-													type="number"
-													className="input"
-													value={lastFrameHoldDuration}
+													ref={overlayFrameNumberInputRef}
+													type="checkbox"
+													value="true"
+													checked={overlayFrameNumberIsChecked}
 													onChange={handleInputChange}
-													data-settings-key-to-modify="exportLastFrameHoldDuration" 
-													max={MAX_FRAME_DURATION_MS}
-													min={MIN_FRAME_DURATION_MS}
+													data-settings-key-to-modify="exportOverlayFrameNumber" 
 												/>
 											</div>
 										</div>
 									</div>
 								</div>
-
-					<label>Overlay Frame Number?:
-					<input
-						ref={overlayFrameNumberInputRef}
-						type="checkbox"
-						value="true"
-						checked={overlayFrameNumberIsChecked}
-						onChange={handleInputChange}
-						data-settings-key-to-modify="exportOverlayFrameNumber" 
-					/>
-					</label><br/>
-					<label>Overlay Entry Information?:
-					<input
-						ref={overlayEntryInfoInputRef}
-						type="checkbox"
-						value="true"
-						checked={overlayEntryInfoIsChecked}
-						onChange={handleInputChange}
-						data-settings-key-to-modify="exportOverlayEntryInfo" 
-					/>
-					</label><br/>
+								<div className="column is-narrow">
+									<div className="field">
+										<label className="label">Overlay Entry Information?</label>
+										<div className="control">
+											<div className="checkbox">		
+												<input
+													ref={overlayEntryInfoInputRef}
+													type="checkbox"
+													value="true"
+													checked={overlayEntryInfoIsChecked}
+													onChange={handleInputChange}
+													data-settings-key-to-modify="exportOverlayEntryInfo" 
+											/>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div className="columns">
+								<div className="column">
 					<p>Estimated video duration: {estimatedVideoDurationString}</p>
+								</div>
+							</div>
+							<div className="columns">
+								<div className="column">
+					
+									<div className="field">
+										<div className="control">
 					<button
 						type="button"
 						className="button is-primary"
 						onClick={handleExportVideo}
 					>
 						Export Video
-					</button><br/>
-					<label>Export Progress
+					</button>
+					</div>
+					</div>
+					</div>
+					</div>
+							<div className="columns">
+								<div className="column">
+									<div className="field">
+					<label className="label">Export Progress</label>
+						
+										<div className="control">
 						<progress 
 							className="progress is-info"
 							max={entries ? entries?.length-1 : 0} value={entriesProcessed}
 						>
 							{entriesProcessed} entries processed out of {entries ? entries?.length-1 : 0}
 						</progress>
-					</label>
-					<p>Export Log</p>
+					</div>
+					</div>
+					</div>
+					</div>
+							<div className="columns">
+								<div className="column">
+									<div className="field">
+					<label className="label">Export Log</label>
+										<div className="control">
 					<textarea
 						className="textarea"
 						value={
@@ -862,6 +926,10 @@ function Export({
 						}
 					>
 					</textarea>
+					</div>
+					</div>
+					</div>
+					</div>
 					<hr/>
 					<h2 className="title is-5">Output Video</h2>
 					<video 

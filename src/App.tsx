@@ -55,6 +55,8 @@ const defaultSettings:Settings = {
 	bottomLeftCornerCropCoordinateY: -1,
 	exportFrameDuration: 500,
 	showDraftsInEntries: false,
+	exportFirstFrameHoldDuration: 500,
+	exportLastFrameHoldDuration: 500,
 };
 
 function App() {
