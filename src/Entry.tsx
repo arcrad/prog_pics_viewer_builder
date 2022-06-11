@@ -236,6 +236,16 @@ function EntryComponent({
 
 	return (
 		<>
+			<div className="columns is-mobile is-centered">
+				<div className="column is-12">
+					<div className="hero is-small is-primary">
+						<div className="hero-body">
+    					<h2 className="title">Entries</h2>
+							<p className="subtitle">Create entries and manage entry data.</p>
+						</div>
+					</div>
+				</div>
+			</div>
     <div className="columns is-mobile is-centered">
 			<div className="column is-11-mobile is-10-tablet is-6-desktop">
 				<div className="section">
@@ -262,7 +272,7 @@ function EntryComponent({
 				{
 					entries?.map( entry =>
 						<li key={entry.id} className="box">
-							<div className="columns is-centered">
+							<div className="columns is-centered is-multiline is-mobile">
 							<div className="column is-narrow">
 							{ entryThumbnailImageUrls && entry.id && 
 								<div style={{

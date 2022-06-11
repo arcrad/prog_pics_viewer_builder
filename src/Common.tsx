@@ -1,4 +1,8 @@
 import React, { useEffect, useRef, Dispatch, SetStateAction, MouseEvent} from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+	faAngleDown, 
+} from '@fortawesome/free-solid-svg-icons'
 
 import { Entry } from './db';
 
@@ -199,17 +203,27 @@ export function EntryOptionsDropdown({
 			}
 			//recursively try to find the trigger button
 			let triggerButtonClicked = false;
+			let dropdownClicked = false;
 			let curElement = event.target;
+			let depth = 0;
 			while (curElement) {
 				if(curElement == triggerButtonRef.current) {
 					console.warn('triggerButton found');
 					triggerButtonClicked = true;
 					break;
 				}
+				if(curElement == dropdownRef.current && depth < 4) {
+					console.warn('dropdown found');
+					dropdownClicked = true;
+					break;
+				}
 		    curElement = (curElement as HTMLElement).parentElement;
+				depth++;
 			}
 			//if trigger button clicked then show menu, otherwise hide menu
 			if(triggerButtonClicked) {
+				dropdownRef.current.classList.toggle('is-active');
+			} else if(dropdownClicked) {
 				dropdownRef.current.classList.add('is-active');
 			} else {
 				dropdownRef.current.classList.remove('is-active');
@@ -236,7 +250,7 @@ export function EntryOptionsDropdown({
 				>
 					<span>Options</span>
 					<span className="icon is-small">
-						<i className="fas fa-angle-down" aria-hidden="true"></i>
+						<FontAwesomeIcon icon={faAngleDown}/>
 					</span>
 				</button>
 			</div>
