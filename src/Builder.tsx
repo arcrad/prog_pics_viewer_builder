@@ -1,12 +1,40 @@
 import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Outlet, NavLink } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+	faGear,
+	faAngleRight
+} from '@fortawesome/free-solid-svg-icons'
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
 import SetupModal from './SetupModal';
 
 import styles from './Builder.module.scss';
+
+const navLinks = [
+	{ 
+		name: 'Entries',
+		path: '/entry'
+	},
+	{ 
+		name: 'Adjust',
+		path: '/adjust'
+	},
+	{ 
+		name: 'Process',
+		path: '/process'
+	},
+	{ 
+		name: 'Export',
+		path: '/export'
+	},
+/*	{ 
+		name: 'Settings',
+		path: '/settings'
+	}*/
+];
 
 type BuilderAttributes= {
 	globalState: GlobalState;
@@ -44,18 +72,38 @@ function Builder({
 	return (
 		<div className="columns">
 			<div className="column">
-				<nav className={styles.navbar} role="navigation" aria-label="main navigation">
-					<div className="navbar-brand">
-						<NavLink className="navbar-item" to="/">Builder (Home)</NavLink>
-					</div>
-					<div id="mainNavBar" className={`${styles.navbarMenu} navbar-menu is-active`}>
-						<div className="navbar-start">
-							<NavLink to="/entry" className={styles.mainNavLink}>Entry</NavLink>
-							<NavLink to="/adjust" className={styles.mainNavLink}>Adjust</NavLink>
-							<NavLink to="/process" className={styles.mainNavLink}>Process</NavLink>
-							<NavLink to="/export" className={styles.mainNavLink}>Export</NavLink>
-							<NavLink to="/settings" className={styles.mainNavLink}>Settings</NavLink>
-						</div>
+				<nav role="navigation" aria-label="main navigation">
+					<div className="level is-mobile">
+						{/*<NavLink className="navbar-item" to="/">Builder (Home)</NavLink>*/}
+						{
+							navLinks.map( (link, index) => {
+								return <>
+									<NavLink 
+										to={link.path} 
+										className={`level-item is-flex-grow-1 has-text-centered is-justify-content-center mx-0 ${styles.mainNavLink}`}
+										style={{marginLeft: 0, marginRight:0}}
+									>
+										{link.name}
+									</NavLink>
+									{ 
+										index < navLinks.length-1 &&
+										<div 
+											className="level-item has-text-centered is-flex-grow-0 is-flex-shrink-1"
+											style={{marginLeft: '0.25rem', marginRight: '0.25rem'}}
+										>
+											<FontAwesomeIcon icon={faAngleRight} />
+										</div>
+									}
+								</>
+							})
+						}
+						<NavLink 
+							to="/settings" 
+							className={`level-item is-flex-grow-0 has-text-centered is-justify-content-center mx-0 ${styles.mainNavLink}`}
+							style={{marginLeft: 0, marginRight:0}}
+						>
+							<FontAwesomeIcon icon={faGear} />
+						</NavLink>
 					</div>
 				</nav>
 				<div>

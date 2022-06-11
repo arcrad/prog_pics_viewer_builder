@@ -13,12 +13,17 @@ $navbar-breakpoint: $tablet;
 }
 */
 .mainNavLink {
-	@extend .navbar-item;
-	padding-bottom: 0.25rem;
+	/*@extend .navbar-item;*/
+	padding: 0.75rem 0.75rem;
+	color: #333;
+	height: 3.5rem;
+	/*padding-bottom: 0.25rem;*/
 }
 
 .mainNavLink[class~="active"] {
-	border-bottom: 5px solid blue;
+	/*border-bottom: 5px solid blue;*/
+	color: #000;
+	text-decoration: underline;
 }
 
 @import "../node_modules/bulma/sass/utilities/_all.sass";

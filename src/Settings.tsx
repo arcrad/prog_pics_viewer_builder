@@ -87,25 +87,43 @@ function SettingsComponent({
 	};
 
   return (
-    <div>
-    	<h2>Settings</h2>
-			<p>These settings are controlled throughout the application and don't need to be edited on this page. They are provided here for diagnostic/debugging purposes.</p>
-			<ul>
+    <>
+			<div className="columns is-mobile is-centered">
+				<div className="column is-12">
+					<div className="hero is-small is-primary">
+						<div className="hero-body">
+    					<h2 className="title">Settings</h2>
+							<p className="subtitle">View and modify settings.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="columns is-mobile is-centered">
+				<div className="column is-11-mobile is-10-tablet is-8-desktop">
+					<div className="box">
+						<p className="mb-5">These settings are managed by the application and should not normally need to be edited. They are primarly provided here for diagnostic/debugging purposes. </p>
+			<div>
 			{
 				currentSettings?.map( (setting) => 
-					<li key={setting.key}> 
-						{setting.key} :&nbsp;
-						<input 
-							type="text" 
-							value={setting.value} 
-							data-setting-key-to-update={setting.key}
-							onChange={handleSettingInputChange}
-						/>
-					</li>
+					<div className="field"> 
+						<label className="label">{setting.key}</label>
+						<div className="control"> 
+							<input 
+								type="text" 
+								className="input"
+								value={setting.value} 
+								data-setting-key-to-update={setting.key}
+								onChange={handleSettingInputChange}
+							/>
+						</div>
+					</div>
 				)
 			}
-			</ul>
-		</div>
+			</div>
+			</div>
+			</div>
+			</div>
+		</>
   );
 }
 
