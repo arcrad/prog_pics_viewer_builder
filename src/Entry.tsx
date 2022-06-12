@@ -338,6 +338,7 @@ function EntryComponent({
 								<button 
 									type="button" 
 									className="button is-info"
+									title="Edit Data"
 									data-entry-id={entry.id} 
 									onClick={handleEditEntry}
 								>
@@ -351,6 +352,7 @@ function EntryComponent({
 								<button 
 									type="button" 
 									className={`button ${entry.marks && Object.keys(entry.marks).length  == 3 ? 'is-success' : 'is-warning'}`}
+									title="Mark"
 									data-entry-id={entry.id} 
 									onClick={handleMarkEntry}
 								>
@@ -367,6 +369,7 @@ function EntryComponent({
 								<button 
 									type="button" 
 									className="button is-info"
+									title="Change Image"
 									data-entry-id={entry.id} 
 									onClick={handleChangeImageEntry}
 								>
@@ -380,6 +383,7 @@ function EntryComponent({
 								<button 
 									type="button" 
 									className="button is-danger"
+									title="Delete"
 									data-entry-id={entry.id} 
 									onClick={handleDeleteEntry}
 								>
@@ -393,6 +397,7 @@ function EntryComponent({
 								<button 
 									type="button" 
 									className="button is-info"
+									title="Duplicate"
 									data-entry-id={entry.id} 
 									onClick={handleDuplicateEntry}
 								>
