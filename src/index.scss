@@ -40,6 +40,9 @@ code {
 	}
 }
 
+.pe-none {
+	pointer-events: none;
+}
 /*make navbar display at full size at all break points*/
 $navbar-breakpoint: 0px;
 

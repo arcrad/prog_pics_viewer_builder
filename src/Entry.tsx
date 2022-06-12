@@ -130,6 +130,7 @@ function EntryComponent({
 	const handleDeleteEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log("handle delete entry...");
 		//console.dir(event);
+	 console.dir(event.target);
 		if(event.target && event.target instanceof HTMLButtonElement && event.target.dataset.entryId) {
 			console.log(`entryId to delete = ${event.target.dataset.entryId}`);
 			try {
@@ -328,7 +329,7 @@ function EntryComponent({
 		 							<p>{(new Date(entry.date)).toLocaleString()} { entry.draft ? '[draft]' : ''}</p>
 									<p><strong>ID:</strong> {entry.id}</p>
 									<p>
-										<strong>Weight:</strong> 
+										<strong>Weight: </strong> 
 										{ 
 											entry.weight ? 
 												entry.weight 
@@ -337,7 +338,7 @@ function EntryComponent({
 										}
 									</p>
 									<p>
-										<strong>Notes:</strong> 
+										<strong>Notes: </strong> 
 										{
 											entry.notes ? 
 												entry.notes 
@@ -359,10 +360,13 @@ function EntryComponent({
 									data-entry-id={entry.id} 
 									onClick={handleEditEntry}
 								>
-									<span className="is-hidden-touch">
+									<span className="pe-none is-hidden-touch">
 										Edit Data&nbsp;
 									</span>
-									<FontAwesomeIcon icon={faPenToSquare}/>
+									<FontAwesomeIcon 
+										className="pe-none"
+										icon={faPenToSquare}
+									/>
 								</button>
 							</div>
 							<div className="column is-narrow">
@@ -373,11 +377,14 @@ function EntryComponent({
 									data-entry-id={entry.id} 
 									onClick={handleMarkEntry}
 								>
-									<span className="is-hidden-touch">
+									<span className="pe-none is-hidden-touch">
 										Mark&nbsp;
 									</span>
-									<FontAwesomeIcon icon={faLocationCrosshairs}/>
-									<span>
+									<FontAwesomeIcon 
+										className="pe-none"
+										icon={faLocationCrosshairs}
+									/>
+									<span className="pe-none">
 										&nbsp;{ '(' + ( entry.marks ? Object.keys(entry.marks).length : 0) + ')'}
 									</span>
 								</button>
@@ -390,10 +397,13 @@ function EntryComponent({
 									data-entry-id={entry.id} 
 									onClick={handleChangeImageEntry}
 								>
-									<span className="is-hidden-touch">
+									<span className="pe-none is-hidden-touch">
 										Change Image&nbsp;
 									</span>
-									<FontAwesomeIcon icon={faImage}/>
+									<FontAwesomeIcon 
+										className="pe-none"
+										icon={faImage}
+									/>
 								</button>
 							</div>
 							<div className="column is-narrow">
@@ -404,10 +414,13 @@ function EntryComponent({
 									data-entry-id={entry.id} 
 									onClick={handleDeleteEntry}
 								>
-									<span className="is-hidden-touch">
+									<span className="pe-none is-hidden-touch">
 										Delete&nbsp;
 									</span>
-									<FontAwesomeIcon icon={faTrashAlt}/>
+									<FontAwesomeIcon 
+										className="pe-none"
+										icon={faTrashAlt}
+									/>
 								</button>
 							</div>
 							<div className="column is-narrow">
@@ -418,10 +431,13 @@ function EntryComponent({
 									data-entry-id={entry.id} 
 									onClick={handleDuplicateEntry}
 								>
-									<span className="is-hidden-touch">
+									<span className="pe-none is-hidden-touch">
 										Duplicate&nbsp;
 									</span>
-									<FontAwesomeIcon icon={faClone}/>
+									<FontAwesomeIcon 
+										className="pe-none"
+										icon={faClone}
+									/>
 								</button>
 							</div>
 							
