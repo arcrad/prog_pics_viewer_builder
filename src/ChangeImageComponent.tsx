@@ -155,7 +155,7 @@ function ChangeImageComponent({
 						<div className="control">
 							<textarea
 								className="textarea"
-								value={
+								defaultValue={
 									statusMessages?.reduce( (accumulator, message) => {
 										return accumulator + message + "\n";
 									}, "")
