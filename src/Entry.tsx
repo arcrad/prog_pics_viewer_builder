@@ -325,9 +325,26 @@ function EntryComponent({
 								</div>
 								:
 								<>
-		 						<p>{(new Date(entry.date)).toLocaleString()} {entry.draft ? '[draft]' : ''}</p>
-								<p><strong>ID:</strong> {entry.id}</p>
-								<p><strong>Weight:</strong> {entry.weight ? entry.weight : 'No weight defined.'}</p>
+		 							<p>{(new Date(entry.date)).toLocaleString()} { entry.draft ? '[draft]' : ''}</p>
+									<p><strong>ID:</strong> {entry.id}</p>
+									<p>
+										<strong>Weight:</strong> 
+										{ 
+											entry.weight ? 
+												entry.weight 
+												: 
+												<i>No weight defined</i>
+										}
+									</p>
+									<p>
+										<strong>Notes:</strong> 
+										{
+											entry.notes ? 
+												entry.notes 
+												: 
+												<i>No notes.</i>
+										}
+									</p>
 								</>
 							}
 							</div>
