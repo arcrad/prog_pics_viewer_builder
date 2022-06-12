@@ -66,6 +66,7 @@ export function PaginationControls({
 	} else if (maxPage < 5) {
 		midPageControls = Array.from({length: maxPage-1}, (x, i) => i+1).map( (listOffset) => {
 			return <li 
+					key={listOffset+1}
 					className={`pagination-link ${pagerOffset/pagerLimit == (listOffset) ? 'is-current' : ''}`}
 					onClick={() => {
 						setPagerOffset((listOffset)*pagerLimit)
@@ -79,6 +80,7 @@ export function PaginationControls({
 			{
 				[1,2,3].map( (listOffset) => {
 				return <li 
+						key={listOffset+1}
 						className={`pagination-link ${pagerOffset/pagerLimit == (listOffset) ? 'is-current' : ''}`}
 						onClick={() => {
 							setPagerOffset((listOffset)*pagerLimit)
@@ -96,6 +98,7 @@ export function PaginationControls({
 			{
 				[maxPage-3,maxPage-2,maxPage-1].map( (listOffset) => {
 					return <li 
+						key={listOffset+1}
 						className={`pagination-link ${pagerOffset/pagerLimit == listOffset ? 'is-current' : ''}`}
 						onClick={() => {
 							setPagerOffset((listOffset)*pagerLimit)
@@ -112,6 +115,7 @@ export function PaginationControls({
 			{
 				[-1,0,1].map( (listOffset) => {
 					return <li 
+						key={listOffset+1}
 						className={`pagination-link ${pagerOffset/pagerLimit == (curPage+listOffset) ? 'is-current' : ''}`}
 						onClick={() => {
 							setPagerOffset((curPage+listOffset)*pagerLimit)
