@@ -17,6 +17,15 @@ import {
 	NavLink, 
 	useNavigate 
 } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+	faPenToSquare, 
+	faLocationCrosshairs, 
+	faImage,
+	faTrash,
+	faTrashAlt,
+	faClone,
+} from '@fortawesome/free-solid-svg-icons'
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
@@ -247,7 +256,7 @@ function EntryComponent({
 				</div>
 			</div>
     <div className="columns is-mobile is-centered">
-			<div className="column is-11-mobile is-10-tablet is-6-desktop">
+			<div className="column is-11-mobile is-10-tablet is-8-desktop">
 				<div className="section">
 					<div className="control has-text-centered	">
 						<button 
@@ -272,7 +281,7 @@ function EntryComponent({
 				{
 					entries?.map( entry =>
 						<li key={entry.id} className="box">
-							<div className="columns is-centered is-multiline is-mobile">
+							<div className="columns is-centered is-mobile">
 							<div className="column is-narrow">
 							{ entryThumbnailImageUrls && entry.id && 
 								<div style={{
@@ -322,61 +331,78 @@ function EntryComponent({
 								</>
 							}
 							</div>
+						</div>
+						<div className="columns is-variable is-2-mobile is-1 is-centered is-multiline is-mobile">
 							<div className="column is-narrow">
-							<EntryOptionsDropdown entryId={entry.id || 0}>
-								<div className="dropdown-item">
+							{/*<EntryOptionsDropdown entryId={entry.id || 0}>*/}
 								<button 
 									type="button" 
-									className="button is-info is-small"
+									className="button is-info"
 									data-entry-id={entry.id} 
 									onClick={handleEditEntry}
 								>
-									Edit Data
+									<span className="is-hidden-touch">
+										Edit Data&nbsp;
+									</span>
+									<FontAwesomeIcon icon={faPenToSquare}/>
 								</button>
-								</div>
-								<div className="dropdown-item">
+							</div>
+							<div className="column is-narrow">
 								<button 
 									type="button" 
-									className={`button ${entry.marks && Object.keys(entry.marks).length  == 3 ? 'is-success' : 'is-warning'} is-small`}
+									className={`button ${entry.marks && Object.keys(entry.marks).length  == 3 ? 'is-success' : 'is-warning'}`}
 									data-entry-id={entry.id} 
 									onClick={handleMarkEntry}
 								>
-									{ 'Mark (' + ( entry.marks ? Object.keys(entry.marks).length : 0) + ')'}
+									<span className="is-hidden-touch">
+										Mark&nbsp;
+									</span>
+									<FontAwesomeIcon icon={faLocationCrosshairs}/>
+									<span>
+										&nbsp;{ '(' + ( entry.marks ? Object.keys(entry.marks).length : 0) + ')'}
+									</span>
 								</button>
-								</div>
-								<div className="dropdown-item">
+							</div>
+							<div className="column is-narrow">
 								<button 
 									type="button" 
-									className="button is-info is-small"
+									className="button is-info"
 									data-entry-id={entry.id} 
 									onClick={handleChangeImageEntry}
 								>
-									Change Image
+									<span className="is-hidden-touch">
+										Change Image&nbsp;
+									</span>
+									<FontAwesomeIcon icon={faImage}/>
 								</button>
-								</div>
-								<div className="dropdown-item">
+							</div>
+							<div className="column is-narrow">
 								<button 
 									type="button" 
-									className="button is-danger is-small"
+									className="button is-danger"
 									data-entry-id={entry.id} 
 									onClick={handleDeleteEntry}
 								>
-									Delete
+									<span className="is-hidden-touch">
+										Delete&nbsp;
+									</span>
+									<FontAwesomeIcon icon={faTrashAlt}/>
 								</button>
-								</div>
-								<div className="dropdown-item">
+							</div>
+							<div className="column is-narrow">
 								<button 
 									type="button" 
-									className="button is-info is-small"
+									className="button is-info"
 									data-entry-id={entry.id} 
 									onClick={handleDuplicateEntry}
 								>
-									Duplicate
+									<span className="is-hidden-touch">
+										Duplicate&nbsp;
+									</span>
+									<FontAwesomeIcon icon={faClone}/>
 								</button>
-								</div>
-							</EntryOptionsDropdown>
-							
 							</div>
+							
 							</div>
 							<EntryValidationErrorsList entry={entry}/>
 						</li>
