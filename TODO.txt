@@ -84,3 +84,5 @@
 +fix jank when loading EntriesValidator component before validations finish and/or during transition from loading to finished
 
 +ensure label elements are attached to the fields they label (aria)
+
++devise method to make hover image more magnified / controllable magnification 

@@ -42,9 +42,9 @@ type MarkFillStyles = {
 }
 
 const markFillStyles:MarkFillStyles = {
-	'A': 'red',
+	'A': '#c01',
 	'B': 'green',
-	'C': 'blue'
+	'C': '#12c'
 }
 
 function MarkImageComponent({
@@ -350,26 +350,37 @@ function MarkImageComponent({
 
 	return (
 			<>
-				<div className={styles.header}>
-					<h2>Mark Image</h2>	
-					<p>isLoaded = {isLoaded ? 'true' : 'false'}</p>
-					<div className={styles.debugInfo}>
-						<p>
-							Updating entry with entryId = { entryId }
-						</p>
+				<p className="mb-4">Mark three points on the image that will be used to align this image with the other entries' images.</p>
+				<div className={styles.footer}>
+					<div className="field is-grouped is-grouped-centered">
+						<div className="control">
+							<button 
+								type="button"
+								className={`button ${styles.markButtonA} ${(activeMark === 'A' ? styles.markButtonCurrentlyActive : '')}`}
+								onClick={ () => setActiveMark('A') }
+							>
+								Set Mark A
+							</button>
+						</div>
+						<div className="control">
+							<button 
+								type="button" 
+								className={`button ${styles.markButtonB} ${(activeMark === 'B' ? styles.markButtonCurrentlyActive : '')}`}
+								onClick={ () => setActiveMark('B') }
+							>
+								Set Mark B
+							</button>
+						</div>
+						<div className="control">
+							<button 
+								type="button" 
+								className={`button ${styles.markButtonC} ${(activeMark === 'C' ? styles.markButtonCurrentlyActive : '')}`}
+								onClick={ () => setActiveMark('C')}
+							>
+								Set Mark C
+							</button>				
+						</div>
 					</div>
-					{/*
-					<div className="debugInfo">
-						<p>
-							Updating entry with id = { globalState.currentEntryId }, 
-							xNaturalHoverCoord = {xNaturalHoverCoord.toFixed(2)}, 
-							yNaturalHoverCoord = {yNaturalHoverCoord.toFixed(2)},
-							clientX = {clientX}, clientY = {clientY},
-							activeMark = {activeMark}
-							isLoaded = { isLoaded ? 'true' : 'false' }
-						</p>
-					</div>
-					*/}
 				</div>
 				<div ref={imageContainerRef} className={styles.imageContainer}>
 					<div className={styles.imageSandwich}>
@@ -397,30 +408,19 @@ function MarkImageComponent({
 					</div>
 					</div>
 				</div>
-				<div className={styles.footer}>
-					<button 
-						type="button"
-						className={`${styles.markButtonA} ${(activeMark === 'A' ? styles.markButtonCurrentlyActive : '')}`}
-						onClick={ () => setActiveMark('A') }
-					>
-						Set Mark A
-					</button>
-					<button 
-						type="button" 
-						className={`${styles.markButtonB} ${(activeMark === 'B' ? styles.markButtonCurrentlyActive : '')}`}
-						onClick={ () => setActiveMark('B') }
-					>
-						Set Mark B
-					</button>
-					<button 
-						type="button" 
-						className={`${styles.markButtonC} ${(activeMark === 'C' ? styles.markButtonCurrentlyActive : '')}`}
-						onClick={ () => setActiveMark('C')}
-					>
-						Set Mark C
-					</button>				
-				</div>
 				<canvas ref={fullResImageCanvasRef} style={{visibility: "hidden", height: 0, width: 0, pointerEvents: 'none'}} />
+					{/*
+					<div className="debugInfo">
+						<p>
+							Updating entry with id = { globalState.currentEntryId }, 
+							xNaturalHoverCoord = {xNaturalHoverCoord.toFixed(2)}, 
+							yNaturalHoverCoord = {yNaturalHoverCoord.toFixed(2)},
+							clientX = {clientX}, clientY = {clientY},
+							activeMark = {activeMark}
+							isLoaded = { isLoaded ? 'true' : 'false' }
+						</p>
+					</div>
+					*/}
 			</>
   );
 }

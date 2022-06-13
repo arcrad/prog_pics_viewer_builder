@@ -1,8 +1,3 @@
-
-h2 {
-	margin: 0.5rem 0;
-}
-
 .modalOverlay {
 	background: rgba(0,0,0,0.5);
 	z-index: 9000;
@@ -52,15 +47,22 @@ h2 {
 	box-sizing: border-box;
 /*	background-position: center center;
 	background-size: contain;
-	background-repeat: no-repeat;*/
-	border:1px solid red;
+	background-repeat: no-repeat;
+	border:1px solid red;*/
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: center;
+	align-items: center;
+	background: #dee;
+	border-radius: 0.5rem;
 }
 
 .imageSandwich {
 	position: relative;
 	display: inline-block;
 	box-sizing: border-box;
-	border: 1px solid blue;
+	margin: none;
 }
 .entryImage {
 	max-width: 100%;
@@ -86,6 +88,7 @@ h2 {
 	pointer-events: none;
 	display: none;
 	background-origin: border-box;
+	background-repeat: no-repeat;
 }
 
 .hoverMarkerVisible {
@@ -93,7 +96,7 @@ h2 {
 }
 
 .hoverMarker[class~="activeMarkA"] {
-	border-color: red;
+	border-color: #c01;
 }
 
 .hoverMarker[class~="activeMarkB"] {
@@ -101,7 +104,7 @@ h2 {
 }
 
 .hoverMarker[class~="activeMarkC"] {
-	border-color: blue;
+	border-color: #12c;
 }
 
 .clickMarker {
@@ -124,21 +127,24 @@ h2 {
 .markButtonA,
 .markButtonB,
 .markButtonC {
-	background: #ddd;
+	/*background: #ddd;
 	padding: 0.15rem 0.5rem;
 	margin: 0.2rem;
 	border: 1px solid #999;
-	border-radius: 0.25rem;
+	border-radius: 0.25rem;*/
 }
 
 .markButtonA.markButtonCurrentlyActive {
-	background: red;
+	background: #c01;
+	color: #fff;
 }
 
 .markButtonB.markButtonCurrentlyActive {
 	background: green;
+	color: #fff;
 }
 
 .markButtonC.markButtonCurrentlyActive {
-	background: blue;
+	background: #12c;
+	color: #fff;
 }
