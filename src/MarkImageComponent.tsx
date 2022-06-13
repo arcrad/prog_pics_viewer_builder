@@ -14,6 +14,10 @@ import {
 	useParams
 } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+	faLocationCrosshairs, 
+} from '@fortawesome/free-solid-svg-icons'
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
@@ -359,7 +363,7 @@ function MarkImageComponent({
 								className={`button ${styles.markButtonA} ${(activeMark === 'A' ? styles.markButtonCurrentlyActive : '')}`}
 								onClick={ () => setActiveMark('A') }
 							>
-								Set Mark A
+								<FontAwesomeIcon icon={faLocationCrosshairs}/>&nbsp;Mark A
 							</button>
 						</div>
 						<div className="control">
@@ -368,7 +372,7 @@ function MarkImageComponent({
 								className={`button ${styles.markButtonB} ${(activeMark === 'B' ? styles.markButtonCurrentlyActive : '')}`}
 								onClick={ () => setActiveMark('B') }
 							>
-								Set Mark B
+								<FontAwesomeIcon icon={faLocationCrosshairs}/>&nbsp;Mark B
 							</button>
 						</div>
 						<div className="control">
@@ -377,7 +381,7 @@ function MarkImageComponent({
 								className={`button ${styles.markButtonC} ${(activeMark === 'C' ? styles.markButtonCurrentlyActive : '')}`}
 								onClick={ () => setActiveMark('C')}
 							>
-								Set Mark C
+								<FontAwesomeIcon icon={faLocationCrosshairs}/>&nbsp;Mark C
 							</button>				
 						</div>
 					</div>
