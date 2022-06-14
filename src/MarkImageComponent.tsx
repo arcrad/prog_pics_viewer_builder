@@ -355,7 +355,7 @@ function MarkImageComponent({
 	return (
 			<>
 				<p className="mb-4">Mark three points on the image that will be used to align this image with the other entries' images.</p>
-				<div className={styles.footer}>
+				<div className={styles.controlsContainer}>
 					<div className="field is-grouped is-grouped-centered">
 						<div className="control">
 							<button 

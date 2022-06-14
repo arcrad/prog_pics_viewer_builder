@@ -1,49 +1,6 @@
-.modalOverlay {
-	background: rgba(0,0,0,0.5);
-	z-index: 9000;
-	width: 100vw;
-	height: 100vh;
-	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	justify-content: center;
-	align-items: center;
-	position: fixed;
-	top: 0;
-	left: 0;
-	visibility: hidden;
-}
-
-.modalVisible {
-	visibility: visible;
-}
-
-.contentContainer {
-	border: 1px solid black;
-	/*display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;*/
-	background: #fff;
-	padding: 0.5rem;
-	width: 70rem;
-	width: 85vw;
-	height: 90vh;
-	margin: 0;
-	overflow: hidden scroll;
-}
-
-.header {
-	flex: 0 1 auto;
-}
-
-.debugInfo {
-	font-size: 0.6rem;
-}
-
 .imageContainer {
 	/*flex: 1 1 auto;*/
-	height: 75vh;
+	height: 70vh;
 	box-sizing: border-box;
 /*	background-position: center center;
 	background-size: contain;
@@ -64,6 +21,7 @@
 	box-sizing: border-box;
 	margin: none;
 }
+
 .entryImage {
 	max-width: 100%;
 	max-height: 100%;
@@ -118,7 +76,7 @@
 }
 
 
-.footer {
+.controlsContainer {
 	flex: 0 1 auto;
 	padding: 0.5rem;
 }

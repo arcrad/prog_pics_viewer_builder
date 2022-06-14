@@ -19,7 +19,7 @@ import { db, Entry } from './db';
 import { GlobalState } from './App';
 import MarkImageComponent from './MarkImageComponent';
 
-import styles from './MarkImageModal.module.css';
+//import styles from './MarkImageModal.module.css';
 
 type MarkImageModalAttributes = {
 	globalState: GlobalState,
@@ -27,26 +27,6 @@ type MarkImageModalAttributes = {
 //	isModalVisible: boolean,
 //	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
 };
-
-type MarkPoint = {
-	x: number,
-	y: number,
-	fillStyle: string
-}
-
-type Marks = {
-	[key:string]: MarkPoint
-}
-
-type MarkFillStyles = {
-	[key: string]: string
-}
-
-const markFillStyles:MarkFillStyles = {
-	'A': 'red',
-	'B': 'green',
-	'C': 'blue'
-}
 
 function MarkImageModal({
 	globalState, 
@@ -73,13 +53,22 @@ function MarkImageModal({
 
 	}, [isModalVisible]);*/
 
-	useEffect( () => {
+/*	useEffect( () => {
 		if(modalOverlayRef.current && !modalOverlayRef.current.open) {
 				modalOverlayRef.current.showModal();
 		}
 	}, []);
+	*/
 
 	useEffect( () => {
+		document.documentElement.classList.add('is-clipped');
+		return () => {
+			document.documentElement.classList.remove('is-clipped');
+		}
+	}, []);
+
+	/*
+ 	useEffect( () => {
 		if(modalOverlayRef.current) {
 			modalOverlayRef.current.addEventListener('close', handleCloseButton);
 			modalOverlayRef.current.addEventListener('cancel', handleCloseButton);
@@ -91,34 +80,42 @@ function MarkImageModal({
 			}
 		}
 	}, []);
+	*/
 
 	let handleCloseButton = () => {
 			console.log('handleCloseButton()');
 			setIsLoaded(false);
-			navigate('/entry');
+			navigate('../');
 		//	setIsModalVisible(false);
 	};
 
 	return (
-    <dialog ref={modalOverlayRef} className={styles.modalOverlay1}>
-			<div className={styles.contentContainer}>
-				<MarkImageComponent
-					globalState={globalState} 
-					setGlobalState={setGlobalState} 
-					isLoaded={isLoaded}
-					setIsLoaded={setIsLoaded}
-				/>
-				<div>
-				<button 
-					type="button" 
-					className={styles.closeButton}
-					onClick={ handleCloseButton }
-				>
-						Close
-				</button>
+    <div ref={modalOverlayRef} className="modal is-active">
+			<div className="modal-background">
+			</div>
+			<div className="modal-card">
+				<div className={`modal-card-head`}>
+					<h1 className="modal-card-title">Mark Image</h1>
+				</div>
+				<div className={`modal-card-body`}>
+					<MarkImageComponent
+						globalState={globalState} 
+						setGlobalState={setGlobalState} 
+						isLoaded={isLoaded}
+						setIsLoaded={setIsLoaded}
+					/>
+				</div>
+				<div className="modal-card-foot">
+					<button 
+						type="button" 
+						className="button"
+						onClick={ handleCloseButton }
+					>
+							Close
+					</button>
 				</div>
 			</div>
-    </dialog>
+    </div>
   );
 }
 
