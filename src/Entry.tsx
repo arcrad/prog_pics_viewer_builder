@@ -25,6 +25,8 @@ import {
 	faTrash,
 	faTrashAlt,
 	faClone,
+	faXmark,
+	faCircleXmark,
 } from '@fortawesome/free-solid-svg-icons'
 
 import { db, Entry } from './db';
@@ -48,8 +50,9 @@ function EntryComponent({
 	setGlobalState
 } : EntryAttributes ) {
 
-	let [currentEntryWeight, setCurrentEntryWeight] = useState("123");
-	let [currentEntryDate, setCurrentEntryDate] = useState("april 5, 2022");
+	let [currentEntryWeight, setCurrentEntryWeight] = useState("");
+	let [currentEntryDate, setCurrentEntryDate] = useState("");
+	let [currentEntryNotes, setCurrentEntryNotes] = useState("");
 	let [changeImageModalIsVisible, setChangeImageModalIsVisible] = useState(false);
 	let [markImageModalIsVisible, setMarkImageModalIsVisible] = useState(false);
 	let [addEntryModalIsVisible, setAddEntryModalIsVisible] = useState(false);
@@ -180,7 +183,12 @@ function EntryComponent({
 			&& event.target instanceof HTMLButtonElement
 			&& event.target.dataset.entryId
 		) {
-			setEntryIdBeingEdited(parseInt(event.target.dataset.entryId));
+			const entryIdSpecified = parseInt(event.target.dataset.entryId);
+			if(entryIdBeingEdited == entryIdSpecified) {
+				setEntryIdBeingEdited(-1);
+			} else {
+				setEntryIdBeingEdited(entryIdSpecified);
+			}
 		}
 	};
 
@@ -211,11 +219,14 @@ function EntryComponent({
 	};
 
 	let debounceInputTimeout = useRef(0);
-	const handleEntryInputChange = async (event:ChangeEvent<HTMLInputElement>) => {
+	const handleEntryInputChange = async (event:ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => {
 		console.log('handleEntryInputChange');
 		if(
 			event.target
-			&& event.target instanceof HTMLInputElement
+			&& ( 
+				event.target instanceof HTMLInputElement 
+				|| event.target instanceof HTMLTextAreaElement
+			)
 			&& event.target.dataset.entryId
 			&& event.target.dataset.entryKeyToModify
 		) {
@@ -227,8 +238,10 @@ function EntryComponent({
 			console.log('value = ', newValue);
 			if(event.target.dataset.entryKeyToModify === 'weight') {
 				setCurrentEntryWeight(event.target.value);
-			} else {
+			} else if(event.target.dataset.entryKeyToModify === 'date') {
 				setCurrentEntryDate(event.target.value);
+			} else if(event.target.dataset.entryKeyToModify === 'textarea') {
+				setCurrentEntryNotes(event.target.value);
 			}
 			clearTimeout(debounceInputTimeout.current);
 			let modifyDbValueHandler = () => {
@@ -297,33 +310,55 @@ function EntryComponent({
 							</div>
 							<div className="column">
 							{ ( entryIdBeingEdited === entry.id ) ? 
-								<div className="field is-grouped is-grouped-centered">
-									Weight: 
-									<input 
-										type="number" 
-										className="input is-small"
-										defaultValue={entry.weight} 
-										data-entry-id={entry.id} 
-										data-entry-key-to-modify="weight" 
-										onChange={handleEntryInputChange}
-									/>&nbsp;on&nbsp;
-									<input 
-										type="datetime-local" 
-										className="input is-small"
-										defaultValue={entry.date}
-										data-entry-id={entry.id} 
-										data-entry-key-to-modify="date"
-										onChange={handleEntryInputChange}
-									/>
+								<>
+									<p><strong>Editing Entry with ID:</strong> {entry.id}</p>
+									<div className="field">
+										<label className="label">Date</label>
+										<div className="control">
+											<input 
+												type="datetime-local" 
+												className="input is-small"
+												defaultValue={entry.date}
+												data-entry-id={entry.id} 
+												data-entry-key-to-modify="date"
+												onChange={handleEntryInputChange}
+											/>
+										</div>
+									<div className="field">
+										<label className="label">Weight</label>
+										<div className="control">
+											<input 
+												type="number" 
+												className="input is-small"
+												defaultValue={entry.weight} 
+												data-entry-id={entry.id} 
+												data-entry-key-to-modify="weight" 
+												onChange={handleEntryInputChange}
+											/>
+										</div>
+									</div>
+									<div className="field">
+										<label className="label">Notes</label>
+										<div className="control">
+											<textarea
+												className="textarea is-small"
+												defaultValue={entry.notes} 
+												data-entry-id={entry.id} 
+												data-entry-key-to-modify="notes" 
+												onChange={handleEntryInputChange}
+											/>
+										</div>
+									</div>
 									<button 
 										type="button" 
-										className="button is-light is-small"
+										className="button is-small"
 										data-entry-id="-1" 
 										onClick={handleEditEntry}
 									>
 										Close
 									</button>
 								</div>
+								</>
 								:
 								<>
 		 							<p>{(new Date(entry.date)).toLocaleString()} { entry.draft ? '[draft]' : ''}</p>
@@ -361,12 +396,23 @@ function EntryComponent({
 									onClick={handleEditEntry}
 								>
 									<span className="pe-none is-hidden-touch">
-										Edit Data&nbsp;
+										{ ( entryIdBeingEdited === entry.id ) ? 
+											<>Close Edit&nbsp;</>
+											:
+											<>Edit Data&nbsp;</>
+										}
 									</span>
-									<FontAwesomeIcon 
-										className="pe-none"
-										icon={faPenToSquare}
-									/>
+									{ ( entryIdBeingEdited === entry.id ) ? 
+										<FontAwesomeIcon 
+											className="pe-none"
+											icon={faXmark}
+										/>
+										:
+										<FontAwesomeIcon 
+											className="pe-none"
+											icon={faPenToSquare}
+										/>
+									}
 								</button>
 							</div>
 							<div className="column is-narrow">
