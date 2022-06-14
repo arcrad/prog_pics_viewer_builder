@@ -52,8 +52,8 @@ const validationResultsDisplayNameMap:{[key: string]: string} = {
 	allEntriesHaveDate: 'All Entries have a date?',
 	allEntriesHaveWeight: 'All Entries have a weight?',
 	allEntriesHaveAllMarks: 'All Entries have three marks?',
-	adjustmentImageCropAndScalingChosen: 'A crop/scaling image was chosen?',
-	djustmentImageCropAndScalingIsValid: 'The crop/scalimg image chosen is valid?',
+	adjustmentImageCropAndScalingChosen: 'A crop/scaling (adjust) image was chosen?',
+	adjustmentImageCropAndScalingIsValid: 'The crop/scaling (adjust) image chosen is valid?',
 };
 
 type EntriesValidatorAttributes= {
@@ -75,7 +75,10 @@ function EntriesValidator({
 	let modalOverlayRef = useRef<HTMLDivElement>(null);
 
 	const entries = useLiveQuery(
-		() => db.entries.toArray()
+		() => db
+			.entries
+			.filter((entry) => entry.draft !== true)
+			.toArray()
 	);
 	
 	const settings = useLiveQuery(

@@ -374,8 +374,9 @@ function Viewer({
 		validationResults.moreThanZeroEntries
 		&& validationResults.allEntriesHaveImageBlob
 		&& validationResults.allEntriesHaveAllMarks
-		&& validationResults.adjustmentImageCropAndScalingChosen;
-
+		&& validationResults.adjustmentImageCropAndScalingChosen
+		&& validationResults.adjustmentImageCropAndScalingIsValid;
+	
 	return (
 		<>
 		<div className="columns is-mobile is-centered">
@@ -398,7 +399,8 @@ function Viewer({
 					'moreThanZeroEntries',
 					'allEntriesHaveImageBlob',
 					'allEntriesHaveAllMarks',
-					'adjustmentImageCropAndScalingChosen'
+					'adjustmentImageCropAndScalingChosen',
+					'adjustmentImageCropAndScalingIsValid'
 				]}
 			/>
 				</div>

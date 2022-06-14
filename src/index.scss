@@ -33,7 +33,6 @@ code {
 @include mobile {
 	.button.mt-2-mobile {
 		margin-top: map.get($spacing-values, "2");
-		border:1px solid red;
 	}
 	.is-flex-direction-column-mobile {
 		flex-direction: column;

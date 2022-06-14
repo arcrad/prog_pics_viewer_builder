@@ -1141,7 +1141,7 @@ function Adjust({
 				className="button"
 				onClick={handleSetCropToCorners}
 			>
-				Reset Crop to Corners
+				Reset Crop
 			</button>
 			</div>
 			</div>

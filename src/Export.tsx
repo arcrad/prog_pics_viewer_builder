@@ -666,7 +666,7 @@ function Export({
 		if(estimatedVideoDurationSeconds < 60) {
 			estimatedVideoDurationString = `${seconds.toFixed(2)} ${secondsLabel}`;
 		} else {
-			estimatedVideoDurationString = `${minutes.toFixed(2)} ${minutesLabel} and ${seconds.toFixed(2)} ${secondsLabel}`;
+			estimatedVideoDurationString = `${minutes.toFixed(0)} ${minutesLabel} and ${seconds.toFixed(2)} ${secondsLabel}`;
 		}
 	}
 
@@ -840,7 +840,7 @@ function Export({
 					</div>
 
 							<div className="columns is-mobile">
-								<div className="column is-narrow">
+								<div className="column">
 									<div className="field">
 										<label className="label">Overlay Frame Number?</label>
 										<div className="control">
@@ -857,7 +857,7 @@ function Export({
 										</div>
 									</div>
 								</div>
-								<div className="column is-narrow">
+								<div className="column">
 									<div className="field">
 										<label className="label">Overlay Entry Information?</label>
 										<div className="control">
