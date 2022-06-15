@@ -320,7 +320,7 @@ function EntryComponent({
 												defaultValue={entry.date}
 												data-entry-id={entry.id} 
 												data-entry-key-to-modify="date"
-												onChange={handleEntryInputChange}
+												onBlur={handleEntryInputChange}
 											/>
 										</div>
 									</div>

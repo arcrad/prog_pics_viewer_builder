@@ -46,6 +46,7 @@ function clampFrameDuration(frameDurationInput:number):number {
 function getSVGOverlayAxesAndLine(entries:Entry[], svgWidth: number, svgHeight:number) {
 		const [minX=0, maxX=0] = d3.extent(entries, d => Date.parse(d.date));
 		//setup x axis timeScale
+		console.warn(`minX = ${minX}, maxX = ${maxX}`);
     const _x = d3.scaleUtc()
       .domain([minX, maxX])
       .range([margin.left - 25, svgWidth - margin.right])
