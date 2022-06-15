@@ -18,7 +18,7 @@ type ExportAttributes = {
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
 }
 
-const margin = { top: 50, right: 50, bottom: 10, left: 50 };
+const margin = { top: 50, right: 50, bottom: 10, left: 30 };
 const defaultChartDimensions = { width: 900, height: 250 };
 const smallScreenBreakpoint = 700;
 
@@ -49,7 +49,7 @@ function getSVGOverlayAxesAndLine(entries:Entry[], svgWidth: number, svgHeight:n
 		console.warn(`minX = ${minX}, maxX = ${maxX}`);
     const _x = d3.scaleUtc()
       .domain([minX, maxX])
-      .range([margin.left - 25, svgWidth - margin.right])
+      .range([margin.left+20 , svgWidth - margin.right-20])
 			.nice(); 
 		//setup y axis linear scale
     console.warn(`d3.min(entries, d => d.weight) = ${d3.min(entries, d => d.weight)} `);
@@ -327,7 +327,7 @@ function Export({
 		
 		//setup svg graph overlay 
 		const svgWidth = scaledImageWidth - (scaledImageWidth * 0.05);
-		const svgHeight = Math.floor(scaledImageHeight/4);
+		const svgHeight = Math.floor(scaledImageHeight/4.5);
 		const {x, y, line} = getSVGOverlayAxesAndLine(entries, svgWidth, svgHeight);
 
 		//process frames
@@ -443,7 +443,7 @@ function Export({
     svg
 			.append("g")
 			.attr("class","graphAxis")
-			.attr("transform", `translate(10, 0)`)
+			.attr("transform", `translate(30, 0)`)
 			.attr("color","white")
 			.call(d3.axisLeft(y));
     
@@ -514,7 +514,7 @@ function Export({
 						if(svgImage != null){
 							const prevFillStyle:string = intermediateCanvasContext.fillStyle;
 							intermediateCanvasContext.fillStyle = 'rgba(0,0,0,0.5)';
-							intermediateCanvasContext.fillRect(25, margin.top - 10, svgWidth - margin.right+margin.left, svgHeight - margin.bottom);
+							intermediateCanvasContext.fillRect(25, margin.top - 20, svgWidth - margin.right+margin.left, svgHeight - margin.bottom);
 							intermediateCanvasContext.drawImage(svgImage, 50, 0);
 							intermediateCanvasContext.fillStyle = prevFillStyle;
 						}
