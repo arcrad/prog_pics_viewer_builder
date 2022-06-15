@@ -311,7 +311,6 @@ function EntryComponent({
 							<div className="column">
 							{ ( entryIdBeingEdited === entry.id ) ? 
 								<>
-									<p><strong>Editing Entry with ID:</strong> {entry.id}</p>
 									<div className="field">
 										<label className="label">Date</label>
 										<div className="control">
@@ -324,6 +323,7 @@ function EntryComponent({
 												onChange={handleEntryInputChange}
 											/>
 										</div>
+									</div>
 									<div className="field">
 										<label className="label">Weight</label>
 										<div className="control">
@@ -348,21 +348,31 @@ function EntryComponent({
 												onChange={handleEntryInputChange}
 											/>
 										</div>
+									</div>	
+									<div className="field">
+										<div className="control">
+											<button 
+												type="button" 
+												className="button is-small"
+												data-entry-id="-1" 
+												onClick={handleEditEntry}
+											>
+												Close
+											</button>
 									</div>
-									<button 
-										type="button" 
-										className="button is-small"
-										data-entry-id="-1" 
-										onClick={handleEditEntry}
-									>
-										Close
-									</button>
 								</div>
+									<p><i>Entry id = {entry.id}</i></p>
 								</>
 								:
 								<>
-		 							<p>{(new Date(entry.date)).toLocaleString()} { entry.draft ? '[draft]' : ''}</p>
-									<p><strong>ID:</strong> {entry.id}</p>
+		 							<p>
+										<strong>Date: </strong>
+										{(new Date(entry.date)).toLocaleString()} { entry.draft ? '[draft]' : ''}
+									</p>
+									<p>
+										<strong>ID: </strong> 
+										{entry.id}
+									</p>
 									<p>
 										<strong>Weight: </strong> 
 										{ 
