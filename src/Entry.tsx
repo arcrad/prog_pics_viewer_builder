@@ -232,12 +232,13 @@ function EntryComponent({
 		) {
 			let entryIdToModify = parseInt(event.target.dataset.entryId);
 			let entryKeyToModify = event.target.dataset.entryKeyToModify;
-			let newValue = event.target.value;
+			let newValue:string|number = event.target.value;
 			console.log('entryId = ', entryIdToModify);
 			console.log('entryKeyToModify = ', entryKeyToModify);
 			console.log('value = ', newValue);
 			if(event.target.dataset.entryKeyToModify === 'weight') {
 				setCurrentEntryWeight(event.target.value);
+				newValue = parseFloat(event.target.value);
 			} else if(event.target.dataset.entryKeyToModify === 'date') {
 				setCurrentEntryDate(event.target.value);
 			} else if(event.target.dataset.entryKeyToModify === 'textarea') {

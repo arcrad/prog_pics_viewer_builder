@@ -52,6 +52,8 @@ function getSVGOverlayAxesAndLine(entries:Entry[], svgWidth: number, svgHeight:n
       .range([margin.left - 25, svgWidth - margin.right])
 			.nice(); 
 		//setup y axis linear scale
+    console.warn(`d3.min(entries, d => d.weight) = ${d3.min(entries, d => d.weight)} `);
+    console.warn(`d3.max(entries, d => d.weight) = ${d3.max(entries, d => d.weight)} `);
     const _y = d3.scaleLinear()
       .domain(
         [
@@ -451,8 +453,8 @@ function Export({
       .attr("d", line(entries))
       .attr("fill", "none")
       .attr("stroke","white")
-      .attr("stroke-width", () => '1')
-      .attr("stroke-miterlimit","1"); 
+      .attr("stroke-width", () => "2")
+      .attr("stroke-miterlimit", "1"); 
 
 		//build circle markers
 		svg.append("g").selectAll("circle")
@@ -474,11 +476,11 @@ function Export({
 				//if(d.cheatDay) { 
 				//	return '1.25'; 
 				//}
-				return '2';
+				return '10';
 			});
 
     svg.append("g").selectAll("circle")
-    	.data([entries[1]]) //set to for loop index
+    	.data([entries[c]]) //set to for loop index
 	    .join("circle")
       	.attr("fill", "none")
 	      .attr("stroke", d => {
