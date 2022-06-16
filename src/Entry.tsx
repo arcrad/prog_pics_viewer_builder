@@ -495,7 +495,10 @@ function EntryComponent({
 							</div>
 							
 							</div>
-							<EntryValidationErrorsList entry={entry}/>
+							<EntryValidationErrorsList 
+								entry={entry}
+								showIsValid={false}
+							/>
 						</li>
 					)
 				}

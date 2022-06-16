@@ -8,10 +8,14 @@ import { Entry } from './db';
 
 type EntryValidationErrorsListAttributes = {
 	entry: Entry;
+	showIsValid: boolean;
+	hideAlignedImageError?: boolean;
 }
 
 export function EntryValidationErrorsList({
-	entry
+	entry,
+	showIsValid,
+	hideAlignedImageError
 }: EntryValidationErrorsListAttributes) {
 	const entryHasAllMarks = entry.marks && Object.keys(entry.marks).length == 3; 
 	const entryDoesntHaveWeight = entry.weight == null || String(entry.weight) == '';
@@ -33,9 +37,11 @@ export function EntryValidationErrorsList({
 				{ entryDoesntHaveWeight ? <li>❌ Entry is missing weight</li> : ''}
 				{ entryHasAllMarks ? '' : <li>❌ Entry doesn't have all marks</li>}
 				{ entryDoesntHaveDate ? <li>❌ Entry is missing date</li> : ''}
-				{ entryDoesntHaveAlignedImageBlob ? <li>❌ Entry is missing an aligned image</li> : ''}
+				{ entryDoesntHaveAlignedImageBlob && !hideAlignedImageError ? <li>❌ Entry doesn't have an aligned image</li> : '' }
 			</ul>
 		</div>
+	} else if(showIsValid) { 
+			validationErrorsListContent = <p>✅ Entry has passed all validations</p>
 	}
 	return <>
 		{ validationErrorsListContent } 

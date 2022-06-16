@@ -117,32 +117,46 @@ function UpdateEntryDataComponent({
 
 	return (
 			<>
-				<h1>Update Entry Data</h1>
-				<p>Updating entry with entryId = {entryId}.</p>
-					<div>
-						Weight:
-						<input 
-							type="number" 
-							defaultValue={currentEntry?.weight} 
-							data-entry-id={currentEntry?.id} 
-							data-entry-key-to-modify="weight" 
-							onChange={handleEntryInputChange}
-						/> on&nbsp;
+				<p className="mb-4">Update data about this entry. Date and weight are required to pass all validations.</p>
+				<div className="field">
+					<label className="label">Date</label>
+					<div className="control">
 						<input 
 							type="datetime-local" 
+							className="input"
 							defaultValue={currentEntry?.date}
 							data-entry-id={currentEntry?.id} 
 							data-entry-key-to-modify="date"
 							onChange={handleEntryInputChange}
 						/>
+					</div>
+				</div>
+				<div className="field">
+					<label className="label">Weight</label>
+					<div className="control">
+						<input
+							type="number"
+							className="input"
+							defaultValue={currentEntry?.weight} 
+							data-entry-id={currentEntry?.id} 
+							data-entry-key-to-modify="weight" 
+							onChange={handleEntryInputChange}
+						/>
+					</div>
+				</div>
+				<div className="field">
+					<label className="label">Notes</label>
+					<div className="control">
 						<textarea
+							className="textarea"
 							data-entry-id={currentEntry?.id} 
 							data-entry-key-to-modify="notes"
 							onChange={handleEntryInputChange}
 							defaultValue={currentEntry?.notes}
 						>
 						</textarea>
-					</div> 
+					</div>
+				</div>
 			</>
   );
 }

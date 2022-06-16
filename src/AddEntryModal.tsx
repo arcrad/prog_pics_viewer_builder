@@ -24,8 +24,6 @@ import {
 	fa1,
 	fa2,
 	fa3,
-	faSquare,
-	faCircle,
 } from '@fortawesome/free-solid-svg-icons'
 
 
@@ -41,15 +39,11 @@ import styles from './AddEntryModal.module.scss';
 type AddEntryModalAttributes = {
 	globalState: GlobalState,
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>,
-//	isModalVisible: boolean,
-//	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
 };
 
 function AddEntryModal({
 	globalState, 
 	setGlobalState,
-//	isModalVisible,
-//	setIsModalVisible,
 } : AddEntryModalAttributes ) {
 	let [isLoaded, setIsLoaded] = useState(false);
 	let [modalIsLoaded, setModalIsLoaded] = useState(false);
@@ -197,11 +191,21 @@ function AddEntryModal({
 							/>
 						} />
 					</Routes>
-				<hr/>
 					<div>
-						{ currentEntry ? <EntryValidationErrorsList entry={currentEntry}/> : '' }
+						{ 
+							currentEntry ? 
+								<>
+									<hr/>
+									<EntryValidationErrorsList 
+										entry={currentEntry} 
+										showIsValid={true}
+										hideAlignedImageError={true}
+									/>
+								</>
+								:
+								''
+						}
 					</div>
-				<hr/>
 				</div>
 				<div className="modal-card-foot">
 					<button 
