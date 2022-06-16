@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry, Setting } from './db';
+import IndexComponent from './IndexComponent';
 import EntryComponent from './Entry';
 import Adjust from './Adjust';
 import Process from './Process';
@@ -142,6 +143,12 @@ function App() {
 						/>
 					}
 				>
+					<Route 
+						index
+						element={
+							<IndexComponent/>
+						}
+					/>
 					<Route 
 						path="entry/*" 
 						element={

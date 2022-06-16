@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Outlet, NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
+	faHouse,
 	faGear,
 	faAngleRight
 } from '@fortawesome/free-solid-svg-icons'
@@ -75,6 +76,14 @@ function Builder({
 				<nav role="navigation" aria-label="main navigation">
 					<div className="level is-mobile">
 						{/*<NavLink className="navbar-item" to="/">Builder (Home)</NavLink>*/}
+						<NavLink 
+							to="/" 
+							title="Home"
+							className={`level-item is-flex-grow-0 has-text-centered is-justify-content-center mx-0 ${styles.mainNavLink}`}
+							style={{marginLeft: 0, marginRight:0, borderRight: '1px solid #ccc'}}
+						>
+							<FontAwesomeIcon icon={faHouse} />
+						</NavLink>
 						{
 							navLinks.map( (link, index) => {
 								return <>
@@ -99,8 +108,9 @@ function Builder({
 						}
 						<NavLink 
 							to="/settings" 
+							title="Settings"
 							className={`level-item is-flex-grow-0 has-text-centered is-justify-content-center mx-0 ${styles.mainNavLink}`}
-							style={{marginLeft: 0, marginRight:0}}
+							style={{marginLeft: 0, marginRight:0, borderLeft: '1px solid #ccc'}}
 						>
 							<FontAwesomeIcon icon={faGear} />
 						</NavLink>
@@ -109,12 +119,14 @@ function Builder({
 				<div>
 					<Outlet />
 				</div>
+				{/*
 				<SetupModal 
-						globalState={globalState} 
-						setGlobalState={setGlobalState} 
-						isModalVisible={setupModalIsVisible}
-						setIsModalVisible={setSetupModalIsVisible}
-					/>
+					globalState={globalState} 
+					setGlobalState={setGlobalState} 
+					isModalVisible={setupModalIsVisible}
+					setIsModalVisible={setSetupModalIsVisible}
+				/>
+				*/}
 			</div>
 		</div>
 	);
