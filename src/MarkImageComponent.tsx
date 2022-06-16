@@ -138,6 +138,19 @@ function MarkImageComponent({
 									'x = ', currentEntry.marks[key].x, 
 									'y = ', currentEntry.marks[key].y
 								);
+								//draw contrast circle (white)
+								context.strokeStyle = "#fff";
+								context.lineWidth = fullResImageCanvasRef.current.width * globalState.settings.markLineWidthScalePercent*1.5;
+								context.beginPath();
+								context.arc(
+									currentEntry.marks[key].x, 
+									currentEntry.marks[key].y, 
+									fullResImageCanvasRef.current.width * globalState.settings.markRadiusScalePercent, 
+									0, 
+									2*Math.PI
+								);
+								context.stroke();
+								//draw marker circle (colorful)
 								context.strokeStyle = currentEntry.marks[key].style;
 								context.lineWidth = fullResImageCanvasRef.current.width * globalState.settings.markLineWidthScalePercent;
 								context.beginPath();

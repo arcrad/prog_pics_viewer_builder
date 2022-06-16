@@ -110,11 +110,7 @@ function EntryComponent({
 	};
 
 	const handleAddEntry = async (event:MouseEvent<HTMLButtonElement>) => {
-		//console.dir(imageUploadRef.current);
 		console.log("handle add entry..");
-		//setAddEntryModalIsVisible(true);
-	//	navigate(`./add/${globalState.currentEntryId}/image`);
-	/////	return; 
  		try {
 			const date = ((new Date()).toISOString()).substring(0, 16); 
 			//datetime needs to be more robust
