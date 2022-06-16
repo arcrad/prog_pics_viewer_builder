@@ -38,7 +38,6 @@ declare global {
 };
 
 export type GlobalState = {
-//	currentEntryId: number;
 	settings: Settings;
 };
 
@@ -61,15 +60,9 @@ const defaultSettings:Settings = {
 
 function App() {
 	let [globalState, setGlobalState] = useState<GlobalState>({ 
-	//	currentEntryId: -1,
 		settings: defaultSettings
 	});
 
-	/*const entries = useLiveQuery(
-		() => db.entries.toArray()
-	);*/
-	
-	
 	const updateGlobalStateSettings = () => {	
 		console.log('update settings in globalState');
 		//console.dir(currentSettings);
