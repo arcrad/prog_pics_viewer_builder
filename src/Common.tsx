@@ -28,7 +28,7 @@ export function EntryValidationErrorsList({
 		|| entryDoesntHaveWeight 
 		|| entryDoesntHaveDate
 		|| entryDoesntHaveImageBlob
-		|| entryDoesntHaveAlignedImageBlob
+		|| ( entryDoesntHaveAlignedImageBlob && !hideAlignedImageError )
 	) {
 		validationErrorsListContent = <div>
 			⚠️  This entry has validation errors!
