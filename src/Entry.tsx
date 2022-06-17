@@ -503,16 +503,21 @@ function EntryComponent({
 					)
 				}
 				</ol>
-				<div className="my-5">
-					<PaginationControls
-						curPage={pagerOffset/pagerLimit}
-						maxPage={totalEntriesCount ? Math.floor((totalEntriesCount-1)/pagerLimit) : 0} 
-						pagerOffset={pagerOffset}
-						pagerLimit={pagerLimit}
-						totalEntriesCount={totalEntriesCount || 0}
-						setPagerOffset={setPagerOffset}
-					/>
-				</div>
+				{
+					entries 
+					&& entries.length > 2
+					&&
+					<div className="my-5">
+						<PaginationControls
+							curPage={pagerOffset/pagerLimit}
+							maxPage={totalEntriesCount ? Math.floor((totalEntriesCount-1)/pagerLimit) : 0} 
+							pagerOffset={pagerOffset}
+							pagerLimit={pagerLimit}
+							totalEntriesCount={totalEntriesCount || 0}
+							setPagerOffset={setPagerOffset}
+						/>
+					</div>
+				}
 			</div>
     </div>
 				<Routes>
