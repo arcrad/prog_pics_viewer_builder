@@ -97,9 +97,7 @@ function Viewer({
 				_chosenEntry
 			]) => {
 				console.group('got data from db'); 
-				//console.log('got data from db'); 
 				//console.dir(coordinates);
-				//	originalCoordinatesFromDbRef.current = coordinates;
 				if(_sortedEntries) {
 					sortedEntriesRef.current = _sortedEntries;
 					const [_allEntriesHaveAlignedImage, _entriesWithAlignedImageCount] = checkAllEntriesHaveAlignedImage(_sortedEntries);
@@ -108,7 +106,6 @@ function Viewer({
 					setEntries(_sortedEntries);
 					setEntriesWithAlignedImageCount(_entriesWithAlignedImageCount as number);
 				}
-
 				originalCoordinatesFromDbRef.current = [
 					_topLeftCornerCropCoordinateX,
 					_topLeftCornerCropCoordinateY,
@@ -119,7 +116,6 @@ function Viewer({
 					_bottomLeftCornerCropCoordinateX,
 					_bottomLeftCornerCropCoordinateY,
 				];
-				//updateScaledCornerCropCoordinates();
 				if(_scaleWidthSetting) {
 					scaleWidthSettingRef.current = parseFloat(_scaleWidthSetting.value as string);
 				}
@@ -132,14 +128,6 @@ function Viewer({
 				if(_chosenEntry) {
 					chosenEntryRef.current = _chosenEntry;
 				}
-				/*
-				entries = _entries;
-				chosenEntryIdForAdjustments = _chosenEntryIdForAdjustments;
-				scaleWidthSetting = _scaleWidthSetting;
-				scaleHeightSetting = _scaleHeightSetting;
-				currentEntry = _currentEntry;
-				*/
-				//setIsLoaded(true);
 				console.groupEnd();
 				console.log(`coordinatesFromDb=${JSON.stringify(originalCoordinatesFromDbRef.current)}`);
 				console.log(`sortedEntries=${JSON.stringify(sortedEntriesRef.current.map( (entry) => {
@@ -160,14 +148,11 @@ function Viewer({
 		});;
 	}, []);
 
-	
-	/*
-  let baseImage:HTMLImageElement|null = null;
-	let warpedImageCanvas:HTMLCanvasElement|null = null;
-	let scaledImageCanvas:HTMLCanvasElement|null = null;
-	let croppedImageCanvas:HTMLCanvasElement|null = null;
-*/
-	const processEntry = (entryToProcess:Entry, chosenEntryImageNaturalWidth:number, chosenEntryImageNaturalHeight:number):Promise<number> => {
+	const processEntry = (
+		entryToProcess:Entry, 
+		chosenEntryImageNaturalWidth:number, 
+		chosenEntryImageNaturalHeight:number
+	):Promise<number> => {
 		console.log('processEntry() called');
 		return new Promise( (resolve, reject) => {
 			if(!entryToProcess || !entryToProcess.imageBlob) {
@@ -220,7 +205,6 @@ function Viewer({
 				//console.dir(xformMatrix);
 				//console.dir([...xformMatrix[0],...xformMatrix[1]]);
 				let warpedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
-				//warpedImageCanvas = document.createElement('canvas');
 				warpedImageCanvas.width = chosenEntryImageNaturalWidth;
 				warpedImageCanvas.height = chosenEntryImageNaturalHeight;
 				let warpedImageCanvasContext = warpedImageCanvas.getContext('2d');
@@ -243,7 +227,6 @@ function Viewer({
 				}
 				//scale baseImage
 				let scaledImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
-				//scaledImageCanvas = document.createElement('canvas');
 				scaledImageCanvas.width = scaleWidthSettingRef.current;
 				scaledImageCanvas.height = scaleHeightSettingRef.current; 
 				let scaledImageCanvasContext = scaledImageCanvas.getContext('2d');
@@ -262,7 +245,6 @@ function Viewer({
 				const croppedImageHeight = originalCoordinatesFromDbRef.current[7].value - originalCoordinatesFromDbRef.current[1].value;
 				//create cropped image
 				let croppedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
-				//croppedImageCanvas = document.createElement('canvas');
 				croppedImageCanvas.width = croppedImageWidth;
 				croppedImageCanvas.height = croppedImageHeight;
 				console.log(`croppedImageCanvas.width = ${croppedImageWidth}, croppedImageCanvas.height = ${croppedImageHeight}`);
@@ -286,7 +268,9 @@ function Viewer({
 						db.entries.update(entryToProcess.id, {
 							alignedImageBlob: blob
 						}).then( () => {
-							console.log('processed entry! id=', entryToProcess.id);
+							if(baseImage && baseImage.src) {
+								URL.revokeObjectURL(baseImage.src);
+							}
 							//attempt to guide garbage collector to free the resources
 							//need to determine if this is necessary
 							baseImage = null;
@@ -295,13 +279,13 @@ function Viewer({
 							croppedImageCanvas = null;
 							blob = null;
 							setEntriesProcessed( cs => cs+1);
+							console.log('processed entry! id=', entryToProcess.id);
 							resolve(0);
 						});
 					}
 				});
 			};
 			if(entryToProcess.imageBlob) {
-				//baseImage.src = entryToProcess.image;
 				baseImage.src = URL.createObjectURL(entryToProcess.imageBlob);
 			}
 		});
@@ -363,12 +347,10 @@ function Viewer({
 	};
 	
 	let currentImage = '';
-//	if(entries && entries[currentEntry] && entries[currentEntry].alignedImageBlob) {
-		const blob = entries[currentEntry]?.alignedImageBlob;
-		if(blob) {
+	const blob = entries[currentEntry]?.alignedImageBlob;
+	if(blob) {
 		currentImage = URL.createObjectURL(blob);
-		}
-//	}
+	}
 
 	const allRelevantValidationsPassed = 
 		validationResults.moreThanZeroEntries
@@ -496,26 +478,12 @@ function Viewer({
 						{allEntriesHaveAlignedImage ? ' Yes' : <> No (Click <b>Process ... Entries</b> button)</>}
 					</p>
 					{ entries.length == 0 && <p>Currently no processed images...</p> }
-					{/*
-					<ol>
-					{
-						entries.map( entry =>
-							<li key={entry.id}>
-								<span>{entry.id}</span>
-								<img src={entry.image} style={{maxWidth: "6rem"}} />
-								{'==>'}
-								<img src={entry.alignedImage} style={{maxWidth: "6rem"}} />
-							</li>
-						)
-					}
-					</ol>
-					*/}
 					</div>
 					{
 						allEntriesHaveAlignedImage && 
 						<div className="block">
-							<img src={currentImage} style={{maxWidth: '50%', maxHeight: '75vh'}}/>
-							<p className="mb-2">#{entries[currentEntry].id}: {(new Date(entries[currentEntry].date)).toLocaleString()}</p>
+							<img src={currentImage} style={{maxWidth: '50vw', maxHeight: '75vh'}}/>
+							<p className="mb-2">{(new Date(entries[currentEntry].date)).toLocaleString()} ( ID: {entries[currentEntry].id} )</p>
 							<div className="field has-addons">
 								<div className="control">
 									<button 
