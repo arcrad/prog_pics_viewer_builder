@@ -87,6 +87,54 @@ function drawInlineSVG(svgElem:SVGSVGElement):Promise<HTMLImageElement> {
 	});
 }
 
+//need to figure out proper type for svg (Selection is not generic error)
+function configureSVGGraph(
+	svg:any, 
+	svgWidth:number, 
+	svgHeight:number, 
+	margin:{ [key:string]: number }
+) {
+	svg
+    //const svg = d3.select(svgElem)
+    .attr("width", svgWidth + margin.left + margin.right)
+    .attr("height", svgHeight + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
+}
+
+//need to figure out proper typing for d3 
+function setupSVGGraphXAxis(
+	svg:any, 
+	svgWidth:number, 
+	svgHeight:number, 
+	margin:{ [key:string]: number },
+	x: any,
+	formatXAxis: (domainValue: any) => any,
+) {
+	svg
+		.append("g")
+		.attr("class","graphAxis")
+		.attr("transform", `translate(0, ${svgHeight-margin.bottom+1})`)
+		.attr("color","white")
+		//.call(d3.axisBottom(x).ticks(undefined, '%b'));//d3.utcFormat('%b %d')));
+		//.call(d3.axisBottom(x).ticks(undefined).tickFormat(formatXAxis));
+		.call(d3.axisBottom(x).tickFormat((d) => formatXAxis(d)));
+		//.call(d3.axisBottom(x));
+}
+
+//need to figure out proper typing for d3 
+function setupSVGGraphYAxis(
+	svg:any, 
+	y:any
+) {
+	svg
+		.append("g")
+		.attr("class","graphAxis")
+		.attr("transform", `translate(30, 0)`)
+		.attr("color","white")
+		.call(d3.axisLeft(y));
+};
+
 function Export({
 	globalState,
 	setGlobalState
@@ -100,6 +148,7 @@ function Export({
 	let [frameDuration, setFrameDuration] = useState<number>(150);
 	let [overlayFrameNumberIsChecked, setOverlayFrameNumberIsChecked] = useState<boolean>(false);
 	let [overlayEntryInfoIsChecked, setOverlayEntryInfoIsChecked] = useState<boolean>(false);
+	let [overlayEntryGraphIsChecked, setOverlayEntryGraphIsChecked] = useState<boolean>(false);
 	let [firstFrameHoldDuration, setFirstFrameHoldDuration] = useState<number>(150);
 	let [lastFrameHoldDuration, setLastFrameHoldDuration] = useState<number>(150);
 	let [holdFirstFrameIsChecked, setHoldFirstFrameIsChecked] = useState<boolean>(false);
@@ -111,6 +160,7 @@ function Export({
 	const frameDurationInputRef = useRef<HTMLInputElement|null>(null);
 	const overlayFrameNumberInputRef = useRef<HTMLInputElement|null>(null);
 	const overlayEntryInfoInputRef = useRef<HTMLInputElement|null>(null);
+	const overlayEntryGraphInputRef = useRef<HTMLInputElement|null>(null);
 	const holdFirstFrameInputRef = useRef<HTMLInputElement|null>(null);
 	const holdLastFrameInputRef = useRef<HTMLInputElement|null>(null);
 	const firstFrameHoldDurationInputRef = useRef<HTMLInputElement|null>(null);
@@ -129,6 +179,7 @@ function Export({
 			db.settings.get('exportLastFrameHoldDuration'),
 			db.settings.get('exportOverlayFrameNumber'),
 			db.settings.get('exportOverlayEntryInfo'),
+			db.settings.get('exportOverlayEntryGraph'),
 			db.settings.get('exportHoldFirstFrame'),
 			db.settings.get('exportHoldLastFrame'),
 		]).then( ([
@@ -138,6 +189,7 @@ function Export({
 			_exportLastFrameHoldDuration,
 			_exportOverlayFrameNumber,
 			_exportOverlayEntryInfo,
+			_exportOverlayEntryGraph,
 			_exportHoldFirstFrame,
 			_exportHoldLastFrame,
 		]) => {
@@ -165,6 +217,10 @@ function Export({
 			if(_exportOverlayEntryInfo) {
 				console.log(`setOverlayEntryInfoIsChecked = ${_exportOverlayEntryInfo}`);
 				setOverlayEntryInfoIsChecked(_exportOverlayEntryInfo.value);
+			}
+			if(_exportOverlayEntryGraph) {
+				console.log(`setOverlayEntryGraphIsChecked = ${_exportOverlayEntryGraph}`);
+				setOverlayEntryGraphIsChecked(_exportOverlayEntryGraph.value);
 			}
 			if(_exportHoldFirstFrame) {
 				console.log(`set holdFirstFrame to ${_exportHoldFirstFrame.value}`);
@@ -334,6 +390,7 @@ function Export({
 		const videoCanvasContext = videoCanvas.getContext('2d');
 		console.log(`got video canvas context`);
 
+		//setup intermediate canvas
 		const intermediateCanvas = document.createElement('canvas');
 		intermediateCanvas.width = scaledImageWidth;
 		intermediateCanvas.height = scaledImageHeight;
@@ -348,44 +405,8 @@ function Export({
 
 		intermediateCanvasContext.fillStyle = 'red';
 		intermediateCanvasContext.font = '42px serif';
-	/*
-		const pauseRecorder = ():Promise<void> => {
-			return new Promise( (resolve) => {
-				console.log(`media recorder state = ${mediaRecorder.state}`);
-				console.log('pause requested');
-				if(mediaRecorder.state == 'paused') {
-					console.log('already paused, doing nothing');
-					resolve();
-				} else {
-					mediaRecorder.onpause = () => {
-						console.log('pause event fired');
-						resolve();
-					}
-					console.log('pause() called');
-					mediaRecorder.pause();
-				}
-			});
-		};
-*/
-		//await pauseRecorder();
-		/*
-		console.log('fill rect called');
-		videoCanvasContext.fillStyle = 'blue';
-		videoCanvasContext.fillRect( 0, 0, scaledImageWidth, scaledImageHeight);
-		await delay(1000);
-		videoCanvasContext.fillStyle = 'red';
-		console.log('fill rect 2 called');
-		videoCanvasContext.fillRect( 0, 0, scaledImageWidth, scaledImageHeight);
-		await delay(1000);
-		videoCanvasContext.fillStyle = 'green';
-		videoCanvasContext.fillRect( 0, 0, scaledImageWidth, scaledImageHeight);
-		await delay(1000);
-		videoCanvasContext.fillRect( 0, 0, scaledImageWidth, scaledImageHeight);
-		videoCanvasContext.fillStyle = 'red';
-		mediaRecorder.start();
-		await delay(3000);
-*/
 		setStatusMessages( cs => [...cs, `start generating frames`]);
+		
 		for(let c = 0, max = entries.length; c < max; c++) {
 		//for(let c = 0, max = 5; c < max; c++) {
 			//mediaRecorder.pause();
@@ -420,33 +441,12 @@ function Export({
 				//generate svg graph overlay
 		//const svg = document.createElementNS(d3.ns.prefix.svg, 'svg');
 		//const svgElem = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    const svg = d3
-			.create("svg");
+    const svg = d3.create("svg");
 
-		svg
-    //const svg = d3.select(svgElem)
-      .attr("width", svgWidth + margin.left + margin.right)
-      .attr("height", svgHeight + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left}, ${margin.top})`);
-    
-		svg
-			.append("g")
-			.attr("class","graphAxis")
-			.attr("transform", `translate(0, ${svgHeight-margin.bottom+1})`)
-			.attr("color","white")
-			//.call(d3.axisBottom(x).ticks(undefined, '%b'));//d3.utcFormat('%b %d')));
-			//.call(d3.axisBottom(x).ticks(undefined).tickFormat(formatXAxis));
-			.call(d3.axisBottom(x).tickFormat((d) => formatXAxis(d)));
-			//.call(d3.axisBottom(x));
+		configureSVGGraph(svg, svgWidth, svgHeight, margin);
+		setupSVGGraphXAxis(svg, svgWidth, svgHeight, margin, x, formatXAxis);
+    setupSVGGraphYAxis(svg, y);
 
-    svg
-			.append("g")
-			.attr("class","graphAxis")
-			.attr("transform", `translate(30, 0)`)
-			.attr("color","white")
-			.call(d3.axisLeft(y));
-    
 		//build line 
     svg.append("path")
       //.data([wlProgressDataWithMetadata])
@@ -500,6 +500,8 @@ function Export({
 					intermediateCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
 				}
 				if(overlayEntryInfoIsChecked) {
+				}
+				if(overlayEntryGraphIsChecked) {
 					//intermediateCanvasContext.fillText(`Weight ${entries[c].weight} lbs`, 10, 100);
 					//intermediateCanvasContext.fillText(`Date ${entries[c].date}`, 10, 150);
 					//const svgNode = svg.node();
@@ -618,6 +620,12 @@ function Export({
 				let isChecked:boolean = event.target.checked;
 				console.log('checked? = ', isChecked);
 				(isChecked === true) ? setOverlayEntryInfoIsChecked(true) : setOverlayEntryInfoIsChecked(false);
+				newValue = isChecked;
+				console.log('value = ', newValue);
+			} else if(event.target.dataset.settingsKeyToModify === 'exportOverlayEntryGraph') {
+				let isChecked:boolean = event.target.checked;
+				console.log('checked? = ', isChecked);
+				(isChecked === true) ? setOverlayEntryGraphIsChecked(true) : setOverlayEntryGraphIsChecked(false);
 				newValue = isChecked;
 				console.log('value = ', newValue);
 			} else if(event.target.dataset.settingsKeyToModify === 'exportHoldFirstFrame') {
@@ -872,6 +880,23 @@ function Export({
 													checked={overlayEntryInfoIsChecked}
 													onChange={handleInputChange}
 													data-settings-key-to-modify="exportOverlayEntryInfo" 
+											/>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div className="column">
+									<div className="field">
+										<label className="label">Overlay Entry Graph?</label>
+										<div className="control">
+											<div className="checkbox">		
+												<input
+													ref={overlayEntryGraphInputRef}
+													type="checkbox"
+													value="true"
+													checked={overlayEntryGraphIsChecked}
+													onChange={handleInputChange}
+													data-settings-key-to-modify="exportOverlayEntryGraph" 
 											/>
 											</div>
 										</div>
