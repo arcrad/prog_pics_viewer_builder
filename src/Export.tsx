@@ -18,7 +18,7 @@ type ExportAttributes = {
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>;
 }
 
-const margin = { top: 50, right: 50, bottom: 10, left: 30 };
+const margin = { top: 50, right: 40, bottom: 10, left: 30 };
 const defaultChartDimensions = { width: 900, height: 250 };
 const smallScreenBreakpoint = 700;
 
@@ -400,11 +400,11 @@ function Export({
 			return;
 		}
 		
-		videoCanvasContext.fillStyle = 'red';
-		videoCanvasContext.font = '42px serif';
+		videoCanvasContext.fillStyle = '#fff';
+		videoCanvasContext.font = '32px sans';
 
-		intermediateCanvasContext.fillStyle = 'red';
-		intermediateCanvasContext.font = '42px serif';
+		intermediateCanvasContext.fillStyle = '#fff';
+		intermediateCanvasContext.font = '32px sans';
 		setStatusMessages( cs => [...cs, `start generating frames`]);
 		
 		for(let c = 0, max = entries.length; c < max; c++) {
@@ -443,6 +443,7 @@ function Export({
 		//const svgElem = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const svg = d3.create("svg");
 
+		//setup graph
 		configureSVGGraph(svg, svgWidth, svgHeight, margin);
 		setupSVGGraphXAxis(svg, svgWidth, svgHeight, margin, x, formatXAxis);
     setupSVGGraphYAxis(svg, y);
@@ -496,14 +497,7 @@ function Export({
 				console.log(`start draw frame = ${c}`);
 				intermediateCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
 				intermediateCanvasContext.drawImage(scaledCanvas, 0, 0);
-				if(overlayFrameNumberIsChecked) {
-					intermediateCanvasContext.fillText(`FRAME: ${c}`, 10, 50);
-				}
-				if(overlayEntryInfoIsChecked) {
-				}
 				if(overlayEntryGraphIsChecked) {
-					//intermediateCanvasContext.fillText(`Weight ${entries[c].weight} lbs`, 10, 100);
-					//intermediateCanvasContext.fillText(`Date ${entries[c].date}`, 10, 150);
 					//const svgNode = svg.node();
 					console.log('start draw svg overlay');
 					const svgNode = svg.node();
@@ -512,27 +506,57 @@ function Export({
 						//console.dir(svg);
 						//let svgImage = await drawInlineSVG(svgNode.outerHTML);
 						let svgImage = await drawInlineSVG(svgNode);
+						const extraTopOffset = overlayEntryInfoIsChecked ? 60 : 0;
 						//console.log('got svgImage');
 						if(svgImage != null){
 							const prevFillStyle:string = intermediateCanvasContext.fillStyle;
-							intermediateCanvasContext.fillStyle = 'rgba(0,0,0,0.5)';
-							intermediateCanvasContext.fillRect(25, margin.top - 20, svgWidth - margin.right+margin.left, svgHeight - margin.bottom);
-							intermediateCanvasContext.drawImage(svgImage, 50, 0);
+							intermediateCanvasContext.fillStyle = 'rgba(0,0,0,0.65)';
+							intermediateCanvasContext.fillRect(
+								25, 
+								margin.top - 20 + extraTopOffset, 
+								svgWidth - margin.right + margin.left, 
+								svgHeight - margin.bottom
+							);
+							intermediateCanvasContext.drawImage(svgImage, 50, 0 + extraTopOffset);
 							intermediateCanvasContext.fillStyle = prevFillStyle;
 						}
 					}
 				}
+				if(overlayFrameNumberIsChecked) {
+					const prevFillStyle:string = intermediateCanvasContext.fillStyle;
+					intermediateCanvasContext.fillStyle = 'rgba(0, 0, 0, 0.65)';
+					intermediateCanvasContext.fillRect(
+						scaledImageWidth - 140, 
+						scaledImageHeight - 75, 
+						110, 50
+					);
+					intermediateCanvasContext.fillStyle = prevFillStyle;
+					intermediateCanvasContext.fillText(
+						`${c}`, 
+						scaledImageWidth - 130, 
+						scaledImageHeight - 40
+					);
+				}
+				if(overlayEntryInfoIsChecked) {
+					const prevFillStyle:string = intermediateCanvasContext.fillStyle;
+					intermediateCanvasContext.fillStyle = 'rgba(0, 0, 0, 0.65)';
+					intermediateCanvasContext.fillRect(
+						scaledImageWidth * 0.03, 
+						25, 
+						scaledImageWidth * 0.94, 
+						50
+					);
+					intermediateCanvasContext.fillStyle = prevFillStyle;
+					intermediateCanvasContext.fillText(`${entries[c].weight} lbs on ${entries[c].date}`, 50, 61);
+				}
 				
 				///draw intermediatecanvas onto videocanvas
-				/*
-				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
-				videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
-				*/
 				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
 				videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
 				//additional delay to allow canvas drawing actions to settle
 				//discovered via testing that this improves frame drawing time consistency greatly
-				//NOTE: further testing revealed that this breaks rendering in some cases, not sure exactly why. commented out for now
+				//NOTE: further testing revealed that this breaks rendering in some cases, not sure exactly why.
+				//commented out for now
 				//await delay(50);
 				console.log('resume recording');
 				if(c == 0) {
