@@ -890,6 +890,7 @@ function Export({
 												/>
 											</div>
 										</div>
+										<p className="help">Frame number in bottom right corner.</p>
 									</div>
 								</div>
 								<div className="column">
@@ -907,6 +908,7 @@ function Export({
 											/>
 											</div>
 										</div>
+										<p className="help">Weight and date information at top center..</p>
 									</div>
 								</div>
 								<div className="column">
@@ -924,6 +926,7 @@ function Export({
 											/>
 											</div>
 										</div>
+										<p className="help">Graph with weight on x-axis and date on y-axis.</p>
 									</div>
 								</div>
 							</div>
