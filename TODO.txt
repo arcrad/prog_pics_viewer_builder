@@ -86,3 +86,5 @@
 +ensure label elements are attached to the fields they label (aria)
 
 +devise method to make hover image more magnified / controllable magnification 
+
++implement functionality to import/export raw db data 
