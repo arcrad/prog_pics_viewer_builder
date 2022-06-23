@@ -1006,6 +1006,11 @@ function Export({
 					<h2 className="title is-5">Upload Interactive Viewer</h2>
 					<p><i>Not yet implemented.</i></p>
 				</div>
+				<div className="box">
+					<h2 className="title is-5">Export/Import Raw Data</h2>
+					<p className="mb-5">Since your data is only stored locally on your device, it could be deleted if your browser's IndexedDB storage gets cleared. If you want to ensure your data is safe, use the following options to export the raw data and, if needed, to import previously exported raw data.</p>
+					<p><i>Not yet implemented.</i></p>
+				</div>
 				</>
 			}
 		</div>
