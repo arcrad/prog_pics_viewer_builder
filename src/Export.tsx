@@ -1,6 +1,11 @@
 import React, { useState, useRef, useEffect, Dispatch, SetStateAction, ChangeEvent } from 'react';
 import  * as mathjs  from 'mathjs';
-import * as PIXI from 'pixi.js';
+//import * as PIXI from 'pixi.js';
+import Dexie from "dexie";
+//import "dexie-export-import";
+import {importDB, exportDB, importInto, peakImportFile} from "dexie-export-import";
+
+import { saveAs } from 'file-saver';
 
 import * as d3 from 'd3';
 import { ScaleTime, ScaleLinear } from 'd3-scale'; //from DefinitelyTyped types
@@ -24,6 +29,21 @@ const smallScreenBreakpoint = 700;
 
 const MIN_FRAME_DURATION_MS = 5;
 const MAX_FRAME_DURATION_MS = 5000;
+
+function exportDbProgressCallback(details:ExportProgress){
+	console.log('exportDbProgressCallBack() called');
+	//console.dir(details);
+}
+
+async function handleExportDbButtonClick() {
+	console.log('handleExportButtonClick() called');
+	//const dbBlob = await db.export({
+	const dbBlob = await exportDB(db, {
+		prettyJson: true, 
+		progressCallback: exportDbProgressCallback
+	}); //[options]
+	saveAs(dbBlob, "db_export.json");
+}
 
 function delay(ms:number) {
 	return new Promise( (resolve) => setTimeout(resolve, ms) )
@@ -974,7 +994,7 @@ function Export({
 										<div className="control">
 					<textarea
 						className="textarea"
-						value={
+						defaultValue={
 							statusMessages?.slice(0).reverse().reduce( (accumulator, curMessage) => {
 								return accumulator + curMessage + '\n';
 							}, '')
@@ -1009,6 +1029,19 @@ function Export({
 				<div className="box">
 					<h2 className="title is-5">Export/Import Raw Data</h2>
 					<p className="mb-5">Since your data is only stored locally on your device, it could be deleted if your browser's IndexedDB storage gets cleared. If you want to ensure your data is safe, use the following options to export the raw data and, if needed, to import previously exported raw data.</p>
+					<div className="columns">
+						<div className="column">					
+							<div className="field">
+								<button 
+									type="button"
+									className="button"
+									onClick={handleExportDbButtonClick}
+								>
+									Export Data
+								</button>
+							</div>
+						</div>
+					</div>
 					<p><i>Not yet implemented.</i></p>
 				</div>
 				</>

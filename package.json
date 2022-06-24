@@ -16,7 +16,9 @@
     "bulma": "^0.9.4",
     "d3": "^7.4.4",
     "dexie": "^3.2.1",
+    "dexie-export-import": "^1.0.3",
     "dexie-react-hooks": "^1.1.1",
+    "file-saver": "^2.0.5",
     "homography": "^1.4.0",
     "mathjs": "^10.5.0",
     "pixi.js": "^6.3.2",
@@ -55,6 +57,7 @@
   "devDependencies": {
     "@types/d3": "^7.1.0",
     "@types/d3-scale": "^4.0.2",
-    "@types/d3-shape": "^3.0.2"
+    "@types/d3-shape": "^3.0.2",
+    "@types/file-saver": "^2.0.5"
   }
 }
