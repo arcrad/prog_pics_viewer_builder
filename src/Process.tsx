@@ -283,7 +283,7 @@ function Viewer({
 							resolve(0);
 						});
 					}
-				});
+				}, 'image/jpeg', 0.9);
 			};
 			if(entryToProcess.imageBlob) {
 				baseImage.src = URL.createObjectURL(entryToProcess.imageBlob);

@@ -115,7 +115,7 @@ function ChangeImageComponent({
 							}
 						});
 						}
-					});
+					}, "image/jpeg", 0.75);
 				}
 			}
 			tempImage.src = URL.createObjectURL(selectedFile);
