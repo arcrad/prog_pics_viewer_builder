@@ -90,12 +90,14 @@ function ChangeImageComponent({
 						if(entryId != null ) {
 						db.entries.update(parseInt(entryId), {
 							thumbImageBlob: blob
-						}).then( () => {
+						}).then( async () => {
 							//thumb blob saved
 							setStatusMessages( cs => [...cs, "Saved thumbnail data."]);
 							if(entryId != null) {
 							db.entries.update(parseInt(entryId), {
 								imageBlob: selectedFile,
+								//imageArrayBuffer: await selectedFile.arrayBuffer(),
+								//imageBlobBlob: selectedFile.slice(0, selectedFile.size, selectedFile.type),
 								imageNaturalWidth: tempImage.naturalWidth,
 								imageNaturalHeight: tempImage.naturalHeight
 							}).then( () => {

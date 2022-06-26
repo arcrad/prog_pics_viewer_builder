@@ -6,6 +6,7 @@ import Dexie from "dexie";
 import {importDB, exportDB, importInto, peakImportFile} from "dexie-export-import";
 
 import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 
 import * as d3 from 'd3';
 import { ScaleTime, ScaleLinear } from 'd3-scale'; //from DefinitelyTyped types
@@ -36,13 +37,26 @@ function exportDbProgressCallback(details:ExportProgress){
 }
 
 async function handleExportDbButtonClick() {
-	console.log('handleExportButtonClick() called');
+	console.log('handleExportDbButtonClick() called');
 	//const dbBlob = await db.export({
 	const dbBlob = await exportDB(db, {
 		prettyJson: true, 
 		progressCallback: exportDbProgressCallback
 	}); //[options]
-	saveAs(dbBlob, "db_export.json");
+	const zip = new JSZip();
+	zip.file("db_data.json", dbBlob);
+	//saveAs(dbBlob, "db_export.json");
+	zip.generateAsync({
+    type: "blob",
+    compression: "DEFLATE",
+    compressionOptions: {
+        level: 9
+    }
+})
+		.then(function (blob) {
+			console.log('final zip generated!');
+	    saveAs(blob, "db_export.zip");
+		});
 }
 
 function delay(ms:number) {
@@ -784,8 +798,11 @@ function Export({
 							</>
 						}
 						{ 
-							allRelevantValidationsPassed && 
-							loadedInitialData && 
+							//allRelevantValidationsPassed && 
+							//loadedInitialData && 
+						}
+						{
+							true && 
 							<>
 							<div className="box">
 								<h2 className="title is-5">Export Video Locally (Experimental)</h2>

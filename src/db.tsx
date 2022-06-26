@@ -17,7 +17,6 @@ export type Entry = {
 	weight?: number;
 	notes?: string;
 	image?: string;
-	imageFileHandle?: any; //should be some form of FileHandle type 
 	imageBlob?: File; 
 	imageNaturalWidth?: number;
 	imageNaturalHeight?: number;
@@ -38,7 +37,7 @@ export class TypedDexie extends Dexie {
 
 	constructor() {
 		super('db');
-		this.version(27).stores({
+		this.version(29).stores({
 			entries: '++id, draft, date, weight, notes, marks',
 			settings: 'key, value'
 		});
