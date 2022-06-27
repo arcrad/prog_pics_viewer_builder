@@ -4,6 +4,10 @@ import  * as mathjs  from 'mathjs';
 import Dexie from "dexie";
 //import "dexie-export-import";
 import {importDB, exportDB, importInto, peakImportFile} from "dexie-export-import";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+	faUpload, 
+} from '@fortawesome/free-solid-svg-icons'
 
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
@@ -12,7 +16,7 @@ import * as d3 from 'd3';
 import { ScaleTime, ScaleLinear } from 'd3-scale'; //from DefinitelyTyped types
 import { Line } from 'd3-shape'; //from DefinitelyTyped types
 
-//importi './Viewer.css';
+//import './Viewer.css';
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
 import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
@@ -199,6 +203,24 @@ function Export({
 	const holdLastFrameInputRef = useRef<HTMLInputElement|null>(null);
 	const firstFrameHoldDurationInputRef = useRef<HTMLInputElement|null>(null);
 	const lastFrameHoldDurationInputRef = useRef<HTMLInputElement|null>(null);
+	const dbDataFileUploadContainerRef = useRef<HTMLDivElement>(null);
+	const dbDataFileUploadRef = useRef<HTMLInputElement>(null);
+	const dbDataFileUploadFileNameRef = useRef<HTMLSpanElement>(null);
+	
+	useEffect( () => {
+		if(dbDataFileUploadRef && dbDataFileUploadRef.current) {
+			dbDataFileUploadRef.current.onchange = () => {
+				if(dbDataFileUploadRef.current 
+					&& dbDataFileUploadRef.current.files
+					&& dbDataFileUploadRef.current.files.length > 0) {
+						if(dbDataFileUploadFileNameRef.current) {
+		      		dbDataFileUploadFileNameRef.current.textContent = dbDataFileUploadRef.current.files[0].name;
+							handleDbDataFileLoad();
+						}
+    		}
+			};
+		}
+	},[]);
 
 	useEffect( () => {
 		if(initializedRef.current) {
@@ -715,7 +737,41 @@ function Export({
 		}
 		console.groupEnd();
 	};
+	
+	function importDataCallbackFunction(progressData: importProgress) {
+		console.log('importDataCallbackFunction() called');
+		console.dir(progressData);
+	}
 
+	const handleDbDataFileLoad = async () => {
+		//console.dir(dbDataFileUploadRef.current);
+		console.log("handle load db data..");
+		let selectedFile:File;
+		if(dbDataFileUploadRef.current && dbDataFileUploadRef.current.files) {
+			selectedFile = dbDataFileUploadRef.current.files[0];
+			const zip = new JSZip();
+			await zip.loadAsync(selectedFile)
+			//db_data.json
+		 //   .then(function (zip) {
+	        console.log(zip.files);
+			const dbDataBlob = await zip.file("db_data.json").async("blob");
+			console.dir(dbDataBlob);
+			await importInto(db, dbDataBlob, {
+				overwriteValues: true, 
+				progressCallback: importDataCallbackFunction
+			});
+
+		/*		});
+			zip
+.file("my_text.txt")
+.async("string")
+.then(function success(content) {
+    // use the content
+}, function error(e) {
+    // handle the error
+});*/
+		}
+	};
 
 	//<p>Estimated video duration: { frameDuration && entries ? `${(frameDuration*entries.length/1000)} seconds` : 'N/A'}</p>
 
@@ -1048,6 +1104,7 @@ function Export({
 					<p className="mb-5">Since your data is only stored locally on your device, it could be deleted if your browser's IndexedDB storage gets cleared. If you want to ensure your data is safe, use the following options to export the raw data and, if needed, to import previously exported raw data.</p>
 					<div className="columns">
 						<div className="column">					
+							<h2 className="title is-6">Export</h2>
 							<div className="field">
 								<button 
 									type="button"
@@ -1056,6 +1113,30 @@ function Export({
 								>
 									Export Data
 								</button>
+							</div>
+						</div>
+					</div>
+					<div className="columns">
+						<div className="column">
+								<h2 className="title is-6">Import</h2>
+							<div 
+								ref={dbDataFileUploadContainerRef}
+								className="file is-boxed has-name"
+							>
+								<label className="file-label">
+									<input 
+										ref={dbDataFileUploadRef} 
+										type="file"
+										className="file-input"
+									/>
+									<span className="file-cta">
+										<FontAwesomeIcon icon={faUpload}/>
+										<span className="file-label">
+											Select data file...
+										</span>
+									</span>
+									<span ref={dbDataFileUploadFileNameRef} className="file-name"></span>
+								</label>
 							</div>
 						</div>
 					</div>
