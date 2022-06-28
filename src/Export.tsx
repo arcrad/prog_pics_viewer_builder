@@ -35,14 +35,36 @@ const smallScreenBreakpoint = 700;
 const MIN_FRAME_DURATION_MS = 5;
 const MAX_FRAME_DURATION_MS = 5000;
 
-function exportDbProgressCallback(details:ExportProgress){
-	console.log('exportDbProgressCallBack() called');
-	//console.dir(details);
+//function exportDbProgressCallback(details:ExportProgress){
+function exportDbProgressCallbackFactory(
+	setExportDbDataRowsExported, 
+	setExportDbDataMaxRows, 
+	//setCurrentCompletedRows,
+	setCurrentMaxRows
+) {
+	return (details:ExportProgress) => {
+		console.log('exportDbProgressCallBack() called');
+		console.log(JSON.stringify(details));
+		setExportDbDataMaxRows(details.totalRows+(Math.max(1, parseInt(details.totalRows*0.1))));
+		setCurrentMaxRows(details.totalRows+(Math.max(1, parseInt(details.totalRows*0.1))));
+		setExportDbDataRowsExported(details.completedRows);
+		//setCurrentCompletedRows(details.completedRows);
+	}
 }
 
-async function handleExportDbButtonClick() {
+//async function handleExportDbButtonClick() {
+async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportDbDataMaxRows) {
 	console.log('handleExportDbButtonClick() called');
 	//const dbBlob = await db.export({
+	//let currentCompletedRows = 0;
+	let currentMaxRows = 0;
+	//let setCurrentCompletedRows = (newVal) => { currentCompletedRows = newVal };
+	let setCurrentMaxRows = (newVal) => { currentMaxRows = newVal };
+	const exportDbProgressCallback = exportDbProgressCallbackFactory(
+		setExportDbDataRowsExported,
+		setExportDbDataMaxRows,
+		setCurrentMaxRows
+	);
 	const dbBlob = await exportDB(db, {
 		prettyJson: true, 
 		progressCallback: exportDbProgressCallback
@@ -50,7 +72,7 @@ async function handleExportDbButtonClick() {
 	const zip = new JSZip();
 	zip.file("db_data.json", dbBlob);
 	//saveAs(dbBlob, "db_export.json");
-	zip.generateAsync({
+	await zip.generateAsync({
     type: "blob",
     compression: "DEFLATE",
     compressionOptions: {
@@ -60,8 +82,44 @@ async function handleExportDbButtonClick() {
 		.then(function (blob) {
 			console.log('final zip generated!');
 	    saveAs(blob, "db_export.zip");
+			setExportDbDataRowsExported(currentMaxRows);
 		});
 }
+
+function importDataCallbackFunction(progressData: importProgress) {
+	console.log('importDataCallbackFunction() called');
+	console.dir(progressData);
+}
+
+const handleDbDataFileLoad = async () => {
+	//console.dir(dbDataFileUploadRef.current);
+	console.log("handle load db data..");
+	let selectedFile:File;
+	if(dbDataFileUploadRef.current && dbDataFileUploadRef.current.files) {
+		selectedFile = dbDataFileUploadRef.current.files[0];
+		const zip = new JSZip();
+		await zip.loadAsync(selectedFile)
+		//db_data.json
+	 //   .then(function (zip) {
+        console.log(zip.files);
+		const dbDataBlob = await zip.file("db_data.json").async("blob");
+		console.dir(dbDataBlob);
+		await importInto(db, dbDataBlob, {
+			overwriteValues: true, 
+			progressCallback: importDataCallbackFunction
+		});
+
+	/*		});
+		zip
+.file("my_text.txt")
+.async("string")
+.then(function success(content) {
+    // use the content
+}, function error(e) {
+    // handle the error
+});*/
+	}
+};
 
 function delay(ms:number) {
 	return new Promise( (resolve) => setTimeout(resolve, ms) )
@@ -191,6 +249,9 @@ function Export({
 	let [lastFrameHoldDuration, setLastFrameHoldDuration] = useState<number>(150);
 	let [holdFirstFrameIsChecked, setHoldFirstFrameIsChecked] = useState<boolean>(false);
 	let [holdLastFrameIsChecked, setHoldLastFrameIsChecked] = useState<boolean>(false);
+	let [exportDbDataMaxRows, setExportDbDataMaxRows] = useState(0);
+	let [exportDbDataRowsExported, setExportDbDataRowsExported] = useState(0);
+	let [exportDbDataInProgress, setExportDbDataInProgress] = useState(false);
 
 	const initializedRef = useRef<boolean>(false);
 	const videoElementRef = useRef<HTMLVideoElement|null>(null);
@@ -738,40 +799,6 @@ function Export({
 		console.groupEnd();
 	};
 	
-	function importDataCallbackFunction(progressData: importProgress) {
-		console.log('importDataCallbackFunction() called');
-		console.dir(progressData);
-	}
-
-	const handleDbDataFileLoad = async () => {
-		//console.dir(dbDataFileUploadRef.current);
-		console.log("handle load db data..");
-		let selectedFile:File;
-		if(dbDataFileUploadRef.current && dbDataFileUploadRef.current.files) {
-			selectedFile = dbDataFileUploadRef.current.files[0];
-			const zip = new JSZip();
-			await zip.loadAsync(selectedFile)
-			//db_data.json
-		 //   .then(function (zip) {
-	        console.log(zip.files);
-			const dbDataBlob = await zip.file("db_data.json").async("blob");
-			console.dir(dbDataBlob);
-			await importInto(db, dbDataBlob, {
-				overwriteValues: true, 
-				progressCallback: importDataCallbackFunction
-			});
-
-		/*		});
-			zip
-.file("my_text.txt")
-.async("string")
-.then(function success(content) {
-    // use the content
-}, function error(e) {
-    // handle the error
-});*/
-		}
-	};
 
 	//<p>Estimated video duration: { frameDuration && entries ? `${(frameDuration*entries.length/1000)} seconds` : 'N/A'}</p>
 
@@ -1052,7 +1079,8 @@ function Export({
 										<div className="control">
 						<progress 
 							className="progress is-info"
-							max={entries ? entries?.length-1 : 0} value={entriesProcessed}
+							max={entries ? entries?.length-1 : 0}
+							value={entriesProcessed}
 						>
 							{entriesProcessed} entries processed out of {entries ? entries?.length-1 : 0}
 						</progress>
@@ -1103,16 +1131,34 @@ function Export({
 					<h2 className="title is-5">Export/Import Raw Data</h2>
 					<p className="mb-5">Since your data is only stored locally on your device, it could be deleted if your browser's IndexedDB storage gets cleared. If you want to ensure your data is safe, use the following options to export the raw data and, if needed, to import previously exported raw data.</p>
 					<div className="columns">
-						<div className="column">					
-							<h2 className="title is-6">Export</h2>
+						<div className="column is-narrow">					
 							<div className="field">
+								<label className="label">Export</label>
 								<button 
 									type="button"
-									className="button"
-									onClick={handleExportDbButtonClick}
+									className={`button ${ exportDbDataInProgress ? 'is-loading' : '' }`}
+									onClick={async () => {
+										setExportDbDataInProgress(true);
+										await handleExportDbButtonClick(setExportDbDataRowsExported, setExportDbDataMaxRows)
+										setExportDbDataInProgress(false);
+									}}
 								>
 									Export Data
 								</button>
+							</div>
+						</div>
+						<div className="column">
+							<div className="field">
+								<label className="label">Data Export Progress</label>
+								<div className="control">
+									<progress 
+										className="progress is-info"
+										max={exportDbDataMaxRows ? exportDbDataMaxRows : 0}
+										value={exportDbDataRowsExported}
+									>
+										{exportDbDataRowsExported} rows exported out of {exportDbDataMaxRows ? exportDbDataMaxRows : 0}
+									</progress>
+								</div>
 							</div>
 						</div>
 					</div>
