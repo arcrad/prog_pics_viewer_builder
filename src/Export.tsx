@@ -65,12 +65,16 @@ async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportD
 		setExportDbDataMaxRows,
 		setCurrentMaxRows
 	);
+	console.log('before generate dbBlob');
 	const dbBlob = await exportDB(db, {
 		prettyJson: true, 
+		numRowsPerChunk: 25,
 		progressCallback: exportDbProgressCallback
 	}); //[options]
+	console.log('after generate dbBlob');
 	const zip = new JSZip();
 	zip.file("db_data.json", dbBlob);
+	console.log('after add dbBlob to zip');
 	//saveAs(dbBlob, "db_export.json");
 	await zip.generateAsync({
     type: "blob",
@@ -78,7 +82,15 @@ async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportD
     compressionOptions: {
         level: 9
     }
-})
+	})
+	/*await zip.generateInternalStream({
+    type: "blob",
+    compression: "DEFLATE",
+    compressionOptions: {
+        level: 9
+    }
+	})
+	.accumulate()*/
 		.then(function (blob) {
 			console.log('final zip generated!');
 	    saveAs(blob, "db_export.zip");

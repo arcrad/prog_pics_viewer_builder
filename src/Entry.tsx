@@ -278,6 +278,7 @@ function EntryComponent({
 								Create New Entry
 						</button>
 					</div>
+					{ totalEntriesCount }
 				</div>
 				<PaginationControls
 					curPage={pagerOffset/pagerLimit}
