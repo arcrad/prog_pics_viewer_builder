@@ -36,19 +36,27 @@ const MIN_FRAME_DURATION_MS = 5;
 const MAX_FRAME_DURATION_MS = 5000;
 
 //function exportDbProgressCallback(details:ExportProgress){
+function zipOnUpdateCallback(
+	percent, 
+	currentFile
+) {
+}
+
 function exportDbProgressCallbackFactory(
 	setExportDbDataRowsExported, 
 	setExportDbDataMaxRows, 
-	//setCurrentCompletedRows,
-	setCurrentMaxRows
+	setCurrentCompletedRows,
+	setCurrentMaxRows,
+	setProgressPadding
 ) {
 	return (details:ExportProgress) => {
 		console.log('exportDbProgressCallBack() called');
 		console.log(JSON.stringify(details));
 		setExportDbDataMaxRows(details.totalRows+(Math.max(1, parseInt(details.totalRows*0.1))));
 		setCurrentMaxRows(details.totalRows+(Math.max(1, parseInt(details.totalRows*0.1))));
+		setProgressPadding(Math.max(1, parseInt(details.totalRows*0.1)));
 		setExportDbDataRowsExported(details.completedRows);
-		//setCurrentCompletedRows(details.completedRows);
+		setCurrentCompletedRows(details.completedRows);
 	}
 }
 
@@ -56,20 +64,24 @@ function exportDbProgressCallbackFactory(
 async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportDbDataMaxRows) {
 	console.log('handleExportDbButtonClick() called');
 	//const dbBlob = await db.export({
-	//let currentCompletedRows = 0;
+	let currentCompletedRows = 0;
 	let currentMaxRows = 0;
-	//let setCurrentCompletedRows = (newVal) => { currentCompletedRows = newVal };
+	let progressPadding = 0;
+	let setCurrentCompletedRows = (newVal) => { currentCompletedRows = newVal };
 	let setCurrentMaxRows = (newVal) => { currentMaxRows = newVal };
+	let setProgressPadding = (newVal) => { progressPadding = newVal };
 	const exportDbProgressCallback = exportDbProgressCallbackFactory(
 		setExportDbDataRowsExported,
 		setExportDbDataMaxRows,
-		setCurrentMaxRows
+		setCurrentCompletedRows,
+		setCurrentMaxRows,
+		setProgressPadding
 	);
 	console.log('before generate dbBlob');
 	const dbBlob = await exportDB(db, {
 		prettyJson: true, 
 		numRowsPerChunk: 25,
-		progressCallback: exportDbProgressCallback
+		progressCallback: exportDbProgressCallback,
 	}); //[options]
 	console.log('after generate dbBlob');
 	const zip = new JSZip();
@@ -81,7 +93,14 @@ async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportD
     compression: "DEFLATE",
     compressionOptions: {
         level: 9
-    }
+    },
+		streamFiles: true
+	}, (metadata) => {
+		if(metadata.percent) {
+		//console.log(`percent = ${metadata.percent}`);
+		//console.log(`new rows exported val = ${currentCompletedRows+(progressPadding*(metadata.percent/100))}`);
+		setExportDbDataRowsExported(currentCompletedRows+(progressPadding*(metadata.percent/100)));
+		}
 	})
 	/*await zip.generateInternalStream({
     type: "blob",
@@ -103,7 +122,7 @@ function importDataCallbackFunction(progressData: importProgress) {
 	console.dir(progressData);
 }
 
-const handleDbDataFileLoad = async () => {
+const handleDbDataFileLoad = async (dbDataFileUploadRef) => {
 	//console.dir(dbDataFileUploadRef.current);
 	console.log("handle load db data..");
 	let selectedFile:File;
@@ -288,7 +307,7 @@ function Export({
 					&& dbDataFileUploadRef.current.files.length > 0) {
 						if(dbDataFileUploadFileNameRef.current) {
 		      		dbDataFileUploadFileNameRef.current.textContent = dbDataFileUploadRef.current.files[0].name;
-							handleDbDataFileLoad();
+							handleDbDataFileLoad(dbDataFileUploadRef);
 						}
     		}
 			};
