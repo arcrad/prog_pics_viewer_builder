@@ -321,14 +321,14 @@ function Adjust({
 				const id = await db.settings.put(
 					{ key: 'chosenEntryIdForAdjustments', value: parseInt(imageSelectRef.current.value) }, 
 				);
-				console.log('new id =', id);
+				console.log('new id =', parseInt(imageSelectRef.current.value));
 			} catch(error) {
 				console.error(`failed to add db entry. ${error}`);
 			}
 			//console.log('get entry with id = ', imageSelectRef.current.value );
 			const newEntry = await db.entries.get( parseInt(imageSelectRef.current.value) );
-			//console.log('newEntry = ');
-			//console.dir(newEntry);
+			console.log('newEntry = ');
+			console.dir(newEntry);
 			if(newEntry) {
 				if(newEntry.imageBlob) {
 					setSelectedEntryHasImage(true);

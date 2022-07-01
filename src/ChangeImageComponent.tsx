@@ -67,7 +67,26 @@ function ChangeImageComponent({
 			let tempImage = new Image();
 			tempImage.onload = () => {
 				setStatusMessages( cs => [...cs, "Image loaded."]);
-				//generate thumbnail, if needed
+				//setup scaled image resources
+				const scaledImageMaxDimension = 1920;
+				let scaledImageWidth = tempImage.naturalWidth;
+				let scaledImageHeight = tempImage.naturalHeight;
+				if(tempImage.naturalWidth > scaledImageMaxDimension || tempImage.naturalHeight > scaledImageMaxDimension) {
+					if( tempImage.naturalWidth > tempImage.naturalHeight) {
+						//landscape
+						scaledImageWidth = scaledImageMaxDimension;
+						scaledImageHeight = tempImage.naturalHeight / (tempImage.naturalWidth / scaledImageMaxDimension);
+					} else {
+						//square or portrait
+						scaledImageWidth = tempImage.naturalWidth / (tempImage.naturalHeight / scaledImageMaxDimension);
+						scaledImageHeight = scaledImageMaxDimension;
+					}
+				}
+				const scaledImageCanvas = document.createElement('canvas');
+				scaledImageCanvas.width = scaledImageWidth;
+				scaledImageCanvas.height = scaledImageHeight;
+				const scaledImageCanvasContext = scaledImageCanvas.getContext('2d');
+				//setup thumbnail resources
 				const thumbMaxDimension = 300;
 				let thumbWidth = tempImage.naturalWidth;
 				let thumbHeight = tempImage.naturalHeight;
@@ -84,23 +103,24 @@ function ChangeImageComponent({
 				thumbCanvas.width = thumbWidth;
 				thumbCanvas.height = thumbHeight;
 				const thumbCanvasContext = thumbCanvas.getContext('2d');
-				if(thumbCanvasContext) {
+				if(thumbCanvasContext && scaledImageCanvasContext) {
+					scaledImageCanvasContext.drawImage(tempImage, 0, 0, scaledImageWidth, scaledImageHeight);
 					thumbCanvasContext.drawImage(tempImage, 0, 0, thumbWidth, thumbHeight);
-					thumbCanvas.toBlob( (blob) => {
+					thumbCanvas.toBlob( async (thumbBlob) => {
 						if(entryId != null ) {
-						db.entries.update(parseInt(entryId), {
-							thumbImageBlob: blob
-						}).then( async () => {
+							await db.entries.update(parseInt(entryId), {
+								thumbImageBlob: thumbBlob
+							});
 							//thumb blob saved
 							setStatusMessages( cs => [...cs, "Saved thumbnail data."]);
-							if(entryId != null) {
-							db.entries.update(parseInt(entryId), {
-								imageBlob: selectedFile,
-								//imageArrayBuffer: await selectedFile.arrayBuffer(),
-								//imageBlobBlob: selectedFile.slice(0, selectedFile.size, selectedFile.type),
-								imageNaturalWidth: tempImage.naturalWidth,
-								imageNaturalHeight: tempImage.naturalHeight
-							}).then( () => {
+							scaledImageCanvas.toBlob( async (scaledImageBlob) => {
+								await db.entries.update(parseInt(entryId), {
+									imageBlob: scaledImageBlob,
+									//imageArrayBuffer: await selectedFile.arrayBuffer(),
+									//imageBlobBlob: selectedFile.slice(0, selectedFile.size, selectedFile.type),
+									imageNaturalWidth: scaledImageWidth,
+									imageNaturalHeight: scaledImageHeight
+								});
 								setStatusMessages( cs => [...cs, "Saved full resolution image data."]);
 								//make upload button success color
 								if(imageUploadContainerRef.current) {
@@ -113,9 +133,7 @@ function ChangeImageComponent({
 								if(afterLoadImageFn) {
 									afterLoadImageFn();
 								}
-							});
-							}
-						});
+							}, "image/jpeg", 0.95);
 						}
 					}, "image/jpeg", 0.75);
 				}

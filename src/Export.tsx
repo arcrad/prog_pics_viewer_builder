@@ -52,9 +52,10 @@ function exportDbProgressCallbackFactory(
 	return (details:ExportProgress) => {
 		console.log('exportDbProgressCallBack() called');
 		console.log(JSON.stringify(details));
-		setExportDbDataMaxRows(details.totalRows+(Math.max(1, parseInt(details.totalRows*0.1))));
-		setCurrentMaxRows(details.totalRows+(Math.max(1, parseInt(details.totalRows*0.1))));
-		setProgressPadding(Math.max(1, parseInt(details.totalRows*0.1)));
+		const rowCountPadding = (Math.max(1, parseInt(details.totalRows*0.3)));
+		setExportDbDataMaxRows(details.totalRows+rowCountPadding);
+		setCurrentMaxRows(details.totalRows+rowCountPadding);
+		setProgressPadding(rowCountPadding);
 		setExportDbDataRowsExported(details.completedRows);
 		setCurrentCompletedRows(details.completedRows);
 	}
@@ -77,10 +78,23 @@ async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportD
 		setCurrentMaxRows,
 		setProgressPadding
 	);
+	//clone existing db entries so certain fields can be cleared 
+	/*const allEntries = await db.entries.toArray();
+	allEntries.forEach( (entry) => {
+		console.log(`creating exported version of entry with id = ${entry.id}`);
+		//entry.delete(alignedImageBlob);
+		console.dir(entry);
+		//includeInExport
+			/*const id = await db.entries.add({
+				date: date,
+				draft: true
+			});*/
+	/*});*/
+	//return;	
 	console.log('before generate dbBlob');
 	const dbBlob = await exportDB(db, {
 		prettyJson: true, 
-		numRowsPerChunk: 25,
+		numRowsPerChunk: 1,
 		progressCallback: exportDbProgressCallback,
 	}); //[options]
 	console.log('after generate dbBlob');
@@ -119,7 +133,7 @@ async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportD
 
 function importDataCallbackFunction(progressData: importProgress) {
 	console.log('importDataCallbackFunction() called');
-	console.dir(progressData);
+	console.log(JSON.stringify(progressData));
 }
 
 const handleDbDataFileLoad = async (dbDataFileUploadRef) => {
@@ -1194,26 +1208,42 @@ function Export({
 						</div>
 					</div>
 					<div className="columns">
-						<div className="column">
-								<h2 className="title is-6">Import</h2>
-							<div 
-								ref={dbDataFileUploadContainerRef}
-								className="file is-boxed has-name"
-							>
-								<label className="file-label">
-									<input 
-										ref={dbDataFileUploadRef} 
-										type="file"
-										className="file-input"
-									/>
-									<span className="file-cta">
-										<FontAwesomeIcon icon={faUpload}/>
-										<span className="file-label">
-											Select data file...
+						<div className="column is-narrow">
+							<div className="field">
+								<label className="label">Import</label>
+								<div 
+									ref={dbDataFileUploadContainerRef}
+									className="file is-boxed has-name"
+								>
+									<label className="file-label">
+										<input 
+											ref={dbDataFileUploadRef} 
+											type="file"
+											className="file-input"
+										/>
+										<span className="file-cta">
+											<FontAwesomeIcon icon={faUpload}/>
+											<span className="file-label">
+												Select data file...
+											</span>
 										</span>
-									</span>
-									<span ref={dbDataFileUploadFileNameRef} className="file-name"></span>
-								</label>
+										<span ref={dbDataFileUploadFileNameRef} className="file-name"></span>
+									</label>
+								</div>
+							</div>
+						</div>
+						<div className="column">
+							<div className="field">
+								<label className="label">Data Import Progress</label>
+								<div className="control">
+									<progress 
+										className="progress is-info"
+										max={exportDbDataMaxRows ? exportDbDataMaxRows : 0}
+										value={exportDbDataRowsExported}
+									>
+										{exportDbDataRowsExported} rows exported out of {exportDbDataMaxRows ? exportDbDataMaxRows : 0}
+									</progress>
+								</div>
 							</div>
 						</div>
 					</div>
