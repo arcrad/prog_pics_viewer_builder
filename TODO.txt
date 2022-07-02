@@ -88,3 +88,8 @@
 +devise method to make hover image more magnified / controllable magnification 
 
 +implement functionality to import/export raw db data 
+
++refine export/import progress reporting 
+
++further test component loading times with 300+ entries (seems too slow to load)
+	+if slow loading cannot be fixed, add spinner indicator prior to page loading
