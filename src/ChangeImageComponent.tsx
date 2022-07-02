@@ -109,13 +109,13 @@ function ChangeImageComponent({
 					thumbCanvas.toBlob( async (thumbBlob) => {
 						if(entryId != null ) {
 							await db.entries.update(parseInt(entryId), {
-								thumbImageBlob: thumbBlob
+								thumbImageBlob: new Uint8Array(await thumbBlob.arrayBuffer())
 							});
 							//thumb blob saved
 							setStatusMessages( cs => [...cs, "Saved thumbnail data."]);
 							scaledImageCanvas.toBlob( async (scaledImageBlob) => {
 								await db.entries.update(parseInt(entryId), {
-									imageBlob: scaledImageBlob,
+									imageBlob: new Uint8Array(await scaledImageBlob.arrayBuffer()),
 									//imageArrayBuffer: await selectedFile.arrayBuffer(),
 									//imageBlobBlob: selectedFile.slice(0, selectedFile.size, selectedFile.type),
 									imageNaturalWidth: scaledImageWidth,

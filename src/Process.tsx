@@ -263,10 +263,10 @@ function Viewer({
 						croppedImageHeight
 					);
 				}
-				croppedImageCanvas.toBlob( (blob) => {
+				croppedImageCanvas.toBlob( async (blob) => {
 					if(entryToProcess.id) {
 						db.entries.update(entryToProcess.id, {
-							alignedImageBlob: blob
+							alignedImageBlob: new Uint8Array(await blob.arrayBuffer())
 						}).then( () => {
 							if(baseImage && baseImage.src) {
 								URL.revokeObjectURL(baseImage.src);
@@ -286,7 +286,7 @@ function Viewer({
 				}, 'image/jpeg', 0.9);
 			};
 			if(entryToProcess.imageBlob) {
-				baseImage.src = URL.createObjectURL(entryToProcess.imageBlob);
+				baseImage.src = URL.createObjectURL(new Blob([entryToProcess.imageBlob.buffer]));
 			}
 		});
 	};
@@ -312,7 +312,7 @@ function Viewer({
 			});	
 		}	
 		if(chosenEntryRef.current && chosenEntryRef.current.imageBlob) {
-			chosenEntryImage.src = URL.createObjectURL(chosenEntryRef.current.imageBlob);
+			chosenEntryImage.src = URL.createObjectURL(new Blob([chosenEntryRef.current.imageBlob.buffer]));
 		}
 	};
 
@@ -342,14 +342,15 @@ function Viewer({
 			});	
 		}	
 		if(chosenEntryRef.current && chosenEntryRef.current.imageBlob) {
-			chosenEntryImage.src = URL.createObjectURL(chosenEntryRef.current.imageBlob);
+		//	chosenEntryImage.src = URL.createObjectURL(chosenEntryRef.current.imageBlob);
+			chosenEntryImage.src = URL.createObjectURL(new Blob([chosenEntryRef.current.imageBlob.buffer]));
 		}
 	};
 	
 	let currentImage = '';
 	const blob = entries[currentEntry]?.alignedImageBlob;
 	if(blob) {
-		currentImage = URL.createObjectURL(blob);
+		currentImage = URL.createObjectURL(new Blob([blob.buffer]));
 	}
 
 	const allRelevantValidationsPassed = 

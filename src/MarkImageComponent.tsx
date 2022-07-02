@@ -184,7 +184,7 @@ function MarkImageComponent({
 		if(currentEntry) {
 			if(currentEntry.imageBlob) {
 				setEntryHasImage(true);
-				image.src = URL.createObjectURL(currentEntry.imageBlob);
+				image.src = URL.createObjectURL(new Blob([currentEntry.imageBlob.buffer]));//currentEntry.imageBlob);
 			} else {
 				setEntryHasImage(false);
 			}
@@ -308,7 +308,7 @@ function MarkImageComponent({
 				//setOffsetBottom(target.offsetBottom);	
 			}
 
-			image.src = URL.createObjectURL(currentEntry.imageBlob)
+			image.src = URL.createObjectURL(new Blob([currentEntry.imageBlob.buffer]));
 		}
 	};
 

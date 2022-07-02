@@ -399,7 +399,7 @@ function Export({
 	function loadImageFromBlob(blob:Blob):Promise<HTMLImageElement> {
 		return new Promise( (resolve, reject) => {
 			const image = new Image();
-			const blobUrl = URL.createObjectURL(blob);
+			const blobUrl = URL.createObjectURL(new Blob([blob.buffer]));
 			image.onload = () => {
 				URL.revokeObjectURL(blobUrl);
 				resolve(image);

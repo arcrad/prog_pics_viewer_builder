@@ -94,7 +94,7 @@ function EntryComponent({
 			const entryThumbnailUrls = entries.reduce( (accumulator, currentEntry) => {
 				if(currentEntry.thumbImageBlob) {
 					let newData = {
-						[currentEntry.id as number]: URL.createObjectURL(currentEntry.thumbImageBlob)
+						[currentEntry.id as number]: URL.createObjectURL(new Blob([currentEntry.thumbImageBlob.buffer]))
 					};
 					return { ...accumulator, ...newData};
 				}

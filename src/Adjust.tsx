@@ -356,12 +356,12 @@ function Adjust({
 						if(newEntry && newEntry.imageBlob) {
 							//setScaledImageData(newEntry.image);
 							setScaledImageData(newEntry.imageBlob);
-							setScaledImageDataUrl(newEntry.imageBlob ? URL.createObjectURL(newEntry.imageBlob) : '');
+							setScaledImageDataUrl(newEntry.imageBlob ? URL.createObjectURL(new Blob([newEntry.imageBlob.buffer])) : '');
 						}
 						initialized.current = false;
 					}
 					//image.src = newEntry.image;
-					image.src = URL.createObjectURL(newEntry.imageBlob);
+					image.src = URL.createObjectURL(new Blob([newEntry.imageBlob.buffer]));
 				} else {
 					setSelectedEntryHasImage(false);
 				}
@@ -895,7 +895,7 @@ function Adjust({
 					console.warn('end update chosen image scaling...');
 				}
 				//image.src = _currentEntry.image;
-				image.src = URL.createObjectURL(_currentEntry.imageBlob);
+				image.src = URL.createObjectURL(new Blob([_currentEntry.imageBlob.buffer]));
 					setRenderTrigger(Date.now());
 			}
 		}
