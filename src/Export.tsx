@@ -35,13 +35,6 @@ const smallScreenBreakpoint = 700;
 const MIN_FRAME_DURATION_MS = 5;
 const MAX_FRAME_DURATION_MS = 5000;
 
-//function exportDbProgressCallback(details:ExportProgress){
-function zipOnUpdateCallback(
-	percent, 
-	currentFile
-) {
-}
-
 function exportDbProgressCallbackFactory(
 	setExportDbDataRowsExported, 
 	setExportDbDataMaxRows, 
@@ -78,19 +71,6 @@ async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportD
 		setCurrentMaxRows,
 		setProgressPadding
 	);
-	//clone existing db entries so certain fields can be cleared 
-	/*const allEntries = await db.entries.toArray();
-	allEntries.forEach( (entry) => {
-		console.log(`creating exported version of entry with id = ${entry.id}`);
-		//entry.delete(alignedImageBlob);
-		console.dir(entry);
-		//includeInExport
-			/*const id = await db.entries.add({
-				date: date,
-				draft: true
-			});*/
-	/*});*/
-	//return;	
 	console.log('before generate dbBlob');
 	const dbBlob = await exportDB(db, {
 		prettyJson: true, 
@@ -111,19 +91,9 @@ async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportD
 		streamFiles: true
 	}, (metadata) => {
 		if(metadata.percent) {
-		//console.log(`percent = ${metadata.percent}`);
-		//console.log(`new rows exported val = ${currentCompletedRows+(progressPadding*(metadata.percent/100))}`);
 		setExportDbDataRowsExported(currentCompletedRows+(progressPadding*(metadata.percent/100)));
 		}
 	})
-	/*await zip.generateInternalStream({
-    type: "blob",
-    compression: "DEFLATE",
-    compressionOptions: {
-        level: 9
-    }
-	})
-	.accumulate()*/
 		.then(function (blob) {
 			console.log('final zip generated!');
 	    saveAs(
@@ -159,9 +129,7 @@ const handleDbDataFileLoad = async (
 		selectedFile = dbDataFileUploadRef.current.files[0];
 		const zip = new JSZip();
 		await zip.loadAsync(selectedFile)
-		//db_data.json
-	 //   .then(function (zip) {
-        console.log(zip.files);
+    console.log(zip.files);
 		const dbDataBlob = await zip.file("db_data.json").async("blob");
 		console.dir(dbDataBlob);
 		await importInto(db, dbDataBlob, {
@@ -173,16 +141,6 @@ const handleDbDataFileLoad = async (
 			)
 		});
 		setImportDbDataStatus('Complete');
-
-	/*		});
-		zip
-.file("my_text.txt")
-.async("string")
-.then(function success(content) {
-    // use the content
-}, function error(e) {
-    // handle the error
-});*/
 	}
 };
 
