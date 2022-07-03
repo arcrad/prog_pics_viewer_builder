@@ -1234,7 +1234,6 @@ function Export({
 							<p>Import Status: {importDbDataStatus}</p>
 						</div>
 					</div>
-					<p><i>Not yet implemented.</i></p>
 				</div>
 				</>
 			}
