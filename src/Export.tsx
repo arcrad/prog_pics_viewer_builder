@@ -126,19 +126,34 @@ async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportD
 	.accumulate()*/
 		.then(function (blob) {
 			console.log('final zip generated!');
-	    saveAs(blob, "db_export.zip");
+	    saveAs(
+				blob, 
+				`${(new Date).toISOString().substring(0,10).replaceAll('-','')}-db_export.zip`
+			);
 			setExportDbDataRowsExported(currentMaxRows);
 		});
 }
 
-function importDataCallbackFunction(progressData: importProgress) {
-	console.log('importDataCallbackFunction() called');
-	console.log(JSON.stringify(progressData));
+function importDataCallbackFunctionFactory(
+	setImportDbDataMaxRows,
+	setImportDbDataRowsImported
+) {
+	return (progressData: importProgress) => {
+		console.log('importDataCallbackFunction() called');
+		console.log(JSON.stringify(progressData));
+		setImportDbDataMaxRows(progressData.totalRows);
+		setImportDbDataRowsImported(progressData.completedRows);
+	}
 }
-
-const handleDbDataFileLoad = async (dbDataFileUploadRef) => {
+const handleDbDataFileLoad = async (
+	dbDataFileUploadRef,
+	setImportDbDataMaxRows,
+	setImportDbDataRowsImported,
+	setImportDbDataStatus
+) => {
 	//console.dir(dbDataFileUploadRef.current);
 	console.log("handle load db data..");
+	setImportDbDataStatus('Started');
 	let selectedFile:File;
 	if(dbDataFileUploadRef.current && dbDataFileUploadRef.current.files) {
 		selectedFile = dbDataFileUploadRef.current.files[0];
@@ -150,9 +165,14 @@ const handleDbDataFileLoad = async (dbDataFileUploadRef) => {
 		const dbDataBlob = await zip.file("db_data.json").async("blob");
 		console.dir(dbDataBlob);
 		await importInto(db, dbDataBlob, {
-			overwriteValues: true, 
-			progressCallback: importDataCallbackFunction
+			overwriteValues: true,
+			clearTablesBeforeImport: true, 
+			progressCallback: importDataCallbackFunctionFactory(
+				setImportDbDataMaxRows,
+				setImportDbDataRowsImported
+			)
 		});
+		setImportDbDataStatus('Complete');
 
 	/*		});
 		zip
@@ -297,6 +317,9 @@ function Export({
 	let [exportDbDataMaxRows, setExportDbDataMaxRows] = useState(0);
 	let [exportDbDataRowsExported, setExportDbDataRowsExported] = useState(0);
 	let [exportDbDataInProgress, setExportDbDataInProgress] = useState(false);
+	let [importDbDataMaxRows, setImportDbDataMaxRows] = useState(0);
+	let [importDbDataRowsImported, setImportDbDataRowsImported] = useState(0);
+	let [importDbDataStatus, setImportDbDataStatus] = useState('Not Started');
 
 	const initializedRef = useRef<boolean>(false);
 	const videoElementRef = useRef<HTMLVideoElement|null>(null);
@@ -321,7 +344,12 @@ function Export({
 					&& dbDataFileUploadRef.current.files.length > 0) {
 						if(dbDataFileUploadFileNameRef.current) {
 		      		dbDataFileUploadFileNameRef.current.textContent = dbDataFileUploadRef.current.files[0].name;
-							handleDbDataFileLoad(dbDataFileUploadRef);
+							handleDbDataFileLoad(
+								dbDataFileUploadRef,
+								setImportDbDataMaxRows,
+								setImportDbDataRowsImported,
+								setImportDbDataStatus
+							);
 						}
     		}
 			};
@@ -1238,13 +1266,14 @@ function Export({
 								<div className="control">
 									<progress 
 										className="progress is-info"
-										max={exportDbDataMaxRows ? exportDbDataMaxRows : 0}
-										value={exportDbDataRowsExported}
+										max={importDbDataMaxRows ? importDbDataMaxRows : 0}
+										value={importDbDataRowsImported}
 									>
-										{exportDbDataRowsExported} rows exported out of {exportDbDataMaxRows ? exportDbDataMaxRows : 0}
+										{importDbDataRowsImported} rows exported out of {importDbDataMaxRows ? importDbDataMaxRows : 0}
 									</progress>
 								</div>
 							</div>
+							<p>Import Status: {importDbDataStatus}</p>
 						</div>
 					</div>
 					<p><i>Not yet implemented.</i></p>
