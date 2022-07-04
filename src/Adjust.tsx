@@ -1010,11 +1010,15 @@ function Adjust({
 				</div>
 			}
 			{
-				!loadedInitialData &&
-				allRelevantValidationsPassed &&
+				!Object.keys(validationResults).length > 0 
+				&& (
+					!entries
+					|| !loadedInitialData
+				) &&
 				<p>Loading...</p>
 			}
 			{ 
+				entries && 
 				loadedInitialData && 
 				allRelevantValidationsPassed &&
 				<div className="has-text-centered-">

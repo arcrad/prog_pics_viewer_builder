@@ -410,8 +410,9 @@ function Viewer({
 				
 			}
 			{
-				allRelevantValidationsPassed &&
-				!loadedData && 
+					!Object.keys(validationResults).length > 0
+					&& !loadedData
+				&&
 				<div>
 					<h1>LOADING...</h1>
 				</div> 

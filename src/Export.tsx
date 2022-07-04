@@ -3,14 +3,15 @@ import  * as mathjs  from 'mathjs';
 //import * as PIXI from 'pixi.js';
 import Dexie from "dexie";
 //import "dexie-export-import";
+/*
 import {importDB, exportDB, importInto, peakImportFile} from "dexie-export-import";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
 	faUpload, 
 } from '@fortawesome/free-solid-svg-icons'
-
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
+*/
 
 import * as d3 from 'd3';
 import { ScaleTime, ScaleLinear } from 'd3-scale'; //from DefinitelyTyped types
@@ -35,6 +36,7 @@ const smallScreenBreakpoint = 700;
 const MIN_FRAME_DURATION_MS = 5;
 const MAX_FRAME_DURATION_MS = 5000;
 
+/*
 function exportDbProgressCallbackFactory(
 	setExportDbDataRowsExported, 
 	setExportDbDataMaxRows, 
@@ -143,6 +145,7 @@ const handleDbDataFileLoad = async (
 		setImportDbDataStatus('Complete');
 	}
 };
+*/
 
 function delay(ms:number) {
 	return new Promise( (resolve) => setTimeout(resolve, ms) )
@@ -272,12 +275,14 @@ function Export({
 	let [lastFrameHoldDuration, setLastFrameHoldDuration] = useState<number>(150);
 	let [holdFirstFrameIsChecked, setHoldFirstFrameIsChecked] = useState<boolean>(false);
 	let [holdLastFrameIsChecked, setHoldLastFrameIsChecked] = useState<boolean>(false);
+	/*
 	let [exportDbDataMaxRows, setExportDbDataMaxRows] = useState(0);
 	let [exportDbDataRowsExported, setExportDbDataRowsExported] = useState(0);
 	let [exportDbDataInProgress, setExportDbDataInProgress] = useState(false);
 	let [importDbDataMaxRows, setImportDbDataMaxRows] = useState(0);
 	let [importDbDataRowsImported, setImportDbDataRowsImported] = useState(0);
 	let [importDbDataStatus, setImportDbDataStatus] = useState('Not Started');
+	*/
 
 	const initializedRef = useRef<boolean>(false);
 	const videoElementRef = useRef<HTMLVideoElement|null>(null);
@@ -290,10 +295,13 @@ function Export({
 	const holdLastFrameInputRef = useRef<HTMLInputElement|null>(null);
 	const firstFrameHoldDurationInputRef = useRef<HTMLInputElement|null>(null);
 	const lastFrameHoldDurationInputRef = useRef<HTMLInputElement|null>(null);
+	/*
 	const dbDataFileUploadContainerRef = useRef<HTMLDivElement>(null);
 	const dbDataFileUploadRef = useRef<HTMLInputElement>(null);
 	const dbDataFileUploadFileNameRef = useRef<HTMLSpanElement>(null);
-	
+	*/
+
+	/*
 	useEffect( () => {
 		if(dbDataFileUploadRef && dbDataFileUploadRef.current) {
 			dbDataFileUploadRef.current.onchange = () => {
@@ -313,6 +321,7 @@ function Export({
 			};
 		}
 	},[]);
+	*/
 
 	useEffect( () => {
 		if(initializedRef.current) {
@@ -905,18 +914,15 @@ function Export({
 						</div>
 						}
 						{
-							allRelevantValidationsPassed && 
-							!loadedInitialData && 
+							!Object.keys(validationResults).length > 0 
+							&& !loadedInitialData && 
 							<>
 								<p>Loading...</p>
 							</>
 						}
 						{ 
-							//allRelevantValidationsPassed && 
-							//loadedInitialData && 
-						}
-						{
-							true && 
+							allRelevantValidationsPassed && 
+							loadedInitialData && 
 							<>
 							<div className="box">
 								<h2 className="title is-5">Export Video Locally (Experimental)</h2>
@@ -1158,7 +1164,9 @@ function Export({
 					<h2 className="title is-5">Upload Interactive Viewer</h2>
 					<p><i>Not yet implemented.</i></p>
 				</div>
-				<div className="box">
+				{
+				/*
+ 				<div className="box">
 					<h2 className="title is-5">Export/Import Raw Data</h2>
 					<p className="mb-5">Since your data is only stored locally on your device, it could be deleted if your browser's IndexedDB storage gets cleared. If you want to ensure your data is safe, use the following options to export the raw data and, if needed, to import previously exported raw data.</p>
 					<div className="columns">
@@ -1235,6 +1243,8 @@ function Export({
 						</div>
 					</div>
 				</div>
+					*/
+					}
 				</>
 			}
 		</div>
