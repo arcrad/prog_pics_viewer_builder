@@ -18,6 +18,7 @@ import { ScaleTime, ScaleLinear } from 'd3-scale'; //from DefinitelyTyped types
 import { Line } from 'd3-shape'; //from DefinitelyTyped types
 
 //import './Viewer.css';
+import { LoadingIndicator } from './Common';
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
 import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
@@ -916,9 +917,7 @@ function Export({
 						{
 							!Object.keys(validationResults).length > 0 
 							&& !loadedInitialData && 
-							<>
-								<p>Loading...</p>
-							</>
+							<LoadingIndicator/>
 						}
 						{ 
 							allRelevantValidationsPassed && 

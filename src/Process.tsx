@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import  * as mathjs  from 'mathjs';
 //importi './Viewer.css';
+import { LoadingIndicator } from './Common';
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
 import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
@@ -413,9 +414,7 @@ function Viewer({
 					!Object.keys(validationResults).length > 0
 					&& !loadedData
 				&&
-				<div>
-					<h1>LOADING...</h1>
-				</div> 
+				<LoadingIndicator/>
 			}
 			{ 
 				allRelevantValidationsPassed &&

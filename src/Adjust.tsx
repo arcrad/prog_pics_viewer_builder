@@ -20,6 +20,7 @@ import {
 	faArrowRightLong,
 } from '@fortawesome/free-solid-svg-icons'
 
+import { LoadingIndicator } from './Common';
 import { db, Entry, Setting } from './db';
 import { GlobalState  } from './App';
 import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
@@ -1015,7 +1016,7 @@ function Adjust({
 					!entries
 					|| !loadedInitialData
 				) &&
-				<p>Loading...</p>
+				<LoadingIndicator/>
 			}
 			{ 
 				entries && 

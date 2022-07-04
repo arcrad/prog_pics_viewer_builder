@@ -45,6 +45,13 @@ code {
 /*make navbar display at full size at all break points*/
 $navbar-breakpoint: 0px;
 
+.loading-indicator {
+  @include loader;
+	width: 10vw;
+	height: 10vw;
+	border-width: 1vw;
+}
+
 @import "../node_modules/bulma/sass/base/_all.sass";
 @import "../node_modules/bulma/sass/grid/_all.sass";
 @import "../node_modules/bulma/sass/helpers/overflow.sass";
