@@ -108,98 +108,92 @@ function MarkImageComponent({
 		const image = new Image();
 		//image.src = currentEntry.image;
 		image.onload = () => {
-		if(
-			fullResImageCanvasRef.current 
-			&& currentEntry 
-			&& currentEntry.imageBlob
-		) {
-			console.log('render full-res entry image: onload');
-			const context = fullResImageCanvasRef.current.getContext('2d');
-			fullResImageCanvasRef.current.width = image.naturalWidth;
-			fullResImageCanvasRef.current.height = image.naturalHeight;
-			console.log(`width = ${image.naturalWidth} and height = ${image.naturalHeight}`);
-			if(context) {
-				context.clearRect(0, 0, image.naturalWidth, image.naturalHeight);
-				context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
-				if(currentEntry.marks) {
-					if(Object.keys(currentEntry.marks)) {
-						console.log('found marks');
-						Object.keys(currentEntry.marks).forEach( (key) => {
-							//console.log('loop mark key = ', key);
-							//console.dir(currentEntry?.marks?.[key]);
-							if(
-								currentEntry
-								&& currentEntry.marks
-								&& fullResImageCanvasRef.current
-							) {
-								console.log(
-									'draw mark, mark key = ', key, 
-									'style =',currentEntry.marks[key].style,
-									'x = ', currentEntry.marks[key].x, 
-									'y = ', currentEntry.marks[key].y
-								);
-								//draw contrast circle (white)
-								context.strokeStyle = "#fff";
-								context.lineWidth = fullResImageCanvasRef.current.width * globalState.settings.markLineWidthScalePercent*1.5;
-								context.beginPath();
-								context.arc(
-									currentEntry.marks[key].x, 
-									currentEntry.marks[key].y, 
-									fullResImageCanvasRef.current.width * globalState.settings.markRadiusScalePercent, 
-									0, 
-									2*Math.PI
-								);
-								context.stroke();
-								//draw marker circle (colorful)
-								context.strokeStyle = currentEntry.marks[key].style;
-								context.lineWidth = fullResImageCanvasRef.current.width * globalState.settings.markLineWidthScalePercent;
-								context.beginPath();
-								context.arc(
-									currentEntry.marks[key].x, 
-									currentEntry.marks[key].y, 
-									fullResImageCanvasRef.current.width * globalState.settings.markRadiusScalePercent, 
-									0, 
-									2*Math.PI
-								);
-								context.stroke();
-							}
-						});
+			if(
+				fullResImageCanvasRef.current 
+				&& currentEntry 
+				&& currentEntry.imageBlob
+			) {
+				console.log('render full-res entry image: onload');
+				const context = fullResImageCanvasRef.current.getContext('2d');
+				fullResImageCanvasRef.current.width = image.naturalWidth;
+				fullResImageCanvasRef.current.height = image.naturalHeight;
+				console.log(`width = ${image.naturalWidth} and height = ${image.naturalHeight}`);
+				if(context) {
+					context.clearRect(0, 0, image.naturalWidth, image.naturalHeight);
+					context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
+					if(currentEntry.marks) {
+						if(Object.keys(currentEntry.marks)) {
+							console.log('found marks');
+							Object.keys(currentEntry.marks).forEach( (key) => {
+								//console.log('loop mark key = ', key);
+								//console.dir(currentEntry?.marks?.[key]);
+								if(
+									currentEntry
+									&& currentEntry.marks
+									&& fullResImageCanvasRef.current
+								) {
+									console.log(
+										'draw mark, mark key = ', key, 
+										'style =',currentEntry.marks[key].style,
+										'x = ', currentEntry.marks[key].x, 
+										'y = ', currentEntry.marks[key].y
+									);
+									//draw contrast circle (white)
+									context.strokeStyle = "#fff";
+									context.lineWidth = fullResImageCanvasRef.current.width * globalState.settings.markLineWidthScalePercent*1.5;
+									context.beginPath();
+									context.arc(
+										currentEntry.marks[key].x, 
+										currentEntry.marks[key].y, 
+										fullResImageCanvasRef.current.width * globalState.settings.markRadiusScalePercent, 
+										0, 
+										2*Math.PI
+									);
+									context.stroke();
+									//draw marker circle (colorful)
+									context.strokeStyle = currentEntry.marks[key].style;
+									context.lineWidth = fullResImageCanvasRef.current.width * globalState.settings.markLineWidthScalePercent;
+									context.beginPath();
+									context.arc(
+										currentEntry.marks[key].x, 
+										currentEntry.marks[key].y, 
+										fullResImageCanvasRef.current.width * globalState.settings.markRadiusScalePercent, 
+										0, 
+										2*Math.PI
+									);
+									context.stroke();
+								}
+							});
+						}
 					}
 				}
+				//setFullResImageData(fullResImageCanvasRef.current?.toDataURL());
+				if(fullResImageCanvasRef.current) {
+					fullResImageCanvasRef.current.toBlob( (blob) => {
+						if(blob) {
+							console.log('update setFullResImageData');
+							setFullResImageData(URL.createObjectURL(blob));
+							renderScaledCanvas();
+							setIsLoaded(true);
+						}
+					});
+				}
 			}
-			//setFullResImageData(fullResImageCanvasRef.current?.toDataURL());
-			if(fullResImageCanvasRef.current) {
-				fullResImageCanvasRef.current.toBlob( (blob) => {
-					if(blob) {
-						console.log('update setFullResImageData');
-						setFullResImageData(URL.createObjectURL(blob));
-						renderScaledCanvas();
-						setIsLoaded(true);
-					}
-				});
-			}
-		}
 		};
-			//
 		if(currentEntry) {
 			if(currentEntry.imageBlob) {
 				setEntryHasImage(true);
-				image.src = URL.createObjectURL(new Blob([currentEntry.imageBlob.buffer]));//currentEntry.imageBlob);
+				image.src = URL.createObjectURL(new Blob([currentEntry.imageBlob.buffer]));
 			} else {
 				setEntryHasImage(false);
 			}
-		}
-		
+		}	
 	}, [currentEntry]);
 
 	const renderScaledCanvas = () => {
 		//render scaled canvas
 		console.log('render scaled canvas, current entry id = ', currentEntry?.id);
 		console.dir(currentEntry);
-	/*	if(!isModalVisible) {
-				console.log('modal is not visible, aborting render...');
-				return;
-		}*/
 		//console.log(`before: clientWidth = ${imageContainerRef?.current?.clientWidth}, clientHeight = ${imageContainerRef?.current?.clientHeight}`);
 		if(
 			imageCanvasRef.current 
@@ -265,7 +259,55 @@ function MarkImageComponent({
 	useEffect( () => {
 		renderScaledCanvas();
 	}, [currentEntry, renderTrigger, resizeCanary]);
-
+	
+	let doImageHoverPositionUpdate = (event, target) => {
+		console.log('doImageHoverPositionUpdate() called');
+		const boundingRect = target.getBoundingClientRect();
+		let widthRatio = currentEntry.imageNaturalWidth / target.clientWidth;
+		let heightRatio = currentEntry.imageNaturalHeight / target.clientHeight;
+		let xHoverCoord = event.clientX - boundingRect.x;
+		let yHoverCoord = event.clientY - boundingRect.y;
+		setXNaturalHoverCoord(xHoverCoord*widthRatio);
+		setYNaturalHoverCoord(yHoverCoord*heightRatio);
+		setHoverX(xHoverCoord);
+		setHoverY(yHoverCoord);
+		setImageCanvasOffsetLeft(target.offsetLeft);	
+		setImageCanvasOffsetTop(target.offsetTop);	
+	};
+	
+	let doUpdateImageMark = (
+		event,
+		target,
+		targetOffsetLeft,
+		targetOffsetTop,
+		fullResImageCanvasRefCurrent,
+		imageCanvasRefCurrent,
+		currentEntry		
+	) => {
+		const boundingRect = target.getBoundingClientRect();
+		let widthRatio = fullResImageCanvasRefCurrent.width / imageCanvasRefCurrent.width;
+		let heightRatio = fullResImageCanvasRefCurrent.height / imageCanvasRefCurrent.height;
+		let xClickValue = event.clientX - boundingRect.x;
+		let yClickValue = event.clientY - boundingRect.y;
+		let fullResXClickValue = xClickValue * widthRatio;
+		let fullResYClickValue = yClickValue * heightRatio;
+		console.log(`xClickValue = ${xClickValue}, yClickValue = ${yClickValue}`);
+		console.log(`fullResXClickValue = ${fullResXClickValue}, fullResYClickValue = ${fullResYClickValue}`);
+		let newMarkData = { 
+			x: fullResXClickValue, 
+			y: fullResYClickValue, 
+			style: markFillStyles[activeMark]
+		}
+		const markUpdateKey = 'marks.'+activeMark;
+		//let updatedMarks = {...currentEntry.marks, ...newMark};
+		if(entryId) {
+			db.entries.update(parseInt(entryId), {
+				['marks.'+activeMark]: newMarkData
+			}).then( () => {
+				setRenderTrigger(Date.now());
+			});
+		}
+	};
 
 	let handleImageHover = (event:MouseEvent<HTMLCanvasElement>) => {
 		console.dir(event);
@@ -284,36 +326,9 @@ function MarkImageComponent({
 			&& currentEntry.imageNaturalWidth !== undefined
 			&& currentEntry.imageNaturalHeight !== undefined
 		)	{
-				doImageHoverPositionUpdate(event, target);
 			//console.log(`target.clientWidth = ${target.clientWidth}, target.clientHeight = ${target.clientHeight}`);
-	//		let image = new Image();
-	//		image.onload = () => {
-				//console.log(`currentEntry.imageNaturalWidth = ${currentEntry.imageNaturalWidth} && curentEntry.imageNaturalHeight = ${currentEntry.imageNaturalHeight}`);
-				/*const boundingRect = target.getBoundingClientRect();
-				//let widthRatio = image.naturalWidth / target.clientWidth;
-				//let heightRatio = image.naturalHeight / target.clientHeight;
-				let widthRatio = currentEntry.imageNaturalWidth / target.clientWidth;
-				let heightRatio = currentEntry.imageNaturalHeight / target.clientHeight;
-				let xHoverCoord = event.clientX - boundingRect.x;
-				let yHoverCoord = event.clientY - boundingRect.y;
-				//setXHoverCoord(xHoverCoord);
-				//setYHoverCoord(yHoverCoord);
-				setXNaturalHoverCoord(xHoverCoord*widthRatio);
-				setYNaturalHoverCoord(yHoverCoord*heightRatio);
-				/*console.dir(target.getBoundingClientRect())
-				console.log(`event.pageX = ${event.pageX}, event.pageY = ${event.pageY}`);
-				console.log(`event.clientX = ${event.clientX}, event.clientY = ${event.clientY}`);
-				console.log(`target.offsetLeft = ${target.offsetLeft}, target.offsetTop = ${target.offsetTop}`);
-				console.log(`xHoverCoord = ${xHoverCoord}, yHoverCoord = ${yHoverCoord}`);
-				console.log(`xHoverCoordAlt = ${event.clientX - boundingRect.x}, yHoverCoordAlt = ${event.clientY - boundingRect.y}`);*/
-				/*setHoverX(xHoverCoord);
-				setHoverY(yHoverCoord);
-				setImageCanvasOffsetLeft(target.offsetLeft);	
-				//setOffsetRight(target.offsetRight);	
-				setImageCanvasOffsetTop(target.offsetTop);	
-				//setOffsetBottom(target.offsetBottom);*/	
-		//	}
-		//	image.src = URL.createObjectURL(new Blob([currentEntry.imageBlob.buffer]));
+			//console.log(`currentEntry.imageNaturalWidth = ${currentEntry.imageNaturalWidth} && curentEntry.imageNaturalHeight = ${currentEntry.imageNaturalHeight}`);
+			doImageHoverPositionUpdate(event, target);
 		}
 	};
 
@@ -325,55 +340,6 @@ function MarkImageComponent({
 		setIsHoverMarkerVisible(false);
 	}
 	
-	let doUpdateImageMark = (
-		event,
-		target,
-		targetOffsetLeft,
-		targetOffsetTop,
-		fullResImageCanvasRefCurrent,
-		imageCanvasRefCurrent,
-		currentEntry		
-	) => {
-			const boundingRect = target.getBoundingClientRect();
-			let widthRatio = fullResImageCanvasRefCurrent.width / imageCanvasRefCurrent.width;
-			let heightRatio = fullResImageCanvasRefCurrent.height / imageCanvasRefCurrent.height;
-			let xClickValue = event.clientX - boundingRect.x;
-			let yClickValue = event.clientY - boundingRect.y;
-			let fullResXClickValue = xClickValue * widthRatio;
-			let fullResYClickValue = yClickValue * heightRatio;
-			console.log(`xClickValue = ${xClickValue}, yClickValue = ${yClickValue}`);
-			console.log(`fullResXClickValue = ${fullResXClickValue}, fullResYClickValue = ${fullResYClickValue}`);
-			let newMarkData = { 
-									x: fullResXClickValue, 
-									y: fullResYClickValue, 
-									style: markFillStyles[activeMark]
-								}
-			const markUpdateKey = 'marks.'+activeMark;
-			//let updatedMarks = {...currentEntry.marks, ...newMark};
-			if(entryId) {
-				db.entries.update(parseInt(entryId), {
-					['marks.'+activeMark]: newMarkData
-				}).then( () => {
-					setRenderTrigger(Date.now());
-				});
-			}
-	};
-
-	let doImageHoverPositionUpdate = (event, target) => {
-				console.log('doImageHoverPositionUpdate() called');
-				const boundingRect = target.getBoundingClientRect();
-				let widthRatio = currentEntry.imageNaturalWidth / target.clientWidth;
-				let heightRatio = currentEntry.imageNaturalHeight / target.clientHeight;
-				let xHoverCoord = event.clientX - boundingRect.x;
-				let yHoverCoord = event.clientY - boundingRect.y;
-				setXNaturalHoverCoord(xHoverCoord*widthRatio);
-				setYNaturalHoverCoord(yHoverCoord*heightRatio);
-				setHoverX(xHoverCoord);
-				setHoverY(yHoverCoord);
-				setImageCanvasOffsetLeft(target.offsetLeft);	
-				setImageCanvasOffsetTop(target.offsetTop);	
-	};
-
 	let handleImageTouchStart = (event) => {
 		let target = event.target as HTMLCanvasElement;
 		if(
@@ -392,19 +358,8 @@ function MarkImageComponent({
 			&& currentEntry.imageNaturalWidth !== undefined
 			&& currentEntry.imageNaturalHeight !== undefined
 		)	{
-				console.log('do touch move update' , event.blah);
-				doImageHoverPositionUpdate(event.touches[0], target);
-				/*const boundingRect = target.getBoundingClientRect();
-				let widthRatio = currentEntry.imageNaturalWidth / target.clientWidth;
-				let heightRatio = currentEntry.imageNaturalHeight / target.clientHeight;
-				let xHoverCoord = event.touches[0].clientX - boundingRect.x;
-				let yHoverCoord = event.touches[0].clientY - boundingRect.y;
-				setXNaturalHoverCoord(xHoverCoord*widthRatio);
-				setYNaturalHoverCoord(yHoverCoord*heightRatio);
-				setHoverX(xHoverCoord);
-				setHoverY(yHoverCoord);
-				setImageCanvasOffsetLeft(target.offsetLeft);	
-				setImageCanvasOffsetTop(target.offsetTop);	*/
+			console.log('do touch move update' , event.blah);
+			doImageHoverPositionUpdate(event.touches[0], target);
 		}
 		setIsHoverMarkerVisible(true);
 	};
@@ -429,8 +384,8 @@ function MarkImageComponent({
 			&& currentEntry.imageNaturalWidth !== undefined
 			&& currentEntry.imageNaturalHeight !== undefined
 		)	{
-				console.log('do touch move update');
-				doImageHoverPositionUpdate(event.touches[0], target);
+			console.log('do touch move update');
+			doImageHoverPositionUpdate(event.touches[0], target);
 		}
 	};
 
@@ -446,7 +401,7 @@ function MarkImageComponent({
 			&& imageCanvasRef.current
 			&& currentEntry !== undefined
 		)	{
-			console.log(`target.offsetLeft = ${target.offsetLeft}, target.offsetTop = ${target.offsetTop}`);
+			//console.log(`offsetLeft = ${target.offsetLeft}, offsetTop = ${target.offsetTop}`);
 			doUpdateImageMark(
 				event.changedTouches[0],
 				target,
@@ -458,8 +413,8 @@ function MarkImageComponent({
 			)
 		}
 		setIsHoverMarkerVisible(false);
-	}
-
+	};
+	
 	let handleImageClick = (event:MouseEvent<HTMLCanvasElement>) => {
 		let target = event.target as HTMLCanvasElement;
 		if(
@@ -487,87 +442,87 @@ function MarkImageComponent({
 	}
 
 	let handleCloseButton = () => {
-			setIsLoaded(false);
-//	setIsModalVisible(false);
+		setIsLoaded(false);
+		//setIsModalVisible(false);
 	};
 
 	return (
-			<>
-				<p className="mb-4">Mark three points on the image that will be used to align this image with the other entries' images.</p>
-				<div className={styles.controlsContainer}>
-					<div className="field is-grouped is-grouped-centered">
-						<div className="control">
-							<button 
-								type="button"
-								className={`button ${styles.markButtonA} ${(activeMark === 'A' ? styles.markButtonCurrentlyActive : '')}`}
-								onClick={ () => setActiveMark('A') }
-							>
-								<FontAwesomeIcon icon={faLocationCrosshairs}/>&nbsp;Mark A
-							</button>
-						</div>
-						<div className="control">
-							<button 
-								type="button" 
-								className={`button ${styles.markButtonB} ${(activeMark === 'B' ? styles.markButtonCurrentlyActive : '')}`}
-								onClick={ () => setActiveMark('B') }
-							>
-								<FontAwesomeIcon icon={faLocationCrosshairs}/>&nbsp;Mark B
-							</button>
-						</div>
-						<div className="control">
-							<button 
-								type="button" 
-								className={`button ${styles.markButtonC} ${(activeMark === 'C' ? styles.markButtonCurrentlyActive : '')}`}
-								onClick={ () => setActiveMark('C')}
-							>
-								<FontAwesomeIcon icon={faLocationCrosshairs}/>&nbsp;Mark C
-							</button>				
-						</div>
+		<>
+			<p className="mb-4">Mark three points on the image that will be used to align this image with the other entries' images.</p>
+			<div className={styles.controlsContainer}>
+				<div className="field is-grouped is-grouped-centered">
+					<div className="control">
+						<button 
+							type="button"
+							className={`button ${styles.markButtonA} ${(activeMark === 'A' ? styles.markButtonCurrentlyActive : '')}`}
+							onClick={ () => setActiveMark('A') }
+						>
+							<FontAwesomeIcon icon={faLocationCrosshairs}/>&nbsp;Mark A
+						</button>
+					</div>
+					<div className="control">
+						<button 
+							type="button" 
+							className={`button ${styles.markButtonB} ${(activeMark === 'B' ? styles.markButtonCurrentlyActive : '')}`}
+							onClick={ () => setActiveMark('B') }
+						>
+							<FontAwesomeIcon icon={faLocationCrosshairs}/>&nbsp;Mark B
+						</button>
+					</div>
+					<div className="control">
+						<button 
+							type="button" 
+							className={`button ${styles.markButtonC} ${(activeMark === 'C' ? styles.markButtonCurrentlyActive : '')}`}
+							onClick={ () => setActiveMark('C')}
+						>
+							<FontAwesomeIcon icon={faLocationCrosshairs}/>&nbsp;Mark C
+						</button>				
 					</div>
 				</div>
-				<div ref={imageContainerRef} className={styles.imageContainer}>
-					<div className={styles.imageSandwich}>
-					<canvas
-							ref={imageCanvasRef}
-							className={styles.entryImage}
-							data-rt={renderTrigger}
-							style={{display: (isLoaded ? 'block' : 'none')}}
-							onMouseMove={handleImageHover}
-							onMouseOver={handleImageMouseOver}
-							onMouseOut={handleImageMouseOut}
-							onTouchMove={handleImageTouchMove}
-							onTouchStart={handleImageTouchStart}
-							onTouchEnd={handleImageTouchEnd}
-							onClick={handleImageClick}
-						/>
-						{ !entryHasImage && <p>Entry has no image</p>} 
-						{ entryHasImage && !isLoaded && <p>loading image...</p> }
-					<div 
-						className={`${styles.hoverMarker} ${(isHoverMarkerVisible ? styles.hoverMarkerVisible : "")} ${( activeMark ? 'activeMark'+activeMark : '')}`}
-						style={{
-							left: hoverX,
-							top:hoverY,
-							backgroundImage: 'url("'+fullResImageData+'")',
-							backgroundPosition: 'left calc(-'+(xNaturalHoverCoord)+'px + 9vh) top calc(-'+(yNaturalHoverCoord)+'px + 9vh)',
-						}}
-					>
-					</div>
-					</div>
+			</div>
+			<div ref={imageContainerRef} className={styles.imageContainer}>
+				<div className={styles.imageSandwich}>
+				<canvas
+						ref={imageCanvasRef}
+						className={styles.entryImage}
+						data-rt={renderTrigger}
+						style={{display: (isLoaded ? 'block' : 'none')}}
+						onMouseMove={handleImageHover}
+						onMouseOver={handleImageMouseOver}
+						onMouseOut={handleImageMouseOut}
+						onTouchMove={handleImageTouchMove}
+						onTouchStart={handleImageTouchStart}
+						onTouchEnd={handleImageTouchEnd}
+						onClick={handleImageClick}
+					/>
+					{ !entryHasImage && <p>Entry has no image</p>} 
+					{ entryHasImage && !isLoaded && <p>loading image...</p> }
+				<div 
+					className={`${styles.hoverMarker} ${(isHoverMarkerVisible ? styles.hoverMarkerVisible : "")} ${( activeMark ? 'activeMark'+activeMark : '')}`}
+					style={{
+						left: hoverX,
+						top:hoverY,
+						backgroundImage: 'url("'+fullResImageData+'")',
+						backgroundPosition: 'left calc(-'+(xNaturalHoverCoord)+'px + 9vh) top calc(-'+(yNaturalHoverCoord)+'px + 9vh)',
+					}}
+				>
 				</div>
-				<canvas ref={fullResImageCanvasRef} style={{visibility: "hidden", height: 0, width: 0, pointerEvents: 'none'}} />
-					{/*
-					<div className="debugInfo">
-						<p>
-							Updating entry with id = { globalState.currentEntryId }, 
-							xNaturalHoverCoord = {xNaturalHoverCoord.toFixed(2)}, 
-							yNaturalHoverCoord = {yNaturalHoverCoord.toFixed(2)},
-							clientX = {clientX}, clientY = {clientY},
-							activeMark = {activeMark}
-							isLoaded = { isLoaded ? 'true' : 'false' }
-						</p>
-					</div>
-					*/}
-			</>
+				</div>
+			</div>
+			<canvas ref={fullResImageCanvasRef} style={{visibility: "hidden", height: 0, width: 0, pointerEvents: 'none'}} />
+				{/*
+				<div className="debugInfo">
+					<p>
+						Updating entry with id = { globalState.currentEntryId }, 
+						xNaturalHoverCoord = {xNaturalHoverCoord.toFixed(2)}, 
+						yNaturalHoverCoord = {yNaturalHoverCoord.toFixed(2)},
+						clientX = {clientX}, clientY = {clientY},
+						activeMark = {activeMark}
+						isLoaded = { isLoaded ? 'true' : 'false' }
+					</p>
+				</div>
+				*/}
+		</>
   );
 }
 
