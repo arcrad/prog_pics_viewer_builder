@@ -265,9 +265,7 @@ function MarkImageComponent({
 	useEffect( () => {
 		renderScaledCanvas();
 	}, [currentEntry, renderTrigger, resizeCanary]);
-	let handleImageTouchMove = (event) => {
-		
-	};
+
 
 	let handleImageHover = (event:MouseEvent<HTMLCanvasElement>) => {
 		console.dir(event);
@@ -283,14 +281,15 @@ function MarkImageComponent({
 			&& event.pageX !== undefined
 			&& event.pageY !== undefined
 			&& currentEntry !== undefined
-			&& currentEntry.imageBlob !== undefined
+			&& currentEntry.imageNaturalWidth !== undefined
+			&& currentEntry.imageNaturalHeight !== undefined
 		)	{
+				doImageHoverPositionUpdate(event, target);
 			//console.log(`target.clientWidth = ${target.clientWidth}, target.clientHeight = ${target.clientHeight}`);
 	//		let image = new Image();
 	//		image.onload = () => {
-				if(currentEntry && currentEntry.imageNaturalWidth && currentEntry.imageNaturalHeight) {
 				//console.log(`currentEntry.imageNaturalWidth = ${currentEntry.imageNaturalWidth} && curentEntry.imageNaturalHeight = ${currentEntry.imageNaturalHeight}`);
-				const boundingRect = target.getBoundingClientRect();
+				/*const boundingRect = target.getBoundingClientRect();
 				//let widthRatio = image.naturalWidth / target.clientWidth;
 				//let heightRatio = image.naturalHeight / target.clientHeight;
 				let widthRatio = currentEntry.imageNaturalWidth / target.clientWidth;
@@ -307,14 +306,13 @@ function MarkImageComponent({
 				console.log(`target.offsetLeft = ${target.offsetLeft}, target.offsetTop = ${target.offsetTop}`);
 				console.log(`xHoverCoord = ${xHoverCoord}, yHoverCoord = ${yHoverCoord}`);
 				console.log(`xHoverCoordAlt = ${event.clientX - boundingRect.x}, yHoverCoordAlt = ${event.clientY - boundingRect.y}`);*/
-				setHoverX(xHoverCoord);
+				/*setHoverX(xHoverCoord);
 				setHoverY(yHoverCoord);
 				setImageCanvasOffsetLeft(target.offsetLeft);	
 				//setOffsetRight(target.offsetRight);	
 				setImageCanvasOffsetTop(target.offsetTop);	
-				//setOffsetBottom(target.offsetBottom);	
+				//setOffsetBottom(target.offsetBottom);*/	
 		//	}
-}
 		//	image.src = URL.createObjectURL(new Blob([currentEntry.imageBlob.buffer]));
 		}
 	};
@@ -326,22 +324,19 @@ function MarkImageComponent({
 	let handleImageMouseOut = (event:MouseEvent<HTMLCanvasElement>) => {
 		setIsHoverMarkerVisible(false);
 	}
-
-	let handleImageClick = (event:MouseEvent<HTMLCanvasElement>) => {
-		let target = event.target as HTMLCanvasElement;
-		if(
-			target !== undefined
-			&& target.offsetLeft !== undefined 
-			&& target.offsetTop !== undefined
-			&& fullResImageCanvasRef.current
-			&& imageCanvasRef.current
-			&& currentEntry !== undefined
-		)	{
-			console.log(`full width = ${fullResImageCanvasRef.current.width} / scale width = ${imageCanvasRef.current.width}`);
-			console.log(`full height = ${fullResImageCanvasRef.current.height} / scale height = ${imageCanvasRef.current.height}`);
+	
+	let doUpdateImageMark = (
+		event,
+		target,
+		targetOffsetLeft,
+		targetOffsetTop,
+		fullResImageCanvasRefCurrent,
+		imageCanvasRefCurrent,
+		currentEntry		
+	) => {
 			const boundingRect = target.getBoundingClientRect();
-			let widthRatio = fullResImageCanvasRef.current.width / imageCanvasRef.current.width;
-			let heightRatio = fullResImageCanvasRef.current.height / imageCanvasRef.current.height;
+			let widthRatio = fullResImageCanvasRefCurrent.width / imageCanvasRefCurrent.width;
+			let heightRatio = fullResImageCanvasRefCurrent.height / imageCanvasRefCurrent.height;
 			let xClickValue = event.clientX - boundingRect.x;
 			let yClickValue = event.clientY - boundingRect.y;
 			let fullResXClickValue = xClickValue * widthRatio;
@@ -362,8 +357,132 @@ function MarkImageComponent({
 					setRenderTrigger(Date.now());
 				});
 			}
+	};
+
+	let doImageHoverPositionUpdate = (event, target) => {
+				console.log('doImageHoverPositionUpdate() called');
+				const boundingRect = target.getBoundingClientRect();
+				let widthRatio = currentEntry.imageNaturalWidth / target.clientWidth;
+				let heightRatio = currentEntry.imageNaturalHeight / target.clientHeight;
+				let xHoverCoord = event.clientX - boundingRect.x;
+				let yHoverCoord = event.clientY - boundingRect.y;
+				setXNaturalHoverCoord(xHoverCoord*widthRatio);
+				setYNaturalHoverCoord(yHoverCoord*heightRatio);
+				setHoverX(xHoverCoord);
+				setHoverY(yHoverCoord);
+				setImageCanvasOffsetLeft(target.offsetLeft);	
+				setImageCanvasOffsetTop(target.offsetTop);	
+	};
+
+	let handleImageTouchStart = (event) => {
+		let target = event.target as HTMLCanvasElement;
+		if(
+			target !== undefined
+			&& target.offsetLeft !== undefined
+			&& target.offsetTop !== undefined
+			&& target.clientWidth !== undefined
+			&& target.clientHeight !== undefined
+			&& event.touches !== undefined
+			&& event.touches[0] !== undefined
+			&& event.touches[0].clientX !== undefined
+			&& event.touches[0].clientY !== undefined
+			&& event.touches[0].pageX !== undefined
+			&& event.touches[0].pageY !== undefined
+			&& currentEntry !== undefined
+			&& currentEntry.imageNaturalWidth !== undefined
+			&& currentEntry.imageNaturalHeight !== undefined
+		)	{
+				console.log('do touch move update' , event.blah);
+				doImageHoverPositionUpdate(event.touches[0], target);
+				/*const boundingRect = target.getBoundingClientRect();
+				let widthRatio = currentEntry.imageNaturalWidth / target.clientWidth;
+				let heightRatio = currentEntry.imageNaturalHeight / target.clientHeight;
+				let xHoverCoord = event.touches[0].clientX - boundingRect.x;
+				let yHoverCoord = event.touches[0].clientY - boundingRect.y;
+				setXNaturalHoverCoord(xHoverCoord*widthRatio);
+				setYNaturalHoverCoord(yHoverCoord*heightRatio);
+				setHoverX(xHoverCoord);
+				setHoverY(yHoverCoord);
+				setImageCanvasOffsetLeft(target.offsetLeft);	
+				setImageCanvasOffsetTop(target.offsetTop);	*/
+		}
+		setIsHoverMarkerVisible(true);
+	};
+	
+	let handleImageTouchMove = (event) => {
+		//console.dir(event);	
+		console.log('handleimagetouchmove() called');
+		let target = event.target as HTMLCanvasElement;
+		if(
+			target !== undefined
+			&& target.offsetLeft !== undefined
+			&& target.offsetTop !== undefined
+			&& target.clientWidth !== undefined
+			&& target.clientHeight !== undefined
+			&& event.touches !== undefined
+			&& event.touches[0] !== undefined
+			&& event.touches[0].clientX !== undefined
+			&& event.touches[0].clientY !== undefined
+			&& event.touches[0].pageX !== undefined
+			&& event.touches[0].pageY !== undefined
+			&& currentEntry !== undefined
+			&& currentEntry.imageNaturalWidth !== undefined
+			&& currentEntry.imageNaturalHeight !== undefined
+		)	{
+				console.log('do touch move update');
+				doImageHoverPositionUpdate(event.touches[0], target);
+		}
+	};
+
+	let handleImageTouchEnd = (event) => {
+		console.dir(event);
+		let target = event.target as HTMLCanvasElement;
+		if(
+			event.changedTouches[0]
+			&& target !== undefined
+			&& target.offsetLeft !== undefined 
+			&& target.offsetTop !== undefined
+			&& fullResImageCanvasRef.current
+			&& imageCanvasRef.current
+			&& currentEntry !== undefined
+		)	{
+			console.log(`target.offsetLeft = ${target.offsetLeft}, target.offsetTop = ${target.offsetTop}`);
+			doUpdateImageMark(
+				event.changedTouches[0],
+				target,
+				target.offsetLeft,
+				target.offsetTop,
+				fullResImageCanvasRef.current,
+				imageCanvasRef.current,
+				currentEntry		
+			)
+		}
+		setIsHoverMarkerVisible(false);
+	}
+
+	let handleImageClick = (event:MouseEvent<HTMLCanvasElement>) => {
+		let target = event.target as HTMLCanvasElement;
+		if(
+			target !== undefined
+			&& target.offsetLeft !== undefined 
+			&& target.offsetTop !== undefined
+			&& fullResImageCanvasRef.current
+			&& imageCanvasRef.current
+			&& currentEntry !== undefined
+		)	{
+			console.log(`full width = ${fullResImageCanvasRef.current.width} / scale width = ${imageCanvasRef.current.width}`);
+			console.log(`full height = ${fullResImageCanvasRef.current.height} / scale height = ${imageCanvasRef.current.height}`);
 			//console.log('marks = ');
 			//console.dir(currentEntry.marks);
+			doUpdateImageMark(
+				event,
+				target,
+				target.offsetLeft,
+				target.offsetTop,
+				fullResImageCanvasRef.current,
+				imageCanvasRef.current,
+				currentEntry		
+			)
 		}
 	}
 
@@ -417,8 +536,8 @@ function MarkImageComponent({
 							onMouseOver={handleImageMouseOver}
 							onMouseOut={handleImageMouseOut}
 							onTouchMove={handleImageTouchMove}
-							onTouchStart={handleImageMouseOver}
-							onTouchEnd={handleImageMouseOut}
+							onTouchStart={handleImageTouchStart}
+							onTouchEnd={handleImageTouchEnd}
 							onClick={handleImageClick}
 						/>
 						{ !entryHasImage && <p>Entry has no image</p>} 
