@@ -265,6 +265,9 @@ function MarkImageComponent({
 	useEffect( () => {
 		renderScaledCanvas();
 	}, [currentEntry, renderTrigger, resizeCanary]);
+	let handleImageTouchMove = (event) => {
+		
+	};
 
 	let handleImageHover = (event:MouseEvent<HTMLCanvasElement>) => {
 		console.dir(event);
@@ -283,11 +286,15 @@ function MarkImageComponent({
 			&& currentEntry.imageBlob !== undefined
 		)	{
 			//console.log(`target.clientWidth = ${target.clientWidth}, target.clientHeight = ${target.clientHeight}`);
-			let image = new Image();
-			image.onload = () => {
+	//		let image = new Image();
+	//		image.onload = () => {
+				if(currentEntry && currentEntry.imageNaturalWidth && currentEntry.imageNaturalHeight) {
+				//console.log(`currentEntry.imageNaturalWidth = ${currentEntry.imageNaturalWidth} && curentEntry.imageNaturalHeight = ${currentEntry.imageNaturalHeight}`);
 				const boundingRect = target.getBoundingClientRect();
-				let widthRatio = image.naturalWidth / target.clientWidth;
-				let heightRatio = image.naturalHeight / target.clientHeight;
+				//let widthRatio = image.naturalWidth / target.clientWidth;
+				//let heightRatio = image.naturalHeight / target.clientHeight;
+				let widthRatio = currentEntry.imageNaturalWidth / target.clientWidth;
+				let heightRatio = currentEntry.imageNaturalHeight / target.clientHeight;
 				let xHoverCoord = event.clientX - boundingRect.x;
 				let yHoverCoord = event.clientY - boundingRect.y;
 				//setXHoverCoord(xHoverCoord);
@@ -306,9 +313,9 @@ function MarkImageComponent({
 				//setOffsetRight(target.offsetRight);	
 				setImageCanvasOffsetTop(target.offsetTop);	
 				//setOffsetBottom(target.offsetBottom);	
-			}
-
-			image.src = URL.createObjectURL(new Blob([currentEntry.imageBlob.buffer]));
+		//	}
+}
+		//	image.src = URL.createObjectURL(new Blob([currentEntry.imageBlob.buffer]));
 		}
 	};
 
@@ -409,6 +416,9 @@ function MarkImageComponent({
 							onMouseMove={handleImageHover}
 							onMouseOver={handleImageMouseOver}
 							onMouseOut={handleImageMouseOut}
+							onTouchMove={handleImageTouchMove}
+							onTouchStart={handleImageMouseOver}
+							onTouchEnd={handleImageMouseOut}
 							onClick={handleImageClick}
 						/>
 						{ !entryHasImage && <p>Entry has no image</p>} 
