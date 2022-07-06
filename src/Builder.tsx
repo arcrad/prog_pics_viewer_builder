@@ -71,8 +71,9 @@ function Builder({
 	}, []);*/
 
 	return (
-		<div className="columns">
-			<div className="column">
+			<>
+		{/*<div className="columns">
+			<div className="column">*/}
 				<nav role="navigation" aria-label="main navigation">
 					<div className="level is-mobile">
 						{/*<NavLink className="navbar-item" to="/">Builder (Home)</NavLink>*/}
@@ -89,7 +90,7 @@ function Builder({
 								return <>
 									<NavLink 
 										to={link.path} 
-										className={`level-item is-flex-grow-1 has-text-centered is-justify-content-center mx-0 ${styles.mainNavLink}`}
+										className={`is-size-7-mobile level-item is-flex-grow-1 has-text-centered is-justify-content-center mx-0 ${styles.mainNavLink}`}
 										style={{marginLeft: 0, marginRight:0}}
 									>
 										{link.name}
@@ -98,7 +99,7 @@ function Builder({
 										index < navLinks.length-1 &&
 										<div 
 											className="level-item has-text-centered is-flex-grow-0 is-flex-shrink-1"
-											style={{marginLeft: '0.25rem', marginRight: '0.25rem'}}
+											style={{marginLeft: '0.1rem', marginRight: '0.1rem'}}
 										>
 											<FontAwesomeIcon icon={faAngleRight} />
 										</div>
@@ -127,8 +128,9 @@ function Builder({
 					setIsModalVisible={setSetupModalIsVisible}
 				/>
 				*/}
-			</div>
-		</div>
+	{/*		</div>
+		</div>*/}
+		</>
 	);
 }
 
