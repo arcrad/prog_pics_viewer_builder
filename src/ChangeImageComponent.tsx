@@ -59,8 +59,8 @@ function ChangeImageComponent({
 	const handleImageLoad = async () => {
 		//console.dir(imageUploadRef.current);
 		console.log("handle load image..");
-		const scaledImageMaxDimension = 
-			(await db.settings.get('defaultBaseImageMaxDimension')).value || 1920;
+		const defaultBaseImageMaxDimensionValue = (await db.settings.get('defaultBaseImageMaxDimension')).value;
+		const scaledImageMaxDimension = parseInt(defaultBaseImageMaxDimensionValue) > 0 ? defaultBaseImageMaxDimensionValue : 1920;
 		console.log(`fetched setting defaultBaseImageMaxDimension = ${scaledImageMaxDimension}`);
 		setStatusMessages(["Started loading image..."]);
 		let selectedFile:File;
