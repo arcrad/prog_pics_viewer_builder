@@ -57,6 +57,7 @@ const defaultSettings:Settings = {
 	showDraftsInEntries: false,
 	exportFirstFrameHoldDuration: 500,
 	exportLastFrameHoldDuration: 500,
+	defaultBaseImageMaxDimension: 1920,
 };
 
 function App() {
