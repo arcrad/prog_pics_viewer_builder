@@ -106,3 +106,9 @@
 	background: #12c;
 	color: #fff;
 }
+
+.markButtonA.markButtonCurrentlyActive:focus,
+.markButtonB.markButtonCurrentlyActive:focus,
+.markButtonC.markButtonCurrentlyActive:focus {
+	color: #fff;
+}
