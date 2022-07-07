@@ -278,7 +278,7 @@ function EntryComponent({
 								Create New Entry
 						</button>
 					</div>
-					{ totalEntriesCount }
+					<p className="has-text-centered mt-3">Total Entries: { totalEntriesCount }</p>
 				</div>
 				<PaginationControls
 					curPage={pagerOffset/pagerLimit}
