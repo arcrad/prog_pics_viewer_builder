@@ -13,6 +13,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
 	faUpload, 
+	faTrashAlt,
 } from '@fortawesome/free-solid-svg-icons'
 import {importDB, exportDB, importInto, peakImportFile} from "dexie-export-import";
 import { saveAs } from 'file-saver';
@@ -236,6 +237,13 @@ function SettingsComponent({
 		}
 	};
 
+	let handleDeleteAllEntries = () => {
+		const doDelete = window.confirm('Are you sure you want to delete all entries? There is no way to get them back unless you have Exported a backup.');
+		if(doDelete) {
+			db.entries.clear();
+		}
+	};
+
   return (
     <>
 			<div className="columns is-mobile is-centered">
@@ -328,12 +336,30 @@ function SettingsComponent({
 						</div>
 					</div>
 					<div className="box">
+						<h2 className="title is-5">Delete All Entries</h2>
+						<p className="mb-5">Delete all entries stored in this app.</p>
+						<button 
+							type="button" 
+							className="button is-danger"
+							title="Delete All Entries"
+							onClick={handleDeleteAllEntries}
+						>
+							<span className="pe-none">
+								Delete All Entries&nbsp;
+							</span>
+							<FontAwesomeIcon 
+								className="pe-none"
+								icon={faTrashAlt}
+							/>
+						</button>
+					</div>
+					<div className="box">
 						<h2 className="title is-5">View/Modify Settings</h2>
 						<p className="mb-5">These settings are managed by the application and should not normally need to be edited. They are primarly provided here for diagnostic/debugging purposes. </p>
 						<div>
 						{
-							currentSettings?.map( (setting) => 
-								<div className="field"> 
+							currentSettings?.map( (setting, id) => 
+								<div className="field" key={id}> 
 									<label className="label">{setting.key}</label>
 									<div className="control"> 
 										<input 
