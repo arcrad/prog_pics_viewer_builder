@@ -137,6 +137,7 @@ function App() {
 			<Routes>
     		<Route 
 					path="/" 
+					//index
 					element={
 						<Builder 
 							globalState={globalState} 
