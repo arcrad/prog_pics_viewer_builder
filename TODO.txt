@@ -93,3 +93,11 @@
 
 +further test component loading times with 300+ entries (seems too slow to load)
 	+if slow loading cannot be fixed, add spinner indicator prior to page loading
+
++develop touch compatible functionality for adjust crop component 
+
++improve touch behavior of mark image
+	+try to prevent scrolling when marking image 
+	+consider offsetting the magnification bubble on mobile 
+	+do not activate marker on multiple touch
+	+add scroll area next to image on mobile to make it easier to get back to Mark buttons
