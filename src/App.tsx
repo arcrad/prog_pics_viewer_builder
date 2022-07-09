@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Routes, Route } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry, Setting } from './db';
@@ -133,10 +133,10 @@ function App() {
 
   return (
     <div className={styles.App}>
-		<BrowserRouter>
+		<HashRouter>
 			<Routes>
     		<Route 
-					path="/" 
+					path="" 
 					//index
 					element={
 						<Builder 
@@ -198,7 +198,7 @@ function App() {
 					/>
 				</Route>
 			</Routes>
-		</BrowserRouter>
+		</HashRouter>
     </div>
   );
 }
