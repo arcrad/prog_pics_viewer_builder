@@ -343,17 +343,18 @@ function MarkImageComponent({
 	let handleImageTouchStart = (event) => {
 		let target = event.target as HTMLCanvasElement;
 		if(
-			target !== undefined
-			&& target.offsetLeft !== undefined
-			&& target.offsetTop !== undefined
-			&& target.clientWidth !== undefined
-			&& target.clientHeight !== undefined
-			&& event.touches !== undefined
+			event.touches !== undefined
+			&& event.touches.length === 1
 			&& event.touches[0] !== undefined
 			&& event.touches[0].clientX !== undefined
 			&& event.touches[0].clientY !== undefined
 			&& event.touches[0].pageX !== undefined
 			&& event.touches[0].pageY !== undefined
+			&& target !== undefined
+			&& target.offsetLeft !== undefined
+			&& target.offsetTop !== undefined
+			&& target.clientWidth !== undefined
+			&& target.clientHeight !== undefined
 			&& currentEntry !== undefined
 			&& currentEntry.imageNaturalWidth !== undefined
 			&& currentEntry.imageNaturalHeight !== undefined
@@ -369,17 +370,18 @@ function MarkImageComponent({
 		console.log('handleimagetouchmove() called');
 		let target = event.target as HTMLCanvasElement;
 		if(
-			target !== undefined
-			&& target.offsetLeft !== undefined
-			&& target.offsetTop !== undefined
-			&& target.clientWidth !== undefined
-			&& target.clientHeight !== undefined
-			&& event.touches !== undefined
+			event.touches !== undefined
+			&& event.touches.length === 1
 			&& event.touches[0] !== undefined
 			&& event.touches[0].clientX !== undefined
 			&& event.touches[0].clientY !== undefined
 			&& event.touches[0].pageX !== undefined
 			&& event.touches[0].pageY !== undefined
+			&& target !== undefined
+			&& target.offsetLeft !== undefined
+			&& target.offsetTop !== undefined
+			&& target.clientWidth !== undefined
+			&& target.clientHeight !== undefined
 			&& currentEntry !== undefined
 			&& currentEntry.imageNaturalWidth !== undefined
 			&& currentEntry.imageNaturalHeight !== undefined
