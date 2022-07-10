@@ -393,7 +393,7 @@ function Adjust({
 			if(event.target.dataset.settingsKeyToModify === 'scaleWidth') {
 				//console.log('prev scaleWidth = ', scaleWidth);
 				const widthRatio = selectedImageBaseWidth/parseFloat(newValue);
-				//console.warn('widthRatio = ', widthRatio);
+				console.warn('widthRatio = ', widthRatio);
 				if(!isNaN(widthRatio) && aspectRatioIsLocked) {
 					const newScaleHeight = selectedImageBaseHeight/widthRatio;
 					if(!isNaN(newScaleHeight)) {
@@ -406,7 +406,7 @@ function Adjust({
 			} else if(event.target.dataset.settingsKeyToModify === 'scaleHeight') {
 				//console.log('prev scaleHeight = ', scaleHeight);
 				const heightRatio = selectedImageBaseHeight/parseFloat(newValue);
-				//console.warn('heightRatio = ', heightRatio);
+				console.warn('heightRatio = ', heightRatio);
 				if(!isNaN(heightRatio) && aspectRatioIsLocked) {
 					const newScaleWidth = selectedImageBaseWidth/heightRatio;
 					if(!isNaN(newScaleWidth)) {
@@ -571,9 +571,11 @@ function Adjust({
 				}*/
 				if(_scaleWidthSetting) {
 					setScaleWidth(_scaleWidthSetting.value as string);
+					setSelectedImageBaseWidth(_scaleWidthSetting.value);
 				}
 				if(_scaleHeightSetting) {
 					setScaleHeight(_scaleHeightSetting.value as string);
+					setSelectedImageBaseHeight(_scaleHeightSetting.value);
 				}
 				/*
 				entries = _entries;
@@ -681,8 +683,9 @@ function Adjust({
 
 	
 	useEffect( () => {
-		let handleMouseDown = (event: any) => {
-			console.log('handleMouseDown() called');
+		let handleAdjustCropMarkerStart = (event: any) => {
+			console.log('handleAdjustCropMarkerStart() called');
+			//console.dir(event);
 			//console.dir(event.target);
 			if(event.target.classList.contains(styles.cropCornerControl)) {
 				event.preventDefault();
@@ -692,12 +695,6 @@ function Adjust({
 			}
 		}
 		
-		let handleMouseUp = (event: any) => {
-			if(activeCornerControlRef.current != 'all') {
-			activeCornerControlRef.current = 'none';
-			}
-		}
-
 		const getCoordinateBoundToImage = (baseCoordinate: Coordinate):Coordinate => {
 			let boundCoordinate = { x: baseCoordinate.x, y: baseCoordinate.y };
 			if(!currentCropImageRef.current){
@@ -765,15 +762,29 @@ function Adjust({
 			return boundCoordinate;
 		};
 		
-		const handleMouseMove = (event: any) => {
+		const handleAdjustCropMarkerMove = (event: any) => {
+			//console.log('handleAdjustCropMarkerMove() called');
 			//console.dir(event);
-			//console.log(`pageX=${event.pageX}, pageY=${event.pageY}`);
+			let pageX = 0;
+			let pageY = 0;
+			if(event.touches !== undefined && event.touches.length === 1) {
+				//setup touch event
+				//console.log('touch event');
+				pageX = event.touches[0].pageX;
+				pageY = event.touches[0].pageY;
+			} else {
+				//setup mouse event
+				//console.log('mouse event');
+				pageX = event.pageX;
+				pageY = event.pageY;
+			}
+			//console.log(`pageX=${pageX}, pageY=${pageY}`);
 			//console.log(`screenX=${event.screenX}, screenY=${event.screenY}`);
 			if(currentCropImageContainerRef.current) {
 				const boundingRect = currentCropImageContainerRef.current.getBoundingClientRect();
 				const newCoordinate = getCoordinateBoundToImage({
-						x: event.pageX - boundingRect.left - window.scrollX, 
-						y: event.pageY - boundingRect.top - window.scrollY
+						x: pageX - boundingRect.left - window.scrollX, 
+						y: pageY - boundingRect.top - window.scrollY
 					});
 				if(activeCornerControlRef.current === 'topLeft') {
 					const boundCoordinate = getBoundTopLeftCornerCoordinate(newCoordinate);
@@ -826,13 +837,26 @@ function Adjust({
 				}		
 			}
 		}
-		window.addEventListener('mousedown', handleMouseDown);
-		window.addEventListener('mouseup', handleMouseUp);
-		window.addEventListener('mousemove', handleMouseMove);
+		
+		let handleAdjustCropMarkerEnd = (event: any) => {
+			if(activeCornerControlRef.current != 'all') {
+			activeCornerControlRef.current = 'none';
+			}
+		}
+		
+		window.addEventListener('mousedown', handleAdjustCropMarkerStart);
+		window.addEventListener('mousemove', handleAdjustCropMarkerMove);
+		window.addEventListener('mouseup', handleAdjustCropMarkerEnd);
+		window.addEventListener('touchstart', handleAdjustCropMarkerStart);
+		window.addEventListener('touchmove', handleAdjustCropMarkerMove);
+		window.addEventListener('touchend', handleAdjustCropMarkerEnd);
 		return( () => {
-			window.removeEventListener('mousedown', handleMouseDown);
-			window.removeEventListener('mouseup', handleMouseUp);
-			window.removeEventListener('mousemove', handleMouseMove);
+			window.removeEventListener('mousedown', handleAdjustCropMarkerStart);
+			window.removeEventListener('mousemove', handleAdjustCropMarkerMove);
+			window.removeEventListener('mouseup', handleAdjustCropMarkerEnd);
+			window.removeEventListener('touchstart', handleAdjustCropMarkerStart);
+			window.removeEventListener('touchmove', handleAdjustCropMarkerMove);
+			window.removeEventListener('touchend', handleAdjustCropMarkerEnd);
 		});
 	});
 /*, [

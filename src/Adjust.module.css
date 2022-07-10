@@ -7,16 +7,19 @@
 }
 
 .cropCornerControl {
+	touch-action: none;
 	z-index: 9000;
-	width: 3vmin;
-	height: 3vmin;
-	/*border-radius: 3vmin;*/
-	border:0.5vmin solid #ddd;
+	width: 1.5rem;
+	height: 1.5rem;
+	max-width: 1.5rem;
+	max-height: 1.5rem;
+	border-radius: 3rem;
+	border:0.21rem solid #ddd;
 	background: #000;
 	position: absolute;
 	top: 0;
 	left: 0;
-	transform: translate(-1.5vmin, -1.5vmin);
+	transform: translate(-0.75rem, -0.75rem);
 }
 
 .notVisible {
