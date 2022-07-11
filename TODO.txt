@@ -96,8 +96,7 @@
 
 +develop touch compatible functionality for adjust crop component 
 
-+improve touch behavior of mark image
-	+try to prevent scrolling when marking image 
-	+consider offsetting the magnification bubble on mobile 
-	+do not activate marker on multiple touch
-	+add scroll area next to image on mobile to make it easier to get back to Mark buttons
+-improve touch behavior of mark image
+	-try to prevent scrolling when marking image 
+	-consider offsetting the magnification bubble on mobile 
+	-add scroll area next to image on mobile to make it easier to get back to Mark buttons
