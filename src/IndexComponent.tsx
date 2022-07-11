@@ -35,7 +35,7 @@ export default function IndexComponent() {
 						</ul>
 						<h1>Details</h1>
 						<h2 id="data_is_stored_locally">Data is Stored Locally</h2>
-						<p>This tool stores all its data locally on your device using IndexedDB. This means that the data only exists on your device and if it is ever deleted it cannot be recovered. To guard against this, you can export your raw data via the <strong>Settings</strong> tab. To ensure your data is always recoverable, you can regularly export it and save it to your device. Then, if your browers IndexedDB storage ever gets cleared, you can import your latest saved data and be on your way.</p>
+						<p>This tool stores all its data locally on your device using IndexedDB. This means that the data only exists on your device and if it is ever deleted it cannot be recovered. To guard against this, you can export your raw data via the <strong>Settings</strong> tab. To ensure your data is always up-to-date, you can regularly export it and save it to your device. If your brower's IndexedDB storage ever gets cleared, you can import your latest saved data and pick up where you left off.</p>
 					</div>
 				</div>
 			</div>
