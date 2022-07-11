@@ -276,13 +276,13 @@ export function EntryOptionsDropdown({
 export function LoadingIndicator() {
 	return ( 	
 				<div className="is-flex is-justify-content-center">
-					<div>
-					<div 
-						style={{
-						}}
-						className="loading-indicator">
-					</div>
-					<p className="has-text-centered my-3">Loading...</p>
+					<div className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center">
+						<div 
+							style={{
+							}}
+							className="loading-indicator">
+						</div>
+						<p className="has-text-centered my-3">Loading...</p>
 					</div>
 				</div>
 	);
