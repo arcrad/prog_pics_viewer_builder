@@ -132,7 +132,7 @@ function App() {
 	}, []);
 
   return (
-    <div className={styles.App}>
+    <div className={`mb-5 ${styles.App}`}>
 		<HashRouter>
 			<Routes>
     		<Route 
