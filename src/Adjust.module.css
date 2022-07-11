@@ -2,8 +2,9 @@
 	/*border: 1px solid orange;*/
 	box-sizing: border-box;
 	display: inline-block;
-	margin: 0 auto;
+	margin: 0.75rem;
 	position: relative;
+	background: #000;
 }
 
 .cropCornerControl {

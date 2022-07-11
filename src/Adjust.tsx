@@ -1191,9 +1191,6 @@ function Adjust({
 				<div 
 					ref={currentCropImageContainerRef}
 					className={`${styles.cropImageContainer} ${styles.notVisible}`}
-					style={{
-							background: '#000',
-					}}
 				>
 					<img 
 						src={scaledImageDataUrl}
@@ -1282,8 +1279,8 @@ function Adjust({
 					>
 					</div>
 				</div>
-				<p className="is-italic">Entry Id = '{currentEntry?.id}' Date = '{currentEntry?.date}'</p>
-				<p className="is-italic">chosenEntryIdForAdjustments = {chosenEntryIdForAdjustments?.value}</p>
+				<p className="is-italic">Date: {currentEntry?.date}</p>
+				<p className="is-italic">Entry Id: {currentEntry?.id}</p>
 			</div>
 				</>
 				}
