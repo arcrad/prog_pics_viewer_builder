@@ -33,6 +33,36 @@
 	box-sizing: border-box;
 }
 
+.hoverMarkerTriangle {
+	display: none;
+	position: absolute;
+	width: 13vh;
+	height: 13vh;
+	box-sizing: border-box;
+	transform: translate(-6.5vh, -13.1vh);
+	background: url('../public/triangle-down.svg') center / cover no-repeat;
+	margin: 0;
+	padding: 0;
+	z-index: 5000;
+	pointer-events: none;
+}
+
+.hoverMarkerTriangleVisible {
+	display: block;
+}
+
+.hoverMarkerTriangle[class~="activeMarkA"] {
+	filter: invert(14%) sepia(91%) saturate(4325%) hue-rotate(347deg) brightness(81%) contrast(113%);
+}
+
+.hoverMarkerTriangle[class~="activeMarkB"] {
+	filter: invert(25%) sepia(96%) saturate(1820%) hue-rotate(100deg) brightness(93%) contrast(102%);
+}
+
+.hoverMarkerTriangle[class~="activeMarkC"] {
+	filter: invert(19%) sepia(92%) saturate(2600%) hue-rotate(219deg) brightness(90%) contrast(96%);
+}
+
 .hoverMarker {
 /*	border:2px solid green;
 	height:100%;
@@ -45,11 +75,34 @@
 	width: 100vw;*/
 	position: absolute;
 	z-index: 9500;
-	transform: translate(-9vh, -9vh);
+	transform: translate(-9vh, -22vh);
 	pointer-events: none;
 	display: none;
 	background-origin: border-box;
 	background-repeat: no-repeat;
+	background-color: #ddd;
+}
+
+.hoverMarkerCrosshairContainer {
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	justify-content: center;
+	align-items:center;
+	font-size: 2vh;
+	color: #fff;
+	mix-blend-mode: difference;
+}
+
+.hoverMarkerCrosshair {
+	border: 2px solid #000;
+	border-radius: 1.5vh;
+	width: 1.5vh;
+	height: 1.5vh;
+	background: #fff;
 }
 
 .hoverMarkerVisible {

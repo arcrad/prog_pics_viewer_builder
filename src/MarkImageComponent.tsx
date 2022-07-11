@@ -16,6 +16,7 @@ import {
 import { useLiveQuery } from 'dexie-react-hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
+	faCrosshairs, 
 	faLocationCrosshairs, 
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -500,6 +501,13 @@ function MarkImageComponent({
 					{ !entryHasImage && <p>Entry has no image</p>} 
 					{ entryHasImage && !isLoaded && <p>loading image...</p> }
 				<div 
+					className={`${styles.hoverMarkerTriangle} ${(isHoverMarkerVisible ? styles.hoverMarkerTriangleVisible : "")} ${( activeMark ? 'activeMark'+activeMark : '')}`}
+					style={{
+						left: hoverX,
+						top: hoverY
+					}}
+				></div>
+				<div 
 					className={`${styles.hoverMarker} ${(isHoverMarkerVisible ? styles.hoverMarkerVisible : "")} ${( activeMark ? 'activeMark'+activeMark : '')}`}
 					style={{
 						left: hoverX,
@@ -508,6 +516,9 @@ function MarkImageComponent({
 						backgroundPosition: 'left calc(-'+(xNaturalHoverCoord)+'px + 9vh) top calc(-'+(yNaturalHoverCoord)+'px + 9vh)',
 					}}
 				>
+					<div className={styles.hoverMarkerCrosshairContainer}>
+							<FontAwesomeIcon icon={faCrosshairs}/>
+					</div>
 				</div>
 				</div>
 			</div>
