@@ -293,6 +293,7 @@ function SettingsComponent({
 								</div>
 							</div>
 						</div>
+						<hr/>
 						<div className="columns">
 							<div className="column is-narrow">
 								<div className="field">
