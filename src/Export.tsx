@@ -1,23 +1,11 @@
 import React, { useState, useRef, useEffect, Dispatch, SetStateAction, ChangeEvent } from 'react';
 import  * as mathjs  from 'mathjs';
-//import * as PIXI from 'pixi.js';
 import Dexie from "dexie";
-//import "dexie-export-import";
-/*
-import {importDB, exportDB, importInto, peakImportFile} from "dexie-export-import";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { 
-	faUpload, 
-} from '@fortawesome/free-solid-svg-icons'
-import { saveAs } from 'file-saver';
-import JSZip from 'jszip';
-*/
 
 import * as d3 from 'd3';
 import { ScaleTime, ScaleLinear } from 'd3-scale'; //from DefinitelyTyped types
 import { Line } from 'd3-shape'; //from DefinitelyTyped types
 
-//import './Viewer.css';
 import { LoadingIndicator } from './Common';
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
@@ -37,166 +25,54 @@ const smallScreenBreakpoint = 700;
 const MIN_FRAME_DURATION_MS = 5;
 const MAX_FRAME_DURATION_MS = 5000;
 
-/*
-function exportDbProgressCallbackFactory(
-	setExportDbDataRowsExported, 
-	setExportDbDataMaxRows, 
-	setCurrentCompletedRows,
-	setCurrentMaxRows,
-	setProgressPadding
-) {
-	return (details:ExportProgress) => {
-		console.log('exportDbProgressCallBack() called');
-		console.log(JSON.stringify(details));
-		const rowCountPadding = (Math.max(1, parseInt(details.totalRows*0.3)));
-		setExportDbDataMaxRows(details.totalRows+rowCountPadding);
-		setCurrentMaxRows(details.totalRows+rowCountPadding);
-		setProgressPadding(rowCountPadding);
-		setExportDbDataRowsExported(details.completedRows);
-		setCurrentCompletedRows(details.completedRows);
-	}
-}
-
-//async function handleExportDbButtonClick() {
-async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportDbDataMaxRows) {
-	console.log('handleExportDbButtonClick() called');
-	//const dbBlob = await db.export({
-	let currentCompletedRows = 0;
-	let currentMaxRows = 0;
-	let progressPadding = 0;
-	let setCurrentCompletedRows = (newVal) => { currentCompletedRows = newVal };
-	let setCurrentMaxRows = (newVal) => { currentMaxRows = newVal };
-	let setProgressPadding = (newVal) => { progressPadding = newVal };
-	const exportDbProgressCallback = exportDbProgressCallbackFactory(
-		setExportDbDataRowsExported,
-		setExportDbDataMaxRows,
-		setCurrentCompletedRows,
-		setCurrentMaxRows,
-		setProgressPadding
-	);
-	console.log('before generate dbBlob');
-	const dbBlob = await exportDB(db, {
-		prettyJson: true, 
-		numRowsPerChunk: 1,
-		progressCallback: exportDbProgressCallback,
-	}); //[options]
-	console.log('after generate dbBlob');
-	const zip = new JSZip();
-	zip.file("db_data.json", dbBlob);
-	console.log('after add dbBlob to zip');
-	//saveAs(dbBlob, "db_export.json");
-	await zip.generateAsync({
-    type: "blob",
-    compression: "DEFLATE",
-    compressionOptions: {
-        level: 9
-    },
-		streamFiles: true
-	}, (metadata) => {
-		if(metadata.percent) {
-		setExportDbDataRowsExported(currentCompletedRows+(progressPadding*(metadata.percent/100)));
-		}
-	})
-		.then(function (blob) {
-			console.log('final zip generated!');
-	    saveAs(
-				blob, 
-				`${(new Date).toISOString().substring(0,10).replaceAll('-','')}-db_export.zip`
-			);
-			setExportDbDataRowsExported(currentMaxRows);
-		});
-}
-
-function importDataCallbackFunctionFactory(
-	setImportDbDataMaxRows,
-	setImportDbDataRowsImported
-) {
-	return (progressData: importProgress) => {
-		console.log('importDataCallbackFunction() called');
-		console.log(JSON.stringify(progressData));
-		setImportDbDataMaxRows(progressData.totalRows);
-		setImportDbDataRowsImported(progressData.completedRows);
-	}
-}
-const handleDbDataFileLoad = async (
-	dbDataFileUploadRef,
-	setImportDbDataMaxRows,
-	setImportDbDataRowsImported,
-	setImportDbDataStatus
-) => {
-	//console.dir(dbDataFileUploadRef.current);
-	console.log("handle load db data..");
-	setImportDbDataStatus('Started');
-	let selectedFile:File;
-	if(dbDataFileUploadRef.current && dbDataFileUploadRef.current.files) {
-		selectedFile = dbDataFileUploadRef.current.files[0];
-		const zip = new JSZip();
-		await zip.loadAsync(selectedFile)
-    console.log(zip.files);
-		const dbDataBlob = await zip.file("db_data.json").async("blob");
-		console.dir(dbDataBlob);
-		await importInto(db, dbDataBlob, {
-			overwriteValues: true,
-			clearTablesBeforeImport: true, 
-			progressCallback: importDataCallbackFunctionFactory(
-				setImportDbDataMaxRows,
-				setImportDbDataRowsImported
-			)
-		});
-		setImportDbDataStatus('Complete');
-	}
-};
-*/
-
-function delay(ms:number) {
+function delay(ms: number) {
 	return new Promise( (resolve) => setTimeout(resolve, ms) )
 }
 
-function clampFrameDuration(frameDurationInput:number):number {
+function clampFrameDuration(frameDurationInput: number): number {
 	if(frameDurationInput) {
-		//const frameDurationInputRefValue = parseInt(frameDurationInputRef.current.value as string);
-			return frameDurationInput < MIN_FRAME_DURATION_MS ? 
-				MIN_FRAME_DURATION_MS 
+		return frameDurationInput < MIN_FRAME_DURATION_MS ? 
+			MIN_FRAME_DURATION_MS 
+			: 
+			frameDurationInput > MAX_FRAME_DURATION_MS ? 
+				MAX_FRAME_DURATION_MS
 				: 
-				frameDurationInput > MAX_FRAME_DURATION_MS ? 
-					MAX_FRAME_DURATION_MS
-					: 
-					frameDurationInput;
+				frameDurationInput;
 	}
 	return frameDurationInput;
 }
 
-function getSVGOverlayAxesAndLine(entries:Entry[], svgWidth: number, svgHeight:number) {
-		const [minX=0, maxX=0] = d3.extent(entries, d => Date.parse(d.date));
-		//setup x axis timeScale
-		console.warn(`minX = ${minX}, maxX = ${maxX}`);
-    const _x = d3.scaleUtc()
-      .domain([minX, maxX])
-      .range([margin.left+20 , svgWidth - margin.right-20])
-			.nice(); 
-		//setup y axis linear scale
-    console.warn(`d3.min(entries, d => d.weight) = ${d3.min(entries, d => d.weight)} `);
-    console.warn(`d3.max(entries, d => d.weight) = ${d3.max(entries, d => d.weight)} `);
-    const _y = d3.scaleLinear()
-      .domain(
-        [
-          (d3.min(entries, d => d.weight) ?? 0),
-          (d3.max(entries, d => d.weight) ?? 0)
-        ]
-      )
-      .range([svgHeight - margin.bottom, margin.top])
-			.nice();
-    const _line = d3.line<Entry>()
-      .x( (d) => _x(Date.parse(d.date)) )
-      .y( (d) => _y(d.weight || 0) );
-		return {
-			x: _x,
-			y: _y,
-			line: _line
-		};
+function getSVGOverlayAxesAndLine(entries: Entry[], svgWidth: number, svgHeight: number) {
+	const [minX=0, maxX=0] = d3.extent(entries, d => Date.parse(d.date));
+	//setup x axis timeScale
+	console.warn(`minX = ${minX}, maxX = ${maxX}`);
+   const _x = d3.scaleUtc()
+     .domain([minX, maxX])
+     .range([margin.left+20 , svgWidth - margin.right-20])
+		.nice(); 
+	//setup y axis linear scale
+   console.warn(`d3.min(entries, d => d.weight) = ${d3.min(entries, d => d.weight)} `);
+   console.warn(`d3.max(entries, d => d.weight) = ${d3.max(entries, d => d.weight)} `);
+   const _y = d3.scaleLinear()
+     .domain(
+       [
+         (d3.min(entries, d => d.weight) ?? 0),
+         (d3.max(entries, d => d.weight) ?? 0)
+       ]
+     )
+     .range([svgHeight - margin.bottom, margin.top])
+		.nice();
+   const _line = d3.line<Entry>()
+     .x( (d) => _x(Date.parse(d.date)) )
+     .y( (d) => _y(d.weight || 0) );
+	return {
+		x: _x,
+		y: _y,
+		line: _line
+	};
 }
 
-function drawInlineSVG(svgElem:SVGSVGElement):Promise<HTMLImageElement> {
+function drawInlineSVG(svgElem: SVGSVGElement): Promise<HTMLImageElement> {
 	return new Promise( (resolve,reject) => {
 		console.log('drawInlineSVG');
   	//console.log(rawSVG);
@@ -212,9 +88,9 @@ function drawInlineSVG(svgElem:SVGSVGElement):Promise<HTMLImageElement> {
 
 //need to figure out proper type for svg (Selection is not generic error)
 function configureSVGGraph(
-	svg:any, 
-	svgWidth:number, 
-	svgHeight:number, 
+	svg: any, 
+	svgWidth: number, 
+	svgHeight: number, 
 	margin:{ [key:string]: number }
 ) {
 	svg
@@ -227,9 +103,9 @@ function configureSVGGraph(
 
 //need to figure out proper typing for d3 
 function setupSVGGraphXAxis(
-	svg:any, 
-	svgWidth:number, 
-	svgHeight:number, 
+	svg: any, 
+	svgWidth: number, 
+	svgHeight: number, 
 	margin:{ [key:string]: number },
 	x: any,
 	formatXAxis: (domainValue: any) => any,
@@ -239,16 +115,13 @@ function setupSVGGraphXAxis(
 		.attr("class","graphAxis")
 		.attr("transform", `translate(0, ${svgHeight-margin.bottom+1})`)
 		.attr("color","white")
-		//.call(d3.axisBottom(x).ticks(undefined, '%b'));//d3.utcFormat('%b %d')));
-		//.call(d3.axisBottom(x).ticks(undefined).tickFormat(formatXAxis));
 		.call(d3.axisBottom(x).tickFormat((d) => formatXAxis(d)));
-		//.call(d3.axisBottom(x));
 }
 
 //need to figure out proper typing for d3 
 function setupSVGGraphYAxis(
-	svg:any, 
-	y:any
+	svg: any, 
+	y: any
 ) {
 	svg
 		.append("g")
@@ -296,33 +169,6 @@ function Export({
 	const holdLastFrameInputRef = useRef<HTMLInputElement|null>(null);
 	const firstFrameHoldDurationInputRef = useRef<HTMLInputElement|null>(null);
 	const lastFrameHoldDurationInputRef = useRef<HTMLInputElement|null>(null);
-	/*
-	const dbDataFileUploadContainerRef = useRef<HTMLDivElement>(null);
-	const dbDataFileUploadRef = useRef<HTMLInputElement>(null);
-	const dbDataFileUploadFileNameRef = useRef<HTMLSpanElement>(null);
-	*/
-
-	/*
-	useEffect( () => {
-		if(dbDataFileUploadRef && dbDataFileUploadRef.current) {
-			dbDataFileUploadRef.current.onchange = () => {
-				if(dbDataFileUploadRef.current 
-					&& dbDataFileUploadRef.current.files
-					&& dbDataFileUploadRef.current.files.length > 0) {
-						if(dbDataFileUploadFileNameRef.current) {
-		      		dbDataFileUploadFileNameRef.current.textContent = dbDataFileUploadRef.current.files[0].name;
-							handleDbDataFileLoad(
-								dbDataFileUploadRef,
-								setImportDbDataMaxRows,
-								setImportDbDataRowsImported,
-								setImportDbDataStatus
-							);
-						}
-    		}
-			};
-		}
-	},[]);
-	*/
 
 	useEffect( () => {
 		if(initializedRef.current) {
@@ -480,7 +326,6 @@ function Export({
 			}
 		}
 
-
 	 	setStatusMessages( cs => [...cs, `target frameDurationMs = ${frameDurationMs}`]);
 		//ensure first entry exists
 		if(!(entries[0] && entries[0].alignedImageBlob)) {
@@ -597,8 +442,6 @@ function Export({
 				console.log(`generated scaledCanvas ${c}`);
 
 				//generate svg graph overlay
-		//const svg = document.createElementNS(d3.ns.prefix.svg, 'svg');
-		//const svgElem = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const svg = d3.create("svg");
 
 		//setup graph
@@ -608,7 +451,6 @@ function Export({
 
 		//build line 
     svg.append("path")
-      //.data([wlProgressDataWithMetadata])
       .attr("d", line(entries))
       .attr("fill", "none")
       .attr("stroke","white")
@@ -620,21 +462,15 @@ function Export({
     .data(entries)
     .join("circle")
       .attr("fill", (d,i) => { 
-				//if(d.cheatDay) { return "darkRed"; }
 				return "rgba(0,0,0,0)";
 			})
       .attr("stroke", (d,i) => { 
-				//if(d.cheatDay) { return "white"; }
 				return "rgba(0,0,0,0)";
 			})
       .attr("stroke-width", () => '0')
-      //.attr("id", (d,i) => "circle_mark_"+d.indexRef)
       .attr("cx", d => x(Date.parse(d.date)))
       .attr("cy", d => y(d.weight || 0))
       .attr("r", (d,i) => { 
-				//if(d.cheatDay) { 
-				//	return '1.25'; 
-				//}
 				return '10';
 			});
 
@@ -643,7 +479,6 @@ function Export({
 	    .join("circle")
       	.attr("fill", "none")
 	      .attr("stroke", d => {
-					//return d.cheatDay ? "darkRed" : "#39e";
 					return "#39e";
 				})
 	      .attr("stroke-width", 3)
@@ -662,10 +497,8 @@ function Export({
 					if(svgNode != null) {
 						//console.log(svgNode.outerHTML);
 						//console.dir(svg);
-						//let svgImage = await drawInlineSVG(svgNode.outerHTML);
 						let svgImage = await drawInlineSVG(svgNode);
 						const extraTopOffset = overlayEntryInfoIsChecked ? 60 : 0;
-						//console.log('got svgImage');
 						if(svgImage != null){
 							const prevFillStyle:string = intermediateCanvasContext.fillStyle;
 							intermediateCanvasContext.fillStyle = 'rgba(0,0,0,0.65)';
@@ -737,7 +570,6 @@ function Export({
 				}
 				//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
 				const endTime = Date.now();
-//				mediaRecorder.requestData();
 				mediaRecorder.pause();
 				//await pauseRecorder();
 				console.log(`done drawing frame, time to draw = ${endTime - startTime}`);
@@ -749,21 +581,6 @@ function Export({
 		mediaRecorder.resume();
  		videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
 		videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
-/*		mediaRecorder.resume();
-		//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-		await delay(frameDurationMs);
-		//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-		mediaRecorder.pause();
-*/
-		/*
-				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
-				videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
-		mediaRecorder.resume();
-		//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-		await delay(frameDurationMs*5);
-		(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-		mediaRecorder.pause();
-		*/
 		await delay(500);
 		mediaRecorder.stop();
 		setVideoIsReady(true);
@@ -839,9 +656,6 @@ function Export({
 		}
 		console.groupEnd();
 	};
-	
-
-	//<p>Estimated video duration: { frameDuration && entries ? `${(frameDuration*entries.length/1000)} seconds` : 'N/A'}</p>
 
 	let estimatedVideoDurationString = 'N/A';
 	if(entries && frameDuration) {
@@ -1088,7 +902,7 @@ function Export({
 							</div>
 							<div className="columns">
 								<div className="column">
-					<p>Estimated video duration: {estimatedVideoDurationString}</p>
+									<p>Estimated video duration: {estimatedVideoDurationString}</p>
 								</div>
 							</div>
 							<div className="columns">
@@ -1110,19 +924,18 @@ function Export({
 							<div className="columns">
 								<div className="column">
 									<div className="field">
-					<label className="label">Export Progress</label>
-						
+										<label className="label">Export Progress</label>
 										<div className="control">
-						<progress 
-							className="progress is-info"
-							max={entries ? entries?.length-1 : 0}
-							value={entriesProcessed}
-						>
-							{entriesProcessed} entries processed out of {entries ? entries?.length-1 : 0}
-						</progress>
-					</div>
-					</div>
-					</div>
+											<progress 
+												className="progress is-info"
+												max={entries ? entries?.length-1 : 0}
+												value={entriesProcessed}
+											>
+												{entriesProcessed} entries processed out of {entries ? entries?.length-1 : 0}
+											</progress>
+										</div>
+									</div>
+							</div>
 					</div>
 							<div className="columns">
 								<div className="column">
@@ -1163,87 +976,6 @@ function Export({
 					<h2 className="title is-5">Upload Interactive Viewer</h2>
 					<p><i>Not yet implemented.</i></p>
 				</div>
-				{
-				/*
- 				<div className="box">
-					<h2 className="title is-5">Export/Import Raw Data</h2>
-					<p className="mb-5">Since your data is only stored locally on your device, it could be deleted if your browser's IndexedDB storage gets cleared. If you want to ensure your data is safe, use the following options to export the raw data and, if needed, to import previously exported raw data.</p>
-					<div className="columns">
-						<div className="column is-narrow">					
-							<div className="field">
-								<label className="label">Export</label>
-								<button 
-									type="button"
-									className={`button ${ exportDbDataInProgress ? 'is-loading' : '' }`}
-									onClick={async () => {
-										setExportDbDataInProgress(true);
-										await handleExportDbButtonClick(setExportDbDataRowsExported, setExportDbDataMaxRows)
-										setExportDbDataInProgress(false);
-									}}
-								>
-									Export Data
-								</button>
-							</div>
-						</div>
-						<div className="column">
-							<div className="field">
-								<label className="label">Data Export Progress</label>
-								<div className="control">
-									<progress 
-										className="progress is-info"
-										max={exportDbDataMaxRows ? exportDbDataMaxRows : 0}
-										value={exportDbDataRowsExported}
-									>
-										{exportDbDataRowsExported} rows exported out of {exportDbDataMaxRows ? exportDbDataMaxRows : 0}
-									</progress>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div className="columns">
-						<div className="column is-narrow">
-							<div className="field">
-								<label className="label">Import</label>
-								<div 
-									ref={dbDataFileUploadContainerRef}
-									className="file is-boxed has-name"
-								>
-									<label className="file-label">
-										<input 
-											ref={dbDataFileUploadRef} 
-											type="file"
-											className="file-input"
-										/>
-										<span className="file-cta">
-											<FontAwesomeIcon icon={faUpload}/>
-											<span className="file-label">
-												Select data file...
-											</span>
-										</span>
-										<span ref={dbDataFileUploadFileNameRef} className="file-name"></span>
-									</label>
-								</div>
-							</div>
-						</div>
-						<div className="column">
-							<div className="field">
-								<label className="label">Data Import Progress</label>
-								<div className="control">
-									<progress 
-										className="progress is-info"
-										max={importDbDataMaxRows ? importDbDataMaxRows : 0}
-										value={importDbDataRowsImported}
-									>
-										{importDbDataRowsImported} rows exported out of {importDbDataMaxRows ? importDbDataMaxRows : 0}
-									</progress>
-								</div>
-							</div>
-							<p>Import Status: {importDbDataStatus}</p>
-						</div>
-					</div>
-				</div>
-					*/
-					}
 				</>
 			}
 		</div>
