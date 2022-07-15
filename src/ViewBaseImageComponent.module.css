@@ -1,0 +1,8 @@
+.imageContainer {
+}
+
+.image {
+	display: block;
+	max-height: 75vh;
+	margin: 0 auto;
+}

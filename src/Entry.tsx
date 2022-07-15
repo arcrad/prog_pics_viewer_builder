@@ -31,6 +31,7 @@ import {
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
+import ViewBaseImageModal from './ViewBaseImageModal';
 import ChangeImageModal from './ChangeImageModal';
 import MarkImageModal from './MarkImageModal';
 import AddEntryModal from './AddEntryModal';
@@ -295,14 +296,32 @@ function EntryComponent({
 						<li key={entry.id} className="box">
 							<div className="columns is-centered is-mobile">
 							<div className="column is-narrow">
-							{ entryThumbnailImageUrls && entry.id && 
+							{ entryThumbnailImageUrls && entry.id && entryThumbnailImageUrls[entry.id] != null &&
+								<a onClick={ () => {
+									if( entryThumbnailImageUrls[entry.id] != null) {
+										navigate(`./image/${entry.id}`);
+									}
+								}}>
 								<div style={{
 									border: '0px solid #000',
 									height: '7rem',
 									width: '7rem',
 									background: `url(${entryThumbnailImageUrls[entry.id]}) center / contain no-repeat #ded`,
 								}}>
-									{entryThumbnailImageUrls[entry.id] == null ? 'no image' : ''}
+								</div>
+								</a>
+							}
+							{ entryThumbnailImageUrls && entry.id && entryThumbnailImageUrls[entry.id] == null &&
+								<div style={{
+									border: '0px solid #000',
+									height: '7rem',
+									width: '7rem',
+									background: `#ded`,
+									display: 'flex',
+									justifyContent: 'center',
+									alignItems: 'center'
+								}}>
+									No image
 								</div>
 							}
 							</div>
@@ -522,6 +541,12 @@ function EntryComponent({
 			</div>
     </div>
 				<Routes>
+				<Route 
+					path="/image/:entryId/*"
+					element={
+						<ViewBaseImageModal/>
+					}
+				/>
 				<Route 
 					path="/add/:entryId/*"
 					element={
