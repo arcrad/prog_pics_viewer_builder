@@ -253,7 +253,7 @@ function setupSVGGraphYAxis(
 	svg
 		.append("g")
 		.attr("class","graphAxis")
-		.attr("transform", `translate(30, 0)`)
+		.attr("transform", `translate(33, 0)`)
 		.attr("color","white")
 		.call(d3.axisLeft(y));
 };
