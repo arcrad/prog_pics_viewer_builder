@@ -100,3 +100,11 @@
 	-try to prevent scrolling when marking image 
 	-consider offsetting the magnification bubble on mobile 
 	-add scroll area next to image on mobile to make it easier to get back to Mark buttons
+
+suggestions from a redditor:
++add unit toggle between imperial and metric
++add height data field 
++add some circumferences data fields 
++add functionality to calculate bmi
+
+
