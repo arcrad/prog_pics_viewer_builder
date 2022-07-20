@@ -130,7 +130,10 @@ function EntryComponent({
 	const handleDeleteEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log("handle delete entry...");
 		//console.dir(event);
-	 console.dir(event.target);
+	 	//console.dir(event.target);
+	 	if(!window.confirm('Are you sure you want to delete this entry?')) {
+			return;
+		}
 		if(event.target && event.target instanceof HTMLButtonElement && event.target.dataset.entryId) {
 			console.log(`entryId to delete = ${event.target.dataset.entryId}`);
 			try {
