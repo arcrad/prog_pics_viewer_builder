@@ -1,60 +1,44 @@
-+get intial repo setup
+-get intial repo setup
+-use CRA to create basic typescript react app
+-create POC for uploading images and storing them in indexedDB
+-create POC for affine transformation based image alignment 
+-develop general outline of app 
+-improve performance of mark component
+-add auto-resize option when loading images 
+-add initializer for default settings 
+-add ratio lock option for adjust component image scaling
+-improve layout/styling 
+-add better/more load indicators
+-add validations to viewer processing 
+-load any already processed images on viewer component load
+-improve options for processing/re-processing images in viewer component
+-improve caching of images 
+-store image natural dimensions in DB so they dont have to be re-calculated on the fly by loading image
+-add check for viewer that adjustment image (image selected for adjustment) exists
+-improve overall data/state validation and warning display
+	-potentially modularize and make global
+-add option on viewer component to process just entries with no aligned image (partial processing)
+-consider making cropping resize instead of reset to corners when image scaling is changed (on adjust component)
+-refine paging functionality on entry component 
+-add streamlined "add entry" wizard to entry component
+-add clear marks option to mark image component
+-improve dialogs/modals
+-make the "add" functionality in entry component ensure that an image, marks, weight, and date are set before allowing it to be saved
+	--make it so that warnings are shown if trying to save before adding all required data
+-improve touch behavior of mark image
+	-try to prevent scrolling when marking image 
+	-consider offsetting the magnification bubble on mobile 
+	-add scroll area next to image on mobile to make it easier to get back to Mark buttons
 
-+use CRA to create basic typescript react app
-
-+create POC for uploading images and storing them in indexedDB
-
-+create POC for affine transformation based image alignment 
-
-+develop general outline of app 
-
-+improve performance of mark component
-
-+add auto-resize option when loading images 
-
-+add initializer for default settings 
-
-+add ratio lock option for adjust component image scaling
-
-+improve layout/styling 
-
-+add better/more load indicators
-
-+add validations to viewer processing 
-
-+load any already processed images on viewer component load
-
-+improve options for processing/re-processing images in viewer component
-
-+improve caching of images 
 
 +test performance on various devices
 	+explore options for improving image performance
 
-+store image natural dimensions in DB so they dont have to be re-calculated on the fly by loading image
-
-+add check for viewer that adjustment image (image selected for adjustment) exists
-
-+improve overall data/state validation and warning display
-	+potentially modularize and make global
-
 +add functionality to abort 'export video locally' frame rendering loop
 	--for example when the page changes or with a cancel button
 
-+add option on viewer component to process just entries with no aligned image (partial processing)
-
-+consider making cropping resize instead of reset to corners when image scaling is changed (on adjust component)
-
-+refine paging functionality on entry component 
-
-+add streamlined "add entry" wizard to entry component
-
 +improve styles (layout and code)
 	--implement bulma?
-
-+add clear marks option to mark image component
-
-+improve dialogs/modals
 
 +fix typescript error for HTMLDialogElement
 	--doesnt think show, showModal, or close methods exist
@@ -71,9 +55,6 @@
 +in entry component, improve handling of auto update of date
 	--when re-ordered, decided how to handle (auto seek to new page?)
 	--disable auto update and add save button? 
-
-+make the "add" functionality in entry component ensure that an image, marks, weight, and date are set before allowing it to be saved
-	--make it so that warnings are shown if trying to save before adding all required data
 
 +ensure pagination on entry component can handle all cases with < 5 pages 
 
@@ -96,10 +77,15 @@
 
 +develop touch compatible functionality for adjust crop component 
 
--improve touch behavior of mark image
-	-try to prevent scrolling when marking image 
-	-consider offsetting the magnification bubble on mobile 
-	-add scroll area next to image on mobile to make it easier to get back to Mark buttons
++create live graph viewer with trends and stats
+
++onion skin image capture mode
+
++hamburger menu for entries list (maybe)
+
++create "disable/hide" entry option (so entry doesnt get exported or included in graphs)
+
++fix datetime recording (currently not local time) 
 
 suggestions from a redditor:
 +add unit toggle between imperial and metric
