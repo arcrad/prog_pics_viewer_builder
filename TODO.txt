@@ -32,6 +32,8 @@
 -fix datetime recording (currently not local time) 
 -fix video export option for hold last frame so that the value specified is actually used 
 -develop touch compatible functionality for adjust crop component 
+-improve styles (layout and code)
+	--implement bulma?
 
 +test performance on various devices
 	+explore options for improving image performance
@@ -39,8 +41,6 @@
 +add functionality to abort 'export video locally' frame rendering loop
 	--for example when the page changes or with a cancel button
 
-+improve styles (layout and code)
-	--implement bulma?
 
 +fix typescript error for HTMLDialogElement
 	--doesnt think show, showModal, or close methods exist
