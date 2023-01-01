@@ -30,7 +30,8 @@
 	-consider offsetting the magnification bubble on mobile 
 	-add scroll area next to image on mobile to make it easier to get back to Mark buttons
 -fix datetime recording (currently not local time) 
-
+-fix video export option for hold last frame so that the value specified is actually used 
+-develop touch compatible functionality for adjust crop component 
 
 +test performance on various devices
 	+explore options for improving image performance
@@ -59,8 +60,6 @@
 
 +ensure pagination on entry component can handle all cases with < 5 pages 
 
-+extract modal component and add 508 functionality such as focus trapping, virtual cursor traping, multiple exit methods, setting focus on open, and focus saving/reset on close
-
 +update adjust component so that it warns if current chosenEntryIdForAdjustments value is invalid (not an existing entry id)
 
 +fix jank when loading EntriesValidator component before validations finish and/or during transition from loading to finished
@@ -76,22 +75,24 @@
 +further test component loading times with 300+ entries (seems too slow to load)
 	+if slow loading cannot be fixed, add spinner indicator prior to page loading
 
-+develop touch compatible functionality for adjust crop component 
-
 +create live graph viewer with trends and stats
 
 +onion skin image capture mode
 
 +hamburger menu for entries list (maybe)
+	--alteratively, refine the entries listings. more compact and adding a few options 
 
 +create "disable/hide" entry option (so entry doesnt get exported or included in graphs)
 
-+fix video export option for hold last frame so that the value specified is actually used 
+
+----------------------------------------------------------------
+
+long-term: 
 
 suggestions from a redditor:
-+add unit toggle between imperial and metric
-+add height data field 
-+add some circumferences data fields 
-+add functionality to calculate bmi
+	+add unit toggle between imperial and metric
+	+add height data field 
+	+add some circumferences data fields 
+	+add functionality to calculate bmi
 
-
++extract modal component and add 508 functionality such as focus trapping, virtual cursor traping, multiple exit methods, setting focus on open, and focus saving/reset on close
