@@ -29,6 +29,7 @@
 	-try to prevent scrolling when marking image 
 	-consider offsetting the magnification bubble on mobile 
 	-add scroll area next to image on mobile to make it easier to get back to Mark buttons
+-fix datetime recording (currently not local time) 
 
 
 +test performance on various devices
@@ -85,7 +86,7 @@
 
 +create "disable/hide" entry option (so entry doesnt get exported or included in graphs)
 
-+fix datetime recording (currently not local time) 
++fix video export option for hold last frame so that the value specified is actually used 
 
 suggestions from a redditor:
 +add unit toggle between imperial and metric
