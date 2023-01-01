@@ -38,7 +38,8 @@ import AddEntryModal from './AddEntryModal';
 import { 
 	EntryValidationErrorsList, 
 	PaginationControls,
-	EntryOptionsDropdown
+	EntryOptionsDropdown,
+	getLocalDateStringFormattedForDateInput
 } from './Common';
  
 type EntryAttributes = {
@@ -113,7 +114,9 @@ function EntryComponent({
 	const handleAddEntry = async (event:MouseEvent<HTMLButtonElement>) => {
 		console.log("handle add entry..");
  		try {
-			const date = ((new Date()).toISOString()).substring(0, 16); 
+			const now = new Date();
+			//const date = ((new Date()).toISOString()).substring(0, 16) + ':00'; 
+			const date = ((new Date()).toISOString()).substring(0, 16) + ':00Z'; 
 			//datetime needs to be more robust
 			const id = await db.entries.add({
 				date: date,
@@ -240,7 +243,9 @@ function EntryComponent({
 				setCurrentEntryWeight(event.target.value);
 				newValue = parseFloat(event.target.value);
 			} else if(event.target.dataset.entryKeyToModify === 'date') {
-				setCurrentEntryDate(event.target.value);
+				setCurrentEntryDate(event.target.value); //TODO: may be uneeded now, have to check
+				//convert user-supplied date to UTC in truncated format 
+				newValue = ((new Date(event.target.value)).toISOString()).substring(0, 16) + ':00Z'; 
 			} else if(event.target.dataset.entryKeyToModify === 'textarea') {
 				setCurrentEntryNotes(event.target.value);
 			}
@@ -337,7 +342,7 @@ function EntryComponent({
 											<input 
 												type="datetime-local" 
 												className="input is-small"
-												defaultValue={entry.date}
+												defaultValue={getLocalDateStringFormattedForDateInput(entry.date)}
 												data-entry-id={entry.id} 
 												data-entry-key-to-modify="date"
 												onBlur={handleEntryInputChange}

@@ -16,7 +16,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
+import { getLocalDateStringFormattedForDateInput } from './Common';
 //import './UpdateEntryDataComponent.css';
+
 
 type UpdateEntryDataComponentAttributes= {
 	//globalState: GlobalState;
@@ -101,6 +103,10 @@ function UpdateEntryDataComponent({
 				setCurrentEntryNotes(event.target.value);
 			}
 			*/
+			if(event.target.dataset.entryKeyToModify === 'date') {
+				//convert user-supplied date to UTC date in truncated format 
+				newValue = ((new Date(event.target.value)).toISOString()).substring(0, 16) + ':00Z'; 
+			}
 			clearTimeout(debounceInputTimeout.current);
 			let modifyDbValueHandler = () => {
 					console.log('fire update db with new input', newValue, entryIdToModify);
@@ -110,7 +116,6 @@ function UpdateEntryDataComponent({
 					});
 					}
 			};
-
 			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);
 		}
 	};
@@ -124,7 +129,7 @@ function UpdateEntryDataComponent({
 						<input 
 							type="datetime-local" 
 							className="input"
-							defaultValue={currentEntry?.date}
+							defaultValue={getLocalDateStringFormattedForDateInput(currentEntry?.date)}
 							data-entry-id={currentEntry?.id} 
 							data-entry-key-to-modify="date"
 							onChange={handleEntryInputChange}

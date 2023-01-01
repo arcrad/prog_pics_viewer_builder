@@ -287,3 +287,20 @@ export function LoadingIndicator() {
 				</div>
 	);
 }
+
+export function getLocalDateStringFormattedForDateInput(
+	UTCDateString?: string
+): string {
+	let now = new Date();
+	if(UTCDateString != null) {
+		now = new Date(UTCDateString);
+		if(isNaN(now.valueOf())) {
+			return 'Invalid Date';
+		}
+	}
+	return now.getFullYear() + '-' +
+		String(now.getMonth()+1).padStart(2,'0') + '-' +
+		String(now.getDate()).padStart(2,'0') + 'T' +
+		String(now.getHours()).padStart(2,'0') + ':' +
+		String(now.getMinutes()).padStart(2,'0');
+}

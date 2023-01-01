@@ -60,12 +60,13 @@ function AddEntryModal({
 			return db.entries.get(sanitizedEntryId)
 		}
 	, [entryId]);
-	
+
+	/*	
 	const addEntry = async () => {
 		//console.dir(imageUploadRef.current);
 		console.log("addEntry() called");
 		try {
-			const date = ((new Date()).toISOString()).substring(0, 16); 
+			const date = ((new Date()).toISOString()).substring(0, 16) + ':00Z'; 
 			//datetime needs to be more robust
 			const id = await db.entries.add({
 				date: date,
@@ -81,7 +82,8 @@ function AddEntryModal({
 			console.error(`failed to add db entry. ${error}`);
 		}
 	};
-	
+	*/
+
 	useEffect( () => {
 		document.documentElement.classList.add('is-clipped');
 		return () => {
