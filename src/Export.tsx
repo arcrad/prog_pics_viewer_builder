@@ -564,7 +564,7 @@ function Export({
 					await delay(firstFrameHoldDurationMs);
 				} else if(holdLastFrameIsChecked && c == max-1) {
 					//optionally hold lastframe longer
-					await delay(firstFrameHoldDurationMs);
+					await delay(lastFrameHoldDurationMs);
 				} else {
 					await delay(frameDurationMs);
 				}
