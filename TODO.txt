@@ -33,7 +33,7 @@
 -fix video export option for hold last frame so that the value specified is actually used 
 -develop touch compatible functionality for adjust crop component 
 -improve styles (layout and code)
-	--implement bulma?
+	--implement bulma? used bulma
 
 +test performance on various devices
 	+explore options for improving image performance
