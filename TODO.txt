@@ -74,8 +74,9 @@
 
 +refine export/import progress reporting 
 
-+further test component loading times with 300+ entries (seems too slow to load)
-	+if slow loading cannot be fixed, add spinner indicator prior to page loading
++add loading indicator for entries page
+	+further test component loading times with 300+ entries (seems too slow to load)
+		+if slow loading cannot be fixed, add spinner indicator prior to page loading
 
 +create live graph viewer with trends and stats
 
