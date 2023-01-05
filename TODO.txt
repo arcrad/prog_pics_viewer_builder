@@ -34,6 +34,8 @@
 -develop touch compatible functionality for adjust crop component 
 -improve styles (layout and code)
 	--implement bulma? used bulma
+-create "disable/hide" entry option (so entry doesnt get exported or included in graphs)
+	--luckily already had key in DB so no DB version updated needed 
 
 +test performance on various devices
 	+explore options for improving image performance
@@ -82,7 +84,6 @@
 +hamburger menu for entries list (maybe)
 	--alteratively, refine the entries listings. more compact and adding a few options 
 
-+create "disable/hide" entry option (so entry doesnt get exported or included in graphs)
 
 
 ----------------------------------------------------------------
