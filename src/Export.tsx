@@ -334,6 +334,10 @@ function Export({
 		}
 		//setup media objects
 		const videoCanvas = document.createElement('canvas');
+		//firefox throws error if it dont got context (initialization maybe?) 
+		//possibly room here to improve performance via context-attributes, or alternate context from '2d'
+		const canvasContext = videoCanvas.getContext('2d');
+		//setup capture stream
 		//const canvasStream = videoCanvas.captureStream(0);
 		const canvasStream = videoCanvas.captureStream();
 	 	setStatusMessages( cs => [...cs, 'created canvas and canvas stream']);
