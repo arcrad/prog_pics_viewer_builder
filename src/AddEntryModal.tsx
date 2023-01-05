@@ -127,6 +127,7 @@ function AddEntryModal({
 	let handleSaveButton = () => {
 		if(entryId != null) {
 			db.entries.update(parseInt(entryId), {
+				includeInExport: true,
 				draft: false
 			});
 		}

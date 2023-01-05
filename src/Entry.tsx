@@ -240,18 +240,20 @@ function EntryComponent({
 			console.log('entryKeyToModify = ', entryKeyToModify);
 			console.log('value = ', newValue);
 			if(event.target.dataset.entryKeyToModify === 'weight') {
-				setCurrentEntryWeight(event.target.value);
+				//setCurrentEntryWeight(event.target.value);
 				newValue = parseFloat(event.target.value);
 			} else if(event.target.dataset.entryKeyToModify === 'date') {
-				setCurrentEntryDate(event.target.value); //TODO: may be uneeded now, have to check
+				//setCurrentEntryDate(event.target.value);
 				//convert user-supplied date to UTC in truncated format 
 				newValue = ((new Date(event.target.value)).toISOString()).substring(0, 16) + ':00Z'; 
-			} else if(event.target.dataset.entryKeyToModify === 'textarea') {
-				setCurrentEntryNotes(event.target.value);
+			} else if(event.target.dataset.entryKeyToModify === 'notes') {
+				//setCurrentEntryNotes(event.target.value);
+			} else if(event.target.dataset.entryKeyToModify === 'includeInExport') {
+				newValue = event.target.checked;
 			}
 			clearTimeout(debounceInputTimeout.current);
 			let modifyDbValueHandler = () => {
-					console.log('fire update db with new input', newValue, entryIdToModify);
+					console.log(`fire update db with new input newValue=${newValue}, entryIdToModify=${entryIdToModify}`);
 					if(event.target.dataset.entryKeyToModify) {
 					db.entries.update(entryIdToModify, {
 						[entryKeyToModify]: newValue
@@ -373,7 +375,18 @@ function EntryComponent({
 												onChange={handleEntryInputChange}
 											/>
 										</div>
-									</div>	
+									</div>
+									<div className="field">
+										<label className="checkbox">
+												<input 
+													type="checkbox" 
+													defaultChecked={entry.includeInExport} 
+													data-entry-id={entry.id} 
+													data-entry-key-to-modify="includeInExport" 
+													onChange={handleEntryInputChange}
+												/> Include in Export?
+										</label>
+									</div>
 									<div className="field">
 										<div className="control">
 											<button 
