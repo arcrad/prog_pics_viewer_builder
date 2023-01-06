@@ -906,7 +906,7 @@ function Export({
 							</div>
 							<div className="columns">
 								<div className="column">
-									<p>Estimated video duration: {estimatedVideoDurationString}</p>
+									<p>Estimated video duration: {estimatedVideoDurationString} ({entries.length} entries)</p>
 								</div>
 							</div>
 							<div className="columns">
