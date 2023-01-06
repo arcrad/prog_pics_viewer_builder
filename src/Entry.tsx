@@ -171,7 +171,8 @@ function EntryComponent({
 						imageNaturalWidth: entryToDuplicate.imageNaturalWidth,
 						imageNaturalHeight: entryToDuplicate.imageNaturalHeight,
 						thumbImageBlob: entryToDuplicate.thumbImageBlob,
-						marks: entryToDuplicate.marks
+						marks: entryToDuplicate.marks,
+						includeInExport: entryToDuplicate.includeInExport
 					});
 					console.log( 'new id =', id);
 				} catch(error) {
