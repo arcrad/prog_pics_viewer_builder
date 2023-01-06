@@ -437,6 +437,12 @@ function EntryComponent({
 												<i>No notes.</i>
 										}
 									</p>
+									{
+										!entry.includeInExport ? 
+											<p><i>Entry is not included in export.</i></p>
+											:
+											''
+									}
 								</>
 							}
 							</div>
