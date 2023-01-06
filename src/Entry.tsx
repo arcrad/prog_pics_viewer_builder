@@ -36,6 +36,7 @@ import ChangeImageModal from './ChangeImageModal';
 import MarkImageModal from './MarkImageModal';
 import AddEntryModal from './AddEntryModal';
 import { 
+	LoadingIndicator,
 	EntryValidationErrorsList, 
 	PaginationControls,
 	EntryOptionsDropdown,
@@ -75,10 +76,11 @@ function EntryComponent({
 	);
 	const entries = useLiveQuery(
 		() => db.entries.orderBy('date').filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).reverse().offset(pagerOffset).limit(pagerLimit).toArray()
-	, [
-		pagerOffset, 
-		pagerLimit
-	]);
+		, [
+			pagerOffset, 
+			pagerLimit
+		]
+	);
 
 	useEffect( () => {
 		//remove old urls 
@@ -277,6 +279,11 @@ function EntryComponent({
 					</div>
 				</div>
 			</div>
+			{ 
+				(!entries) && 
+				<LoadingIndicator/>
+			}
+			{ (entries) &&
     <div className="columns is-mobile is-centered">
 			<div className="column is-11-mobile is-10-tablet is-8-desktop">
 				<div className="section">
@@ -561,6 +568,7 @@ function EntryComponent({
 				}
 			</div>
     </div>
+		}
 				<Routes>
 				<Route 
 					path="/image/:entryId/*"
