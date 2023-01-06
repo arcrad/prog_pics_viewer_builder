@@ -87,6 +87,7 @@
 	--alteratively, refine the entries listings. more compact and adding a few options 
 
 +determine if any new vaidations are needed related to includeInExport field now being used
+	--'all entries have aligned image' needs to be updated to account for entries with includeInExport = false
 
 ----------------------------------------------------------------
 
