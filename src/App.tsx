@@ -58,6 +58,7 @@ const defaultSettings:Settings = {
 	exportFirstFrameHoldDuration: 500,
 	exportLastFrameHoldDuration: 500,
 	defaultBaseImageMaxDimension: 1920,
+	measurementSystem: 'imperial', 
 };
 
 function App() {
