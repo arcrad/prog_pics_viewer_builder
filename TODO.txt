@@ -40,13 +40,14 @@
 	-further test component loading times with 300+ entries (seems too slow to load)
 		-if slow loading cannot be fixed, add spinner indicator prior to page loading
 			--possible to investigate improving load times in future, but added loading indicator to entries page anyhow
+-implement functionality to import/export raw db data 
+
 
 +test performance on various devices
 	+explore options for improving image performance
 
 +add functionality to abort 'export video locally' frame rendering loop
 	--for example when the page changes or with a cancel button
-
 
 +fix typescript error for HTMLDialogElement
 	--doesnt think show, showModal, or close methods exist
@@ -74,14 +75,14 @@
 
 +devise method to make hover image more magnified / controllable magnification 
 
-+implement functionality to import/export raw db data 
++add plain magnifier option to the mark image controls 
+	--would allow user to zoom in on existing marks without possiblity of changing any marks 
 
 +refine export/import progress reporting 
 
-
 +create live graph viewer with trends and stats
-
-+onion skin image capture mode
+	--show projected weightloss with trend line?
+	--show bmi/weight classification scale? 
 
 +hamburger menu for entries list (maybe)
 	--alteratively, refine the entries listings. more compact and adding a few options 
@@ -89,17 +90,27 @@
 +determine if any new vaidations are needed related to includeInExport field now being used
 	--'all entries have aligned image' needs to be updated to account for entries with includeInExport = false
 
-+add censoring feature
++add censoring feature to the Adjust screen 
+
++configure CRA/webpack to automatically scrub out console.* calls on production build
+
++add unit labels as-needed based on measurementSystem setting
+
 ----------------------------------------------------------------
 
 long-term: 
 
 suggestions from a redditor:
 	+add unit toggle between imperial and metric
-	+add height data field 
+	-add height data field 
+		--added jan 2023
 	+add some circumferences data fields 
 	+add functionality to calculate bmi
 
 +extract modal component and add 508 functionality such as focus trapping, virtual cursor traping, multiple exit methods, setting focus on open, and focus saving/reset on close
 
 +investigate methods to reduce load time on entries page
+
++onion skin image capture mode
+	--possible to use canvas to display camera input and then can customize the overlay? 
+
