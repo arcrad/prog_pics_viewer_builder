@@ -373,6 +373,19 @@ function EntryComponent({
 										</div>
 									</div>
 									<div className="field">
+										<label className="label">Height</label>
+										<div className="control">
+											<input 
+												type="number" 
+												className="input is-small"
+												defaultValue={entry.height} 
+												data-entry-id={entry.id} 
+												data-entry-key-to-modify="height" 
+												onChange={handleEntryInputChange}
+											/>
+										</div>
+									</div>
+									<div className="field">
 										<label className="label">Notes</label>
 										<div className="control">
 											<textarea
