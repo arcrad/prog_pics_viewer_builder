@@ -118,11 +118,17 @@ function EntryComponent({
  		try {
 			const now = new Date();
 			//const date = ((new Date()).toISOString()).substring(0, 16) + ':00'; 
-			const date = ((new Date()).toISOString()).substring(0, 16) + ':00Z'; 
 			//datetime needs to be more robust
+			const date = ((new Date()).toISOString()).substring(0, 16) + ':00Z'; 
+			//attempt to get height from latest entry and pre-populate it on new one
+			let height = undefined;
+			if(entries?.length > 0) {
+				height = entries[0].height;
+			}
 			const id = await db.entries.add({
 				date: date,
-				draft: true
+				draft: true,
+				height: height,
 			});
 			console.log( 'new id =', id);
 			setAddEntryModalIsVisible(true);
