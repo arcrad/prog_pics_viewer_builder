@@ -429,6 +429,15 @@ function EntryComponent({
 										}
 									</p>
 									<p>
+										<strong>Height: </strong> 
+										{ 
+											entry.height ? 
+												entry.height 
+												: 
+												<i>No height defined</i>
+										}
+									</p>
+									<p>
 										<strong>Notes: </strong> 
 										{
 											entry.notes ? 
