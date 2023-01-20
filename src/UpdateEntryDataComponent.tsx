@@ -150,6 +150,19 @@ function UpdateEntryDataComponent({
 					</div>
 				</div>
 				<div className="field">
+					<label className="label">Height</label>
+					<div className="control">
+						<input
+							type="number"
+							className="input"
+							defaultValue={currentEntry?.height} 
+							data-entry-id={currentEntry?.id} 
+							data-entry-key-to-modify="height" 
+							onChange={handleEntryInputChange}
+						/>
+					</div>
+				</div>
+				<div className="field">
 					<label className="label">Notes</label>
 					<div className="control">
 						<textarea
