@@ -195,23 +195,6 @@ function SettingsComponent({
 	let currentSettings = useLiveQuery( () => {
 		return db.settings.toArray()
 	});
-
-	let addSetting = async () => {
-		try {
-			const id = await db.settings.put(
-				{ key: 'markRadiusScalePercent', value: 0.01 }, 
-			);
-			const id2 = await db.settings.put(
-				{ key: 'markLineWidthScalePercent', value: 0.005 }, 
-			);
-			console.log( 'new id =', id);
-		} catch(error) {
-			console.error(`failed to add db entry. ${error}`);
-		}
-	};
-	useEffect( () => {
-		//addSetting();
-	}, []);
 	
 	useEffect( () => {
 		console.log('based on current settings change, update settings');
