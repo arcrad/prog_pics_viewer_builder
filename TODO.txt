@@ -96,6 +96,8 @@
 
 +add unit labels as-needed based on measurementSystem setting
 
++convert settings edit forms to non-controlled fields 
+
 ----------------------------------------------------------------
 
 long-term: 
