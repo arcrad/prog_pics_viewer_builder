@@ -366,7 +366,14 @@ function EntryComponent({
 										</div>
 									</div>
 									<div className="field">
-										<label className="label">Weight</label>
+										<label className="label">Weight
+										{
+											globalState.settings.measurementSystem == 'imperial' ? 
+												' (lbs.)'
+												:
+												' (kgs.)'
+										}
+										</label>
 										<div className="control">
 											<input 
 												type="number" 
@@ -379,7 +386,14 @@ function EntryComponent({
 										</div>
 									</div>
 									<div className="field">
-										<label className="label">Height</label>
+										<label className="label">Height
+										{
+											globalState.settings.measurementSystem == 'imperial' ? 
+												' (inches)'
+												:
+												' (centimeters)'
+										}
+										</label>
 										<div className="control">
 											<input 
 												type="number" 
@@ -440,20 +454,26 @@ function EntryComponent({
 									</p>
 									<p>
 										<strong>Weight: </strong> 
-										{ 
-											entry.weight ? 
-												entry.weight 
-												: 
-												<i>No weight defined</i>
+										{
+											(() => { 
+												if(entry.weight) {
+													return ( <>{entry.weight} {globalState.settings.measurementSystem == 'imperial' ? 'lbs.' : 'kgs.'}</> );
+										  	} else {
+													return (<i>No weight defined</i>);
+												}
+											})()
 										}
 									</p>
 									<p>
 										<strong>Height: </strong> 
-										{ 
-											entry.height ? 
-												entry.height 
-												: 
-												<i>No height defined</i>
+										{
+											(() => { 
+												if(entry.height) {
+													return ( <>{entry.height} {globalState.settings.measurementSystem == 'imperial' ? 'inches' : 'centimeters'}</> );
+										  	} else {
+													return (<i>No height defined</i>);
+												}
+											})()
 										}
 									</p>
 									<p>
