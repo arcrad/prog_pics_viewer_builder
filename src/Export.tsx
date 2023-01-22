@@ -542,7 +542,7 @@ function Export({
 						50
 					);
 					intermediateCanvasContext.fillStyle = prevFillStyle;
-					intermediateCanvasContext.fillText(`${entries[c].weight} lbs on ${entries[c].date}`, 50, 61);
+					intermediateCanvasContext.fillText(`${entries[c].weight} ${globalState.settings.measurementSystem == 'imperial' ? 'lbs' : 'kgs'} on ${entries[c].date}`, 50, 61);
 				}
 				
 				///draw intermediatecanvas onto videocanvas
