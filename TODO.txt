@@ -41,6 +41,8 @@
 		-if slow loading cannot be fixed, add spinner indicator prior to page loading
 			--possible to investigate improving load times in future, but added loading indicator to entries page anyhow
 -implement functionality to import/export raw db data 
+-convert settings edit forms to non-controlled fields 
+
 
 
 +test performance on various devices
@@ -95,8 +97,7 @@
 +configure CRA/webpack to automatically scrub out console.* calls on production build
 
 +add unit labels as-needed based on measurementSystem setting
-
-+convert settings edit forms to non-controlled fields 
+	--2023-01-22: started adding where applicable 
 
 ----------------------------------------------------------------
 
@@ -104,9 +105,11 @@ long-term:
 
 suggestions from a redditor:
 	+add unit toggle between imperial and metric
+		--2023-01-22: added functionality (setting), still need to add easily accessible user control
 	-add height data field 
 		--added jan 2023
-	+add some circumferences data fields 
+	+add some circumferences data fields
+		--2023-01-22: not exactly consistent what circumferences are measued or how bf% is derived, not sure if adding is useful  
 	+add functionality to calculate bmi
 
 +extract modal component and add 508 functionality such as focus trapping, virtual cursor traping, multiple exit methods, setting focus on open, and focus saving/reset on close
