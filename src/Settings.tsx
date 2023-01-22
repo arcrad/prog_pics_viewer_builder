@@ -213,10 +213,18 @@ function SettingsComponent({
 			let newValue = event.target.value;
 			console.log('settingKeyToUpdate = ', settingKeyToUpdate);
 			console.log('value = ', newValue);
-			//do db update
-			db.settings.update(settingKeyToUpdate, {
-				value: newValue
-			});
+			//setup db update handler
+			clearTimeout(debounceInputTimeout.current);
+			let modifyDbValueHandler = () => {
+				console.log(`fire settings update db with new input newValue=${newValue}, settingKeyToUpdate=${settingKeyToUpdate}`);
+				if(event.target.dataset.settingKeyToUpdate) {
+					db.settings.update(settingKeyToUpdate, {
+						value: newValue
+					});
+				}
+			};
+			//do debounced db update
+			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);
 		}
 	};
 
@@ -349,7 +357,7 @@ function SettingsComponent({
 										<input 
 											type="text" 
 											className="input"
-											value={setting.value} 
+											defaultValue={setting.value} 
 											data-setting-key-to-update={setting.key}
 											onChange={handleSettingInputChange}
 										/>
