@@ -127,6 +127,7 @@ const handleDbDataFileLoad = async (
 		const dbDataBlob = await zip.file("db_data.json").async("blob");
 		console.dir(dbDataBlob);
 		await importInto(db, dbDataBlob, {
+			acceptVersionDiff: true,
 			overwriteValues: true,
 			clearTablesBeforeImport: true, 
 			progressCallback: importDataCallbackFunctionFactory(
