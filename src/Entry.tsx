@@ -109,11 +109,7 @@ function EntryComponent({
 		}
 	}, [entries]);
 
-	const addDbEntry = async (imageData:string) => {
-		console.log("adding db entry...");
-	};
-
-	const handleAddEntry = async (event:MouseEvent<HTMLButtonElement>) => {
+	async function handleAddEntry(event:MouseEvent<HTMLButtonElement>) {
 		console.log("handle add entry..");
  		try {
 			const now = new Date();
@@ -136,9 +132,9 @@ function EntryComponent({
 		} catch(error) {
 			console.error(`failed to add db entry. ${error}`);
 		}
-	};
+	}
 
-	const handleDeleteEntry = async (event:MouseEvent<HTMLButtonElement>) => {
+	async function handleDeleteEntry(event:MouseEvent<HTMLButtonElement>) {
 		console.log("handle delete entry...");
 		//console.dir(event);
 	 	//console.dir(event.target);
@@ -156,11 +152,11 @@ function EntryComponent({
 				console.error(`encountered error trying to delete record with id = ${event.target.dataset.entryId}`);
 			}
 		}
-	};
+	}
 
-	const handleDuplicateEntry = async (event:MouseEvent<HTMLButtonElement>) => {
+	async function handleDuplicateEntry(event:MouseEvent<HTMLButtonElement>) {
 		//console.dir(imageUploadRef.current);
-		console.log("handle duplicate entry..");
+		console.log("handle duplicate entry...");
 		if(event.target && event.target instanceof HTMLButtonElement && event.target.dataset.entryId) {
 			console.log(`entryId to duplicate = ${event.target.dataset.entryId}`);
 			const date = ((new Date()).toISOString()).substring(0, 16);
@@ -186,9 +182,9 @@ function EntryComponent({
 				}
 			}
 		}
-	};
+	}
 
-	const handleEditEntry = async (event:MouseEvent<HTMLButtonElement>) => {
+	async function handleEditEntry(event:MouseEvent<HTMLButtonElement>) {
 		console.log('handleEditEntry');
 		if(
 			event.target
@@ -202,9 +198,9 @@ function EntryComponent({
 				setEntryIdBeingEdited(entryIdSpecified);
 			}
 		}
-	};
+	}
 
-	const handleMarkEntry = async (event:MouseEvent<HTMLButtonElement>) => {
+	async function handleMarkEntry(event:MouseEvent<HTMLButtonElement>) {
 		console.log('handleMarkEntry');
 		if(
 			event.target
@@ -215,9 +211,9 @@ function EntryComponent({
 			//setMarkImageModalIsVisible(true);
 			navigate(`./mark/${entryId}`);
 		}
-	};
+	}
 	
-	const handleChangeImageEntry = async (event:MouseEvent<HTMLButtonElement>) => {
+	async function handleChangeImageEntry(event:MouseEvent<HTMLButtonElement>) {
 		console.log('handleChangeImageEntry');
 		if(
 			event.target
@@ -228,10 +224,10 @@ function EntryComponent({
 			//setChangeImageModalIsVisible(true);
 			navigate(`./change_image/${entryId}`);
 		}
-	};
+	}
 
 	let debounceInputTimeout = useRef(0);
-	const handleEntryInputChange = async (event:ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => {
+	async function handleEntryInputChange(event:ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) {
 		console.log('handleEntryInputChange');
 		if(
 			event.target
@@ -272,7 +268,7 @@ function EntryComponent({
 
 			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);
 		}
-	};
+	}
 
 	return (
 		<>
