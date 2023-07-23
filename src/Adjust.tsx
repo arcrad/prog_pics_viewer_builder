@@ -102,24 +102,7 @@ function Adjust({
 	const bottomRightCornerControl = useRef<HTMLDivElement>(null);	
 	const bottomLeftCornerControl = useRef<HTMLDivElement>(null);	
 	const imageSelectRef = useRef<HTMLSelectElement>(null);
-	///////
-
-
-
-
-
-	///////
-	/*
-	useEffect( () => {
-		if(needToResetCornerCoordinatesRef.current) {
-			console.warn('do reset corner coordinates');
-			activeCornerControlRef.current = 'all';
-			updateAdjustmentImageCornerCoordinates();
-			setCropCoordinatesToImageCorners();
-			needToResetCornerCoordinatesRef.current = false;
-		}	
-	});
-	*/
+	
 	const updateScaledCornerCropCoordinates = () => {
 		console.group('updateScaledCornerCropCoordinates() called');
 		let xScaleFactor = 1;
@@ -265,12 +248,6 @@ function Adjust({
 			console.log(`xScaleFactor = ${xScaleFactor}, yScaleFactor = ${yScaleFactor}`);
 			try {
 				let idsUpdated = [];
-				/*
- 				console.log(`topLeftCornerCoordinateRef.current.x = ${topLeftCornerCoordinateRef.current.x} * ${xScaleFactor}`);
-				console.log(`topRightCornerCoordinateRef.current.x = ${topRightCornerCoordinateRef.current.x} * ${xScaleFactor}`);
-				console.log(`bottomRightCornerCoordinateRef.current.x = ${bottomRightCornerCoordinateRef.current.x} * ${xScaleFactor}`);
-				console.log(`bottomLeftCornerCoordinateRef.current.x = ${bottomLeftCornerCoordinateRef.current.x} * ${xScaleFactor}`);
-				*/
 				idsUpdated.push( await db.settings.bulkPut([
 					{ 
 						key: "topLeftCornerCropCoordinateX", 
@@ -539,36 +516,6 @@ function Adjust({
 					_bottomLeftCornerCropCoordinateX,
 					_bottomLeftCornerCropCoordinateY,
 				];
-				//updateScaledCornerCropCoordinates();
-				/*
-				if(_topLeftCornerCropCoordinateX && _topLeftCornerCropCoordinateY) {
-					console.log('loaded topLeftCornerCropCoordinates');
-					topLeftCornerCoordinateRef.current = {
-						x: _topLeftCornerCropCoordinateX.value as number,
-						y: _topLeftCornerCropCoordinateY.value as number
-					};
-				}
-				if(_topRightCornerCropCoordinateX && _topRightCornerCropCoordinateY) {
-					console.log('loaded topRightCornerCropCoordinates');
-					topRightCornerCoordinateRef.current = {
-						x: _topRightCornerCropCoordinateX.value as number,
-						y: _topRightCornerCropCoordinateY.value as number
-					};
-				}
-				if(_bottomRightCornerCropCoordinateX && _bottomRightCornerCropCoordinateY) {
-					console.log('loaded bottomRightCornerCropCoordinates');
-					bottomRightCornerCoordinateRef.current = {
-						x: _bottomRightCornerCropCoordinateX.value as number,
-						y: _bottomRightCornerCropCoordinateY.value as number
-					};
-				}
-				if(_bottomLeftCornerCropCoordinateX && _bottomLeftCornerCropCoordinateY) {
-					console.log('loaded bottomLeftCornerCropCoordinates');
-					bottomLeftCornerCoordinateRef.current = {
-						x: _bottomLeftCornerCropCoordinateX.value as number,
-						y: _bottomLeftCornerCropCoordinateY.value as number
-					};
-				}*/
 				if(_scaleWidthSetting) {
 					setScaleWidth(_scaleWidthSetting.value as string);
 					setSelectedImageBaseWidth(_scaleWidthSetting.value);
@@ -577,37 +524,7 @@ function Adjust({
 					setScaleHeight(_scaleHeightSetting.value as string);
 					setSelectedImageBaseHeight(_scaleHeightSetting.value);
 				}
-				/*
-				entries = _entries;
-				chosenEntryIdForAdjustments = _chosenEntryIdForAdjustments;
-				scaleWidthSetting = _scaleWidthSetting;
-				scaleHeightSetting = _scaleHeightSetting;
-				currentEntry = _currentEntry;
-				*/
-				//validate chosenEntryIdForAdjustments
-				/*
-				async function isChosenEntryIdForAdjustmentsValid() {
-					if(_chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
-						const potentialChosenEntry = await db.entries.get(parseInt(_chosenEntryIdForAdjustments.value));
-						if(potentialChosenEntry != null) {
-							return true;
-						}
-					}
-					return false;
-				}*/
-			/*	if(_chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
-					db.entries.get(parseInt(_chosenEntryIdForAdjustments.value)).then( (potentialChosenEntry) => {
-							console.log('potentialChosenEntry = ');
-							console.dir(potentialChosenEntry);
-							if(potentialChosenEntry != null) {
-								setChosenEntryIdIsValid(true);
-							} else {
-								setChosenEntryIdIsValid(false);
-							}						
-					});
-				}*/
 				//setChosenEntryIdIsValid(isChosenEntryIdForAdjustmentsValid());
-
 				//setIsLoaded(true);
 		if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
 			scaleChosenImage(_scaleWidthSetting, _scaleHeightSetting, _chosenEntryIdForAdjustments);
@@ -617,29 +534,6 @@ function Adjust({
 			});
 		//});
 	}, [initialized.current]);
-
-
-
-
-
-
-
-
-
-/*
-	useEffect( () => {
-			//initialize chosen crop image
-			db.settings.get('chosenCropImageData').then( (chosenCropImageDataSetting) => {
-				if(chosenCropImageDataSetting) {
-					setScaledImageData(chosenCropImageDataSetting.value as string);
-				}
-			});
-	}, []);
-*/
-/*	useEffect( () => {
-		console.log('load original corner crop coordinates from db');
-		loadCropCoordinatesFromDb();
-	}, [activeCornerControlRef]);*/
 
 	useEffect( () => {
 		//console.log('useEffect handler called, trying to call updateCropCoordinatesinDb()');
@@ -859,22 +753,7 @@ function Adjust({
 			window.removeEventListener('touchend', handleAdjustCropMarkerEnd);
 		});
 	});
-/*, [
-		topLeftCornerCoordinateRef, 
-		topRightCornerCoordinateRef, 
-		bottomRightCornerCoordinateRef, 
-		bottomLeftCornerCoordinateRef
-	]);*/;
-/*	
-	useEffect( () => {
-		if(scaleWidthSetting) {
-			setScaleWidth(scaleWidthSetting.value as string);
-		}
-		if(scaleHeightSetting) {
-			setScaleHeight(scaleHeightSetting.value as string);
-		}
-	}, [scaleWidthSetting, scaleHeightSetting]);
-	*/
+	
 	const scaleChosenImage = async (scaleWidthSetting:Setting, scaleHeightSetting:Setting, chosenEntryIdForAdjustments:Setting) => {
 		console.group('scaledChosenImage() called');
 		if(
@@ -908,34 +787,15 @@ function Adjust({
 							setScaledImageData(blob);
 							setScaledImageDataUrl(blob ? URL.createObjectURL(blob) : '');
 						}
-					});
-					
-/////					let lastIdUpdated = await setCropCoordinatesToImageCornersInDb(scaledImageWidth, scaledImageHeight);
-
-/*				loadCropCoordinatesFromDb().then( () => {
-					console.log('after loadCropCordinates resolves');
-					updateAdjustmentImageCornerCoordinates();
-					updateScaledCornerCropCoordinates();
-				});*/
+					});	
 					console.warn('end update chosen image scaling...');
 				}
-				//image.src = _currentEntry.image;
 				image.src = URL.createObjectURL(new Blob([_currentEntry.imageBlob.buffer]));
 					setRenderTrigger(Date.now());
 			}
 		}
 		console.groupEnd();
 	};
-
-/*
-	useEffect( () => {
-		console.group('useEffect: scaleChosenImage(): chosenEntryIdForAdjustments = ',chosenEntryIdForAdjustments);
-		if(scaleWidthSetting && scaleHeightSetting && chosenEntryIdForAdjustments) {
-			scaleChosenImage(scaleWidthSetting, scaleHeightSetting, chosenEntryIdForAdjustments);
-		}
-		console.groupEnd();
-	}, [scaleWidthSetting, scaleHeightSetting, chosenEntryIdForAdjustments]);
-*/
 
 	useEffect( () => {
 		if(
@@ -991,15 +851,7 @@ function Adjust({
 
 	
 	//console.log('RENDER!');
-	const allRelevantValidationsPassed = 
-		validationResults.moreThanZeroEntries
-		/*
-		&& validationResults.allEntriesHaveAlignedImageBlob 
-		&& validationResults.allEntriesHaveDate
-		&& validationResults.allEntriesHaveWeight
-		&& validationResults.allEntriesHaveAllMarks
-		&& validationResults.adjustmentImageCropAndScalingChosen;
-		*/
+	const allRelevantValidationsPassed = validationResults.moreThanZeroEntries;
  
 	return (
 		<>
