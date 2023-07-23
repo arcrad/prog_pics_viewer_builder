@@ -103,7 +103,7 @@ function Adjust({
 	const bottomLeftCornerControl = useRef<HTMLDivElement>(null);	
 	const imageSelectRef = useRef<HTMLSelectElement>(null);
 	
-	const updateScaledCornerCropCoordinates = () => {
+	function updateScaledCornerCropCoordinates() {
 		console.group('updateScaledCornerCropCoordinates() called');
 		let xScaleFactor = 1;
 		let yScaleFactor = 1;
@@ -156,7 +156,7 @@ function Adjust({
 		console.groupEnd();
 	};
 	
-	const updateAdjustmentImageCornerCoordinates = () => {
+	function updateAdjustmentImageCornerCoordinates() {
 		console.group('updateAdjustmentImageCornerCoordinates');
 		if(currentCropImageContainerRef.current && currentCropImageRef.current) {	
 			//console.log('currentCropImageContainerRef.current = ');
@@ -183,7 +183,7 @@ function Adjust({
 		console.groupEnd();
 	};
 
-	const loadCropCoordinatesFromDb = () => {
+	function loadCropCoordinatesFromDb() {
 		console.log('loadCropCoordinatesFromDb() called');
 		return Promise.all([
 			db.settings.get('topLeftCornerCropCoordinateX'),
@@ -195,13 +195,13 @@ function Adjust({
 			db.settings.get('bottomLeftCornerCropCoordinateX'),
 			db.settings.get('bottomLeftCornerCropCoordinateY')
 		]).then( (coordinates) => { 
-			console.log('got corner coords from db'); 
+			console.log('got corner coords from db');
 			//console.dir(coordinates);
 			originalCoordinatesFromDbRef.current = coordinates;
 		});
 	};
 	
-	const setCropCoordinatesToImageCornersInDb = (imageWidth:number, imageHeight:number) => {
+	function setCropCoordinatesToImageCornersInDb(imageWidth:number, imageHeight:number) {
 		console.log(`setCropCoordinatesToImageCornersInDb() called width=${imageWidth} height=${imageHeight}`);
 				return db.settings.bulkPut([
 					{ 
@@ -233,7 +233,7 @@ function Adjust({
 	};
 
 	const debounceUpdateCoordinatesInDbTimeout = useRef(0);	
-	const updateCropCoordinatesInDb = () => {
+	function updateCropCoordinatesInDb() {
 		window.clearTimeout(debounceUpdateCoordinatesInDbTimeout.current);
 		debounceUpdateCoordinatesInDbTimeout.current = window.setTimeout( async () => {
 			console.group('updating crop coordinate in DB...');
@@ -283,7 +283,7 @@ function Adjust({
 		}, 200);
 	};
 
-	const handleSelectImage = async () => {
+	async function handleSelectImage() {
 		console.group('handleSelectImage() called');
 		if(
 			imageSelectRef.current
@@ -348,12 +348,12 @@ function Adjust({
 		console.groupEnd();
 	};
 		
-	const handleAdjustCropping = (event: MouseEvent<HTMLButtonElement>) => {
+	function handleAdjustCropping(event: MouseEvent<HTMLButtonElement>) {
 		setCropAdjustActive( cs => !cs);
 	};
 	
 	let debounceInputTimeout = useRef(0);
-	const handleScaleDimensionInputChange = async (event:ChangeEvent<HTMLInputElement>) => {
+	async function handleScaleDimensionInputChange(event:ChangeEvent<HTMLInputElement>) {
 		console.group('handleScaleDimensionInputChange() called');
 		if(
 			event.target
@@ -577,7 +577,7 @@ function Adjust({
 
 	
 	useEffect( () => {
-		let handleAdjustCropMarkerStart = (event: any) => {
+		function handleAdjustCropMarkerStart(event: any) {
 			console.log('handleAdjustCropMarkerStart() called');
 			//console.dir(event);
 			//console.dir(event.target);
@@ -589,7 +589,7 @@ function Adjust({
 			}
 		}
 		
-		const getCoordinateBoundToImage = (baseCoordinate: Coordinate):Coordinate => {
+		function getCoordinateBoundToImage(baseCoordinate: Coordinate):Coordinate {
 			let boundCoordinate = { x: baseCoordinate.x, y: baseCoordinate.y };
 			if(!currentCropImageRef.current){
 				return boundCoordinate;
@@ -612,7 +612,7 @@ function Adjust({
 			return boundCoordinate;
 		};
 
-		const getBoundTopLeftCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+		function getBoundTopLeftCornerCoordinate(baseCoordinate:Coordinate):Coordinate {
 			let boundCoordinate = { ...baseCoordinate }
 			if(baseCoordinate.x > topRightCornerCoordinateRef.current.x) {
 				boundCoordinate.x = topRightCornerCoordinateRef.current.x
@@ -623,7 +623,7 @@ function Adjust({
 			return boundCoordinate;
 		};
 
-		const getBoundTopRightCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+		function getBoundTopRightCornerCoordinate(baseCoordinate:Coordinate):Coordinate {
 			let boundCoordinate = { ...baseCoordinate }
 			if(baseCoordinate.x < topLeftCornerCoordinateRef.current.x) {
 				boundCoordinate.x = topLeftCornerCoordinateRef.current.x
@@ -634,7 +634,7 @@ function Adjust({
 			return boundCoordinate;
 		};
 		
-		const getBoundBottomRightCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+		function getBoundBottomRightCornerCoordinate(baseCoordinate:Coordinate):Coordinate {
 			let boundCoordinate = { ...baseCoordinate }
 			if(baseCoordinate.x < bottomLeftCornerCoordinateRef.current.x) {
 				boundCoordinate.x = bottomLeftCornerCoordinateRef.current.x
@@ -645,7 +645,7 @@ function Adjust({
 			return boundCoordinate;
 		};
 		
-		const getBoundBottomLeftCornerCoordinate = (baseCoordinate:Coordinate):Coordinate => {
+		function getBoundBottomLeftCornerCoordinate(baseCoordinate:Coordinate):Coordinate {
 			let boundCoordinate = { ...baseCoordinate }
 			if(baseCoordinate.x > bottomRightCornerCoordinateRef.current.x) {
 				boundCoordinate.x = bottomRightCornerCoordinateRef.current.x
@@ -656,7 +656,7 @@ function Adjust({
 			return boundCoordinate;
 		};
 		
-		const handleAdjustCropMarkerMove = (event: any) => {
+		function handleAdjustCropMarkerMove(event: any) {
 			//console.log('handleAdjustCropMarkerMove() called');
 			//console.dir(event);
 			let pageX = 0;
@@ -732,9 +732,9 @@ function Adjust({
 			}
 		}
 		
-		let handleAdjustCropMarkerEnd = (event: any) => {
+		function handleAdjustCropMarkerEnd(event: any) {
 			if(activeCornerControlRef.current != 'all') {
-			activeCornerControlRef.current = 'none';
+				activeCornerControlRef.current = 'none';
 			}
 		}
 		
@@ -754,7 +754,7 @@ function Adjust({
 		});
 	});
 	
-	const scaleChosenImage = async (scaleWidthSetting:Setting, scaleHeightSetting:Setting, chosenEntryIdForAdjustments:Setting) => {
+	async function scaleChosenImage(scaleWidthSetting:Setting, scaleHeightSetting:Setting, chosenEntryIdForAdjustments:Setting) {
 		console.group('scaledChosenImage() called');
 		if(
 			scaleWidthSetting 
@@ -806,7 +806,7 @@ function Adjust({
 		}
 	}, [chosenEntryIdForAdjustments]);
 
-	const handleSetCropToCorners = () => {
+	function handleSetCropToCorners() {
 		console.log('handleSetCropToCorners() called');
 		activeCornerControlRef.current = 'all';
 		updateAdjustmentImageCornerCoordinates();
@@ -814,7 +814,7 @@ function Adjust({
 		setRenderTrigger(Date.now());
 	};
 	
-	const handleSelectOnChange = (event:ChangeEvent<HTMLSelectElement>) => {
+	function handleSelectOnChange(event:ChangeEvent<HTMLSelectElement>) {
 		console.log('handleSelectOnChange() called');
 		if(
 			event
@@ -825,7 +825,7 @@ function Adjust({
 		}
 	};
 
-	const setCropCoordinatesToImageCorners = () => {
+	function setCropCoordinatesToImageCorners() {
 			console.warn('setCropCoordinatesToImageCorners() called');
 			if(currentCropImageContainerRef.current) {
 				console.warn('setCropCoordinatesToImageCorners first condition');
@@ -849,7 +849,6 @@ function Adjust({
 			}
 	};
 
-	
 	//console.log('RENDER!');
 	const allRelevantValidationsPassed = validationResults.moreThanZeroEntries;
  
