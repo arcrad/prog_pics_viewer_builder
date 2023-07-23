@@ -30,7 +30,7 @@ export default function IndexComponent() {
 							<li>Choose consistent alignment mark points and ensure they are as consistent as possible from one image to another. Choose features that do not move between pictures. Both nipples and the bellybutton are a good choice if they are visible.</li>
 							<li>Go through all the steps in the top navigation before trying to export. Make sure you have selected an image on the Adjust tab prior to trying to Process your entries.</li>
 							<li>Due to how images are stored in the browser database, working with larger images can be slow. If performance is sluggish, try uploading smaller images. By default, images are scaled down so that their largest dimesion is 1920 pixels. This is governed by the <i>defaultBaseImageMaxDimension</i> setting.</li>
-							<li>The data and images you upload only exist on your device. Reguarly backup your data if you want to ensure it wont be lost. See the <a href="#data_is_stored_locally">Data is Stored Locally</a> section for more information.</li>
+							<li>The data and images you upload only exist on your device. Reguarly backup your data if you want to ensure it wont be lost. See the <a onClick={() => document.getElementById('data_is_stored_locally').scrollIntoView()}>Data is Stored Locally</a> section for more information.</li>
 							<li>The Settings tab shows internal data used by the tool. You should not need to edit the values presented during normal operation. This tab also has the Export/Import options used to backup/recover your data.</li>
 						</ul>
 						<h1>Details</h1>
