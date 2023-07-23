@@ -391,15 +391,6 @@ function Viewer({
 			</div>
 		<div className="columns is-mobile is-centered">
 			<div className="column is-11-mobile is-10-tablet is-8-desktop">
-			{ 
-			/*	!validationResults.moreThanZeroEntries &&
-				<p>You must have at least one entry to process.</p>*/
-			}
-			{
-				/*validationResults.moreThanZeroEntries &&
-				!validationResults.adjustmentImageCropAndScalingChosen &&
-				<p>You must select an entry as the base for scaling and cropping.</p>*/
-			}
 			{
 				Object.keys(validationResults).length > 0 &&
 				!allRelevantValidationsPassed &&
