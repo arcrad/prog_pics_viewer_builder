@@ -86,7 +86,7 @@ function drawInlineSVG(svgElem: SVGSVGElement): Promise<HTMLImageElement> {
 	});
 }
 
-//need to figure out proper type for svg (Selection is not generic error)
+//TODO: need to figure out proper type for svg (Selection is not generic error)
 function configureSVGGraph(
 	svg: any, 
 	svgWidth: number, 
@@ -101,7 +101,7 @@ function configureSVGGraph(
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 }
 
-//need to figure out proper typing for d3 
+//TODO: need to figure out proper typing for d3 
 function setupSVGGraphXAxis(
 	svg: any, 
 	svgWidth: number, 
@@ -118,7 +118,7 @@ function setupSVGGraphXAxis(
 		.call(d3.axisBottom(x).tickFormat((d) => formatXAxis(d)));
 }
 
-//need to figure out proper typing for d3 
+//TODO: need to figure out proper typing for d3 
 function setupSVGGraphYAxis(
 	svg: any, 
 	y: any
