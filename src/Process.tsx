@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import  * as mathjs  from 'mathjs';
-//importi './Viewer.css';
 import { LoadingIndicator } from './Common';
 import { db, Entry, Setting } from './db';
 import { GlobalState } from './App';
@@ -149,11 +148,11 @@ function Viewer({
 		});;
 	}, []);
 
-	const processEntry = (
+	function processEntry(
 		entryToProcess:Entry, 
 		chosenEntryImageNaturalWidth:number, 
 		chosenEntryImageNaturalHeight:number
-	):Promise<number> => {
+	):Promise<number> {
 		console.log('processEntry() called');
 		return new Promise( (resolve, reject) => {
 			if(!entryToProcess || !entryToProcess.imageBlob) {
@@ -292,7 +291,7 @@ function Viewer({
 		});
 	};
 
-  const handleProcessAllEntries = () => {
+  function handleProcessAllEntries() {
 		if(!(processingState == 'unstarted' || processingState == 'complete')) {
 			return;
 		}
@@ -317,7 +316,7 @@ function Viewer({
 		}
 	};
 
-	const handleProcessUnprocessedEntries = () => {
+	function handleProcessUnprocessedEntries() {
 		if(!(processingState == 'unstarted' || processingState == 'complete')) {
 			return;
 		}
