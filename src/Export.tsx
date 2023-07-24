@@ -408,7 +408,6 @@ function Export({
 		setStatusMessages( cs => [...cs, `start generating frames`]);
 		
 		for(let c = 0, max = entries.length; c < max; c++) {
-		//for(let c = 0, max = 5; c < max; c++) {
 			//mediaRecorder.pause();
 			//await pauseRecorder();
 			//await delay(50);
