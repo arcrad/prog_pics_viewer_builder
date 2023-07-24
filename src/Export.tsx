@@ -149,14 +149,6 @@ function Export({
 	let [lastFrameHoldDuration, setLastFrameHoldDuration] = useState<number>(150);
 	let [holdFirstFrameIsChecked, setHoldFirstFrameIsChecked] = useState<boolean>(false);
 	let [holdLastFrameIsChecked, setHoldLastFrameIsChecked] = useState<boolean>(false);
-	/*
-	let [exportDbDataMaxRows, setExportDbDataMaxRows] = useState(0);
-	let [exportDbDataRowsExported, setExportDbDataRowsExported] = useState(0);
-	let [exportDbDataInProgress, setExportDbDataInProgress] = useState(false);
-	let [importDbDataMaxRows, setImportDbDataMaxRows] = useState(0);
-	let [importDbDataRowsImported, setImportDbDataRowsImported] = useState(0);
-	let [importDbDataStatus, setImportDbDataStatus] = useState('Not Started');
-	*/
 
 	const initializedRef = useRef<boolean>(false);
 	const videoElementRef = useRef<HTMLVideoElement|null>(null);
@@ -250,7 +242,7 @@ function Export({
 		});
 	}
 	
-	const setupD3ChartScales = (entries:Entry[], width: number, height: number) => {
+	function setupD3ChartScales(entries:Entry[], width: number, height: number) {
 		//TODO: need to improve/clean up data 
 		const [minX=0, maxX=0] = d3.extent(entries, d => Date.parse(d.date));
 		//setup x axis timeScale
@@ -278,21 +270,22 @@ function Export({
 		return [x, y, line];
 	};
 
-	let formatXAxis = (function() {
-		let xFormatShort = d3.utcFormat('%b');
-		let xFormatLong = d3.utcFormat('%b'); //redundant right now
-		let prevYear = 0;
-		return (d:any) => {
-			if(prevYear !== d.getUTCFullYear()) {
-				//console.log('d=',d,'year=',d.getUTCFullYear(),'prevYear=',prevYear);
-				prevYear = d.getUTCFullYear();
-				return String(d.getUTCFullYear()).substring(2,4);
+	function formatXAxis() {
+		(function() {
+			let xFormatShort = d3.utcFormat('%b');
+			let xFormatLong = d3.utcFormat('%b'); //redundant right now
+			let prevYear = 0;
+			return (d:any) => {
+				if(prevYear !== d.getUTCFullYear()) {
+					//console.log('d=',d,'year=',d.getUTCFullYear(),'prevYear=',prevYear);
+					prevYear = d.getUTCFullYear();
+					return String(d.getUTCFullYear()).substring(2,4);
+				}
+				return xFormatShort(d).substring(0,1);
 			}
-			return xFormatShort(d).substring(0,1);
-		}
-	})();
-
-	const handleExportVideo = async () => {
+		})();
+	}
+	async function handleExportVideo() {
 		console.log('handleExportVideo() called');
 		if(!entries) {
 			setStatusMessages(["Error: Entries not loaded or none found."]);
@@ -591,7 +584,7 @@ function Export({
 	};
 
 	let debounceInputTimeout = useRef(0);
-	const handleInputChange = async (event:ChangeEvent<HTMLInputElement>) => {
+	async function handleInputChange(event:ChangeEvent<HTMLInputElement>) {
 		console.group('handleInputChange() called');
 		if(
 			event.target
@@ -645,7 +638,7 @@ function Export({
 				console.log('value = ', newValue);
 			}
 			clearTimeout(debounceInputTimeout.current);
-			let modifyDbValueHandler = async () => {
+			async function modifyDbValueHandler() {
 					console.log('fire update db with new input', newValue, settingsKeyToModify);
 						try {
 							const id = await db.settings.put(
