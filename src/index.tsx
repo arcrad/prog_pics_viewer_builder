@@ -8,6 +8,13 @@ import App from './App';
 //import './index.css';
 import './index.scss';
 
+//hacky way to supress console functions instead of ejecting from CRA
+//would be better to use custom CRA template or rewire CRA
+if (process.env.NODE_ENV !== 'development') {
+  console.log = () => {}
+  console.dir = () => {}
+}
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
