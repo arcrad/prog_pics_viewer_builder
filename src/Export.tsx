@@ -325,11 +325,14 @@ function Export({
 			setStatusMessages(["Error: Unable to find first entry data."]);
 			return;
 		}
+
 		//setup media objects
 		const videoCanvas = document.createElement('canvas');
+
 		//firefox throws error if it dont got context (initialization maybe?) 
 		//possibly room here to improve performance via context-attributes, or alternate context from '2d'
 		const canvasContext = videoCanvas.getContext('2d');
+
 		//setup capture stream
 		//const canvasStream = videoCanvas.captureStream(0);
 		const canvasStream = videoCanvas.captureStream();
@@ -340,12 +343,14 @@ function Export({
 		});
 		let recorderData:any[] = [];
 	 	setStatusMessages( cs => [...cs, 'created MediaRecorder']);
+
 		//setup handler for data available event
 		mediaRecorder.ondataavailable = (event) => {
 			setStatusMessages( cs => [...cs, `pushed data from mediaRecorder`]);
 			console.dir(event)
 			recorderData.push(event.data);
 		};
+
 		//promisify mediaRecorder onstop handler and attach handler to it to display final video
 		let recorderStopped = new Promise( (resolve, reject) => {
 			mediaRecorder.onstop = resolve;
@@ -359,7 +364,8 @@ function Export({
 				videoElementRef.current.src = URL.createObjectURL(recordedBlob);
 			}
 		});
-		//determine scaled image dimensions (720p hardcoded currently)
+	
+	//determine scaled image dimensions (720p hardcoded currently)
 		let scaledImageWidth = 720;
 		let scaledImageHeight = 1280;
 		let firstBlob = entries[0].alignedImageBlob;
