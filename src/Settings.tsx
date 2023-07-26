@@ -109,12 +109,12 @@ function importDataCallbackFunctionFactory(
 	}
 }
 
-const handleDbDataFileLoad = async (
+async function handleDbDataFileLoad(
 	dbDataFileUploadRef,
 	setImportDbDataMaxRows,
 	setImportDbDataRowsImported,
 	setImportDbDataStatus
-) => {
+) {
 	//console.dir(dbDataFileUploadRef.current);
 	console.log("handle load db data..");
 	setImportDbDataStatus('Started');
@@ -137,7 +137,7 @@ const handleDbDataFileLoad = async (
 		});
 		setImportDbDataStatus('Complete');
 	}
-};
+}
 
 
 
@@ -177,7 +177,7 @@ function SettingsComponent({
 		}
 	},[]);
 
-	const updateGlobalStateSettings = () => {	
+	function updateGlobalStateSettings() {	
 		console.log('update settings in globalState');
 		console.dir(currentSettings);
 		setGlobalState( (cs):GlobalState => {
@@ -193,7 +193,7 @@ function SettingsComponent({
 		});
 	}
 	
-	let currentSettings = useLiveQuery( () => {
+	let currentSettings = useLiveQuery(() => {
 		return db.settings.toArray()
 	});
 	
@@ -203,7 +203,7 @@ function SettingsComponent({
 	}, [currentSettings]);
 	
 	let debounceInputTimeout = useRef(0);
-	const handleSettingInputChange = async (event:ChangeEvent<HTMLInputElement>) => {
+	async function handleSettingInputChange(event:ChangeEvent<HTMLInputElement>) {
 		console.log('handleSettingInputChange');
 		if(
 			event.target
@@ -227,9 +227,9 @@ function SettingsComponent({
 			//do debounced db update
 			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);
 		}
-	};
+	}
 
-	let handleDeleteAllEntries = () => {
+	function handleDeleteAllEntries() {
 		const doDelete = window.confirm('Are you sure you want to delete all entries? There is no way to get them back unless you have Exported a backup.');
 		if(doDelete) {
 			db.entries.clear();
