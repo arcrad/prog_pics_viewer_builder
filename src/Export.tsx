@@ -422,7 +422,7 @@ function Export({
 			if(currentBlob) {
 				console.log(`load image ${c}`);
 				const currentImage = await loadImageFromBlob(currentBlob);
-				
+
 				//generate scaled version in canvas
 				const scaledCanvas = document.createElement('canvas');
 				scaledCanvas.width = scaledImageWidth;
@@ -430,71 +430,71 @@ function Export({
 				const scaledCanvasContext = scaledCanvas.getContext('2d');
 				if(scaledCanvasContext) {
 					scaledCanvasContext.drawImage(
-						currentImage, 
-						0, 
-						0, 
-						currentImage.naturalWidth, 
-						currentImage.naturalHeight, 
-						0, 
-						0, 
-						scaledImageWidth, 
-						scaledImageHeight
-					);
+							currentImage, 
+							0, 
+							0, 
+							currentImage.naturalWidth, 
+							currentImage.naturalHeight, 
+							0, 
+							0, 
+							scaledImageWidth, 
+							scaledImageHeight
+							);
 				}
 				console.log(`generated scaledCanvas ${c}`);
 
 				//generate svg graph overlay
-    const svg = d3.create("svg");
+				const svg = d3.create("svg");
 
-		//setup graph
-		configureSVGGraph(svg, svgWidth, svgHeight, margin);
-		setupSVGGraphXAxis(svg, svgWidth, svgHeight, margin, x, formatXAxis);
-    setupSVGGraphYAxis(svg, y);
+				//setup graph
+				configureSVGGraph(svg, svgWidth, svgHeight, margin);
+				setupSVGGraphXAxis(svg, svgWidth, svgHeight, margin, x, formatXAxis);
+				setupSVGGraphYAxis(svg, y);
 
-		//build line 
-    svg.append("path")
-      .attr("d", line(entries))
-      .attr("fill", "none")
-      .attr("stroke","white")
-      .attr("stroke-width", () => "2")
-      .attr("stroke-miterlimit", "1"); 
+				//build line 
+				svg.append("path")
+					.attr("d", line(entries))
+					.attr("fill", "none")
+					.attr("stroke","white")
+					.attr("stroke-width", () => "2")
+					.attr("stroke-miterlimit", "1"); 
 
-		//build circle markers
-		svg.append("g").selectAll("circle")
-    .data(entries)
-    .join("circle")
-      .attr("fill", (d,i) => { 
-				return "rgba(0,0,0,0)";
-			})
-      .attr("stroke", (d,i) => { 
-				return "rgba(0,0,0,0)";
-			})
-      .attr("stroke-width", () => '0')
-      .attr("cx", d => x(Date.parse(d.date)))
-      .attr("cy", d => y(d.weight || 0))
-      .attr("r", (d,i) => { 
-				return '10';
-			});
+				//build circle markers
+				svg.append("g").selectAll("circle")
+					.data(entries)
+					.join("circle")
+					.attr("fill", (d,i) => { 
+							return "rgba(0,0,0,0)";
+							})
+				.attr("stroke", (d,i) => { 
+						return "rgba(0,0,0,0)";
+						})
+				.attr("stroke-width", () => '0')
+					.attr("cx", d => x(Date.parse(d.date)))
+					.attr("cy", d => y(d.weight || 0))
+					.attr("r", (d,i) => { 
+							return '10';
+							});
 
-    svg.append("g").selectAll("circle")
-    	.data([entries[c]]) //set to for loop index
-	    .join("circle")
-      	.attr("fill", "none")
-	      .attr("stroke", d => {
-					return "#39e";
-				})
-	      .attr("stroke-width", 3)
-	      .attr("cx", d => x(Date.parse(d.date)))
-	      .attr("cy", d => y(d.weight || 0))
-      	.attr("r", '5');
+				svg.append("g").selectAll("circle")
+					.data([entries[c]]) //set to for loop index
+					.join("circle")
+					.attr("fill", "none")
+					.attr("stroke", d => {
+							return "#39e";
+							})
+				.attr("stroke-width", 3)
+					.attr("cx", d => x(Date.parse(d.date)))
+					.attr("cy", d => y(d.weight || 0))
+					.attr("r", '5');
 
 
-				console.log(`start draw frame = ${c}`);
+				/////console.log(`start draw frame = ${c}`);
 				intermediateCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
 				intermediateCanvasContext.drawImage(scaledCanvas, 0, 0);
 				if(overlayEntryGraphIsChecked) {
 					//const svgNode = svg.node();
-					console.log('start draw svg overlay');
+					/////console.log('start draw svg overlay');
 					const svgNode = svg.node();
 					if(svgNode != null) {
 						//console.log(svgNode.outerHTML);
@@ -505,11 +505,11 @@ function Export({
 							const prevFillStyle:string = intermediateCanvasContext.fillStyle;
 							intermediateCanvasContext.fillStyle = 'rgba(0,0,0,0.65)';
 							intermediateCanvasContext.fillRect(
-								25, 
-								margin.top - 20 + extraTopOffset, 
-								svgWidth - margin.right + margin.left, 
-								svgHeight - margin.bottom
-							);
+									25, 
+									margin.top - 20 + extraTopOffset, 
+									svgWidth - margin.right + margin.left, 
+									svgHeight - margin.bottom
+									);
 							intermediateCanvasContext.drawImage(svgImage, 50, 0 + extraTopOffset);
 							intermediateCanvasContext.fillStyle = prevFillStyle;
 						}
@@ -519,30 +519,30 @@ function Export({
 					const prevFillStyle:string = intermediateCanvasContext.fillStyle;
 					intermediateCanvasContext.fillStyle = 'rgba(0, 0, 0, 0.65)';
 					intermediateCanvasContext.fillRect(
-						scaledImageWidth - 140, 
-						scaledImageHeight - 75, 
-						110, 50
-					);
+							scaledImageWidth - 140, 
+							scaledImageHeight - 75, 
+							110, 50
+							);
 					intermediateCanvasContext.fillStyle = prevFillStyle;
 					intermediateCanvasContext.fillText(
-						`${c}`, 
-						scaledImageWidth - 130, 
-						scaledImageHeight - 40
-					);
+							`${c}`, 
+							scaledImageWidth - 130, 
+							scaledImageHeight - 40
+							);
 				}
 				if(overlayEntryInfoIsChecked) {
 					const prevFillStyle:string = intermediateCanvasContext.fillStyle;
 					intermediateCanvasContext.fillStyle = 'rgba(0, 0, 0, 0.65)';
 					intermediateCanvasContext.fillRect(
-						scaledImageWidth * 0.03, 
-						25, 
-						scaledImageWidth * 0.94, 
-						50
-					);
+							scaledImageWidth * 0.03, 
+							25, 
+							scaledImageWidth * 0.94, 
+							50
+							);
 					intermediateCanvasContext.fillStyle = prevFillStyle;
 					intermediateCanvasContext.fillText(`${entries[c].weight} ${globalState.settings.measurementSystem == 'imperial' ? 'lbs' : 'kgs'} on ${entries[c].date}`, 50, 61);
 				}
-				
+
 				///draw intermediatecanvas onto videocanvas
 				videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
 				videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
@@ -551,7 +551,7 @@ function Export({
 				//NOTE: further testing revealed that this breaks rendering in some cases, not sure exactly why.
 				//commented out for now
 				//await delay(50);
-				console.log('resume recording');
+				/////console.log('resume recording');
 				if(c == 0) {
 					videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
 					videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
@@ -574,10 +574,10 @@ function Export({
 				const endTime = Date.now();
 				mediaRecorder.pause();
 				//await pauseRecorder();
-				console.log(`done drawing frame, time to draw = ${endTime - startTime}`);
+				/////console.log(`done drawing frame, time to draw = ${endTime - startTime}`);
 				setStatusMessages( cs => [...cs, `generated frame: ${c}/${max-1}, actual frame duration = ${endTime - startTime} ms`]);
 				setEntriesProcessed(c);
-			await delay(frameDurationMs);
+				await delay(frameDurationMs);
 			}
 		}
 		mediaRecorder.resume();
@@ -592,10 +592,10 @@ function Export({
 	async function handleInputChange(event:ChangeEvent<HTMLInputElement>) {
 		console.group('handleInputChange() called');
 		if(
-			event.target
-			&& event.target instanceof HTMLInputElement
-			&& event.target.dataset.settingsKeyToModify
-		) {
+				event.target
+				&& event.target instanceof HTMLInputElement
+				&& event.target.dataset.settingsKeyToModify
+			) {
 			let newValue:string|boolean|number = event.target.value as string;
 			let settingsKeyToModify = event.target.dataset.settingsKeyToModify;
 			console.log('settingsKeyToModify = ', settingsKeyToModify);
@@ -644,20 +644,20 @@ function Export({
 			}
 			clearTimeout(debounceInputTimeout.current);
 			async function modifyDbValueHandler() {
-					console.log('fire update db with new input', newValue, settingsKeyToModify);
-						try {
-							const id = await db.settings.put(
-								{ key: settingsKeyToModify, value: newValue }, 
+				console.log('fire update db with new input', newValue, settingsKeyToModify);
+				try {
+					const id = await db.settings.put(
+							{ key: settingsKeyToModify, value: newValue }, 
 							);
-							console.log('new id =', id);
-						} catch(error) {
-							console.error(`failed to add db entry. ${error}`);
-						}
+					console.log('new id =', id);
+				} catch(error) {
+					console.error(`failed to add db entry. ${error}`);
+				}
 			};
 			debounceInputTimeout.current = window.setTimeout( modifyDbValueHandler, 500);
 		}
 		console.groupEnd();
-	};
+	}
 
 	let estimatedVideoDurationString = 'N/A';
 	if(entries && frameDuration) {
