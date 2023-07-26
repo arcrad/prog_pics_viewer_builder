@@ -80,11 +80,19 @@
 +add plain magnifier option to the mark image controls 
 	--would allow user to zoom in on existing marks without possiblity of changing any marks 
 
++improve touch screen performance of mark image controls 
+	--perhaps have a "two finger" approach where one finger controls where mark goes and the other clicks a button to set it 
+
 +refine export/import progress reporting 
+	+improve progress messages/indication for import menu
+	+improve progress messages/indication for export menu
 
 +create live graph viewer with trends and stats
 	--show projected weightloss with trend line?
 	--show bmi/weight classification scale? 
+	--possibly have options to show weekly/monthly mean/median/etc
+
++show lowest weight achieved so far 
 
 +hamburger menu for entries list (maybe)
 	--alteratively, refine the entries listings. more compact and adding a few options 
@@ -98,6 +106,7 @@
 
 +add unit labels as-needed based on measurementSystem setting
 	--2023-01-22: started adding where applicable 
+
 
 ----------------------------------------------------------------
 
