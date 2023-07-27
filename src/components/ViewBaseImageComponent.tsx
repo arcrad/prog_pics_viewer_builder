@@ -20,7 +20,7 @@ import {
 	faLocationCrosshairs, 
 } from '@fortawesome/free-solid-svg-icons'
 
-import { db, Entry } from './db';
+import { db, Entry } from '../db';
 //import { GlobalState } from './App';
 
 import styles from './ViewBaseImageComponent.module.css';

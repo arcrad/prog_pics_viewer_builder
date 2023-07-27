@@ -6,10 +6,10 @@ import * as d3 from 'd3';
 import { ScaleTime, ScaleLinear } from 'd3-scale'; //from DefinitelyTyped types
 import { Line } from 'd3-shape'; //from DefinitelyTyped types
 
-import { LoadingIndicator } from './Common';
-import { db, Entry, Setting } from './db';
-import { GlobalState } from './App';
-import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
+import { LoadingIndicator } from '../Common';
+import { db, Entry, Setting } from '../db';
+import { GlobalState } from '../App';
+import EntriesValidator,  { ValidationResults, defaultValidationResults } from '../components/EntriesValidator';
 
 //import './Export.css';
 

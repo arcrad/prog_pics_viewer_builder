@@ -19,8 +19,9 @@ import {importDB, exportDB, importInto, peakImportFile} from "dexie-export-impor
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 
-import { db, Setting } from './db';
-import { GlobalState, Settings } from './App';
+import { db, Setting } from '../db';
+import { GlobalState, Settings } from '../App';
+
 //import './Settings.css';
 
 type SettingsAttributes = {

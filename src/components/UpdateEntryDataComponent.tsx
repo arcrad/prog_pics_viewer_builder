@@ -14,9 +14,9 @@ import {
 } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
-import { db, Entry } from './db';
-import { GlobalState } from './App';
-import { getLocalDateStringFormattedForDateInput } from './Common';
+import { db, Entry } from '../db';
+import { GlobalState } from '../App';
+import { getLocalDateStringFormattedForDateInput } from '../Common';
 //import './UpdateEntryDataComponent.css';
 
 

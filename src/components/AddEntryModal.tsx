@@ -27,12 +27,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 
-import { db, Entry } from './db';
-import { GlobalState } from './App';
+import { db, Entry } from '../db';
+import { GlobalState } from '../App';
 import ChangeImageComponent from './ChangeImageComponent';
 import MarkImageComponent from './MarkImageComponent';
 import UpdateEntryDataComponent from './UpdateEntryDataComponent';
-import { EntryValidationErrorsList } from './Common';
+import { EntryValidationErrorsList } from '../Common';
 
 import styles from './AddEntryModal.module.scss';
 

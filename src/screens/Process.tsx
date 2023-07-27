@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import  * as mathjs  from 'mathjs';
-import { LoadingIndicator } from './Common';
-import { db, Entry, Setting } from './db';
-import { GlobalState } from './App';
-import EntriesValidator,  { ValidationResults, defaultValidationResults } from './EntriesValidator';
+
+import { LoadingIndicator } from '../Common';
+import { db, Entry, Setting } from '../db';
+import { GlobalState } from '../App';
+import EntriesValidator,  { ValidationResults, defaultValidationResults } from '../components/EntriesValidator';
 
 const processingStateMap:{[key:string]:string} = {
 	'unstarted': 'Not Started',

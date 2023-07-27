@@ -15,8 +15,8 @@ import {
 	faUpload, 
 } from '@fortawesome/free-solid-svg-icons'
 
-import { db, Entry } from './db';
-import { GlobalState } from './App';
+import { db, Entry } from '../db';
+import { GlobalState } from '../App';
 
 type ChangeImageComponentAttributes= {
 	closeModalOnLoad: boolean;

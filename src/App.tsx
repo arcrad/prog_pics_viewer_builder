@@ -3,12 +3,12 @@ import { BrowserRouter, HashRouter, Routes, Route } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry, Setting } from './db';
-import IndexComponent from './IndexComponent';
-import EntryComponent from './Entry';
-import Adjust from './Adjust';
-import Process from './Process';
-import Export from './Export';
-import SettingsComponent from './Settings';
+import IndexComponent from './components/IndexComponent';
+import EntryComponent from './screens/Entry';
+import Adjust from './screens/Adjust';
+import Process from './screens/Process';
+import Export from './screens/Export';
+import SettingsComponent from './screens/Settings';
 import Builder from './Builder';
 
 import styles from './App.module.css';

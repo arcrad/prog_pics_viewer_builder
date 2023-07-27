@@ -10,7 +10,7 @@ import {
 
 import { db, Entry } from './db';
 import { GlobalState } from './App';
-import SetupModal from './SetupModal';
+import SetupModal from './components/SetupModal';
 
 import styles from './Builder.module.scss';
 

@@ -29,19 +29,19 @@ import {
 	faCircleXmark,
 } from '@fortawesome/free-solid-svg-icons'
 
-import { db, Entry } from './db';
-import { GlobalState } from './App';
-import ViewBaseImageModal from './ViewBaseImageModal';
-import ChangeImageModal from './ChangeImageModal';
-import MarkImageModal from './MarkImageModal';
-import AddEntryModal from './AddEntryModal';
+import { db, Entry } from '../db';
+import { GlobalState } from '../App';
+import ViewBaseImageModal from '../components/ViewBaseImageModal';
+import ChangeImageModal from '../components/ChangeImageModal';
+import MarkImageModal from '../components/MarkImageModal';
+import AddEntryModal from '../components/AddEntryModal';
 import { 
 	LoadingIndicator,
 	EntryValidationErrorsList, 
 	PaginationControls,
 	EntryOptionsDropdown,
 	getLocalDateStringFormattedForDateInput
-} from './Common';
+} from '../Common';
  
 type EntryAttributes = {
 	globalState: GlobalState,

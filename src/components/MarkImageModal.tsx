@@ -15,8 +15,8 @@ import {
 } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
-import { db, Entry } from './db';
-import { GlobalState } from './App';
+import { db, Entry } from '../db';
+import { GlobalState } from '../App';
 import MarkImageComponent from './MarkImageComponent';
 
 //import styles from './MarkImageModal.module.css';

@@ -40,7 +40,7 @@
 	height: 13vh;
 	box-sizing: border-box;
 	transform: translate(-6.5vh, -13.1vh);
-	background: url('../public/triangle-down.svg') center / cover no-repeat;
+	background: url('../../public/triangle-down.svg') center / cover no-repeat;
 	margin: 0;
 	padding: 0;
 	z-index: 5000;
