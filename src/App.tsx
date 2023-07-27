@@ -9,7 +9,6 @@ import Adjust from './Adjust';
 import Process from './Process';
 import Export from './Export';
 import SettingsComponent from './Settings';
-import ImageStorePOC from './ImageStorePOC';
 import Builder from './Builder';
 
 import styles from './App.module.css';
