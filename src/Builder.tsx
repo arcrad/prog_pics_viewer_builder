@@ -87,7 +87,7 @@ function Builder({
 						</NavLink>
 						{
 							navLinks.map( (link, index) => {
-								return <>
+								return <React.Fragment key={link.path}>
 									<NavLink 
 										to={link.path} 
 										className={`is-size-7-mobile level-item is-flex-grow-1 has-text-centered is-justify-content-center mx-0 ${styles.mainNavLink}`}
@@ -104,7 +104,7 @@ function Builder({
 											<FontAwesomeIcon icon={faAngleRight} />
 										</div>
 									}
-								</>
+								</React.Fragment>
 							})
 						}
 						<NavLink 

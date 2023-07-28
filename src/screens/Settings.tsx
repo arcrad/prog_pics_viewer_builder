@@ -353,7 +353,7 @@ function SettingsComponent({
 						<div>
 						{
 							currentSettings?.map( (setting, id) => 
-								<div className="field" key={id}> 
+								<div className="field" key={setting.key}> 
 									<label className="label">{setting.key}</label>
 									<div className="control"> 
 										<input 

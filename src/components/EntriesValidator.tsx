@@ -204,7 +204,7 @@ function EntriesValidator({
 						<ul>
 						{
 							filteredValidationResultsKeys.map( (key, index) => {
-								return <li key={index}>
+								return <li key={key}>
 									{validationResultsDisplayNameMap[key]} {validationResults[key] ? '✅' : '❌'}
 								</li>
 							})
