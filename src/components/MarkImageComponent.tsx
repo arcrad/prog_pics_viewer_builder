@@ -3,12 +3,10 @@ import
 	{ 
 		useState, 
 		useEffect, 
-		useLayoutEffect,
 		useRef, 
 		Dispatch, 
 		SetStateAction, 
 		MouseEvent,
-		ChangeEvent 
 	} from 'react';
 import {
 	useParams
@@ -20,7 +18,7 @@ import {
 	faLocationCrosshairs, 
 } from '@fortawesome/free-solid-svg-icons'
 
-import { db, Entry } from '../db';
+import { db } from '../db';
 import { GlobalState } from '../App';
 
 import styles from './MarkImageComponent.module.css';
@@ -31,16 +29,6 @@ type MarkImageComponentAttributes = {
 	isLoaded: boolean,
 	setIsLoaded: Dispatch<SetStateAction<boolean>>,
 };
-
-type MarkPoint = {
-	x: number,
-	y: number,
-	fillStyle: string
-}
-
-type Marks = {
-	[key:string]: MarkPoint
-}
 
 type MarkFillStyles = {
 	[key: string]: string
@@ -66,15 +54,12 @@ function MarkImageComponent({
 	let [imageCanvasOffsetTop, setImageCanvasOffsetTop] = useState(0);
 	let [isHoverMarkerVisible, setIsHoverMarkerVisible] = useState(false);
 	let [activeMark, setActiveMark] = useState("A");
-	let [marks, setMarks] = useState<Marks>({});
 	let [fullResImageData, setFullResImageData] = useState('');
 	let [resizeCanary, setResizeCanary] = useState(false);
 	let [entryHasImage, setEntryHasImage] = useState(false);
 	//let [isLoaded, setIsLoaded] = useState(false);
 	let [renderTrigger, setRenderTrigger] = useState(Date.now());
 
-	const imageUploadRef = useRef<HTMLInputElement>(null);
-  const loadImageButtonRef = useRef<HTMLButtonElement>(null);
 	const imageCanvasRef = useRef<HTMLCanvasElement>(null);
 	const imageContainerRef = useRef<HTMLDivElement>(null);
 	const fullResImageCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -209,8 +194,8 @@ function MarkImageComponent({
 			console.log(`clientWidth = ${imageContainerRef.current.clientWidth}, clientHeight = ${imageContainerRef.current.clientHeight}`);
 			let imageAspectRatio = 
 				fullResImageCanvasRef.current.width/fullResImageCanvasRef.current.height;
-			let imageContainerAspectRatio = 
-				imageContainerRef.current.clientWidth/imageContainerRef.current.clientHeight;
+			/*let imageContainerAspectRatio = 
+				imageContainerRef.current.clientWidth/imageContainerRef.current.clientHeight;*/
 			//determine image scaling based on aspect ratio of image and container 
 			let scaledImageWidth = 0;
 			let scaledImageHeight = 0;
@@ -299,7 +284,6 @@ function MarkImageComponent({
 			y: fullResYClickValue, 
 			style: markFillStyles[activeMark]
 		}
-		const markUpdateKey = 'marks.'+activeMark;
 		//let updatedMarks = {...currentEntry.marks, ...newMark};
 		if(entryId) {
 			db.entries.update(parseInt(entryId), {
@@ -443,11 +427,6 @@ function MarkImageComponent({
 			)
 		}
 	}
-
-	let handleCloseButton = () => {
-		setIsLoaded(false);
-		//setIsModalVisible(false);
-	};
 
 	return (
 		<>

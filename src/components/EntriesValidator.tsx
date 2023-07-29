@@ -1,22 +1,14 @@
 import 
 	React, 
 	{ 
-		useState, 
 		useEffect, 
-		useRef, 
 		Dispatch, 
 		SetStateAction, 
-		MouseEvent,
-		ChangeEvent 
 	} from 'react';
-import {
-	useNavigate,
-	useParams,
-} from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
-import { db, Entry } from '../db';
-import { GlobalState } from '../App';
+import { db } from '../db';
+//import { GlobalState } from '../App';
 //import './EntriesValidator.css';
 
 export type ValidationResults = {
@@ -70,10 +62,6 @@ function EntriesValidator({
 	showOnlyErrors,
 	displayOnlyTheseValidations
 } : EntriesValidatorAttributes ) {
-	let [statusMessages, setStatusMessages] = useState<string[]>([]);
-	
-	let modalOverlayRef = useRef<HTMLDivElement>(null);
-
 	const entries = useLiveQuery(
 		() => db
 			.entries
@@ -103,7 +91,7 @@ function EntriesValidator({
 	
 			if(entries) {
 				//check entry count 
-				if(entries.length == 0) {
+				if(entries.length === 0) {
 					newValidationResults.moreThanZeroEntries = false;
 				}
 				//check for base images
@@ -143,7 +131,7 @@ function EntriesValidator({
 				}
 				//check for marks
 				for(const entry of entries) {
-					if(entry.marks == null || Object.keys(entry.marks).length != 3) {
+					if(entry.marks == null || Object.keys(entry.marks).length !== 3) {
 						newValidationResults.allEntriesHaveAllMarks = false;
 						break;
 					}

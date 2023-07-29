@@ -3,19 +3,15 @@ import
 	{ 
 		useState, 
 		useEffect, 
-		useLayoutEffect,
 		useRef, 
 		Dispatch, 
 		SetStateAction, 
-		MouseEvent,
-		ChangeEvent 
 	} from 'react';
 import {
 	useNavigate,
 } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
 
-import { db, Entry } from '../db';
+//import { db, Entry } from '../db';
 import { GlobalState } from '../App';
 import MarkImageComponent from './MarkImageComponent';
 

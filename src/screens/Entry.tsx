@@ -11,10 +11,8 @@ import
 	} from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { 
-	BrowserRouter, 
 	Routes, 
 	Route, 
-	NavLink, 
 	useNavigate 
 } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -22,14 +20,12 @@ import {
 	faPenToSquare, 
 	faLocationCrosshairs, 
 	faImage,
-	faTrash,
 	faTrashAlt,
 	faClone,
 	faXmark,
-	faCircleXmark,
 } from '@fortawesome/free-solid-svg-icons'
 
-import { db, Entry } from '../db';
+import { db } from '../db';
 import { GlobalState } from '../App';
 import ViewBaseImageModal from '../components/ViewBaseImageModal';
 import ChangeImageModal from '../components/ChangeImageModal';
@@ -39,7 +35,7 @@ import {
 	LoadingIndicator,
 	EntryValidationErrorsList, 
 	PaginationControls,
-	EntryOptionsDropdown,
+	//EntryOptionsDropdown,
 	getLocalDateStringFormattedForDateInput
 } from '../Common';
  
@@ -53,19 +49,19 @@ function EntryComponent({
 	setGlobalState
 } : EntryAttributes ) {
 
-	let [currentEntryWeight, setCurrentEntryWeight] = useState("");
-	let [currentEntryDate, setCurrentEntryDate] = useState("");
-	let [currentEntryNotes, setCurrentEntryNotes] = useState("");
-	let [changeImageModalIsVisible, setChangeImageModalIsVisible] = useState(false);
-	let [markImageModalIsVisible, setMarkImageModalIsVisible] = useState(false);
-	let [addEntryModalIsVisible, setAddEntryModalIsVisible] = useState(false);
+	//let [currentEntryWeight, setCurrentEntryWeight] = useState("");
+	//let [currentEntryDate, setCurrentEntryDate] = useState("");
+	//let [currentEntryNotes, setCurrentEntryNotes] = useState("");
+	//let [changeImageModalIsVisible, setChangeImageModalIsVisible] = useState(false);
+	//let [markImageModalIsVisible, setMarkImageModalIsVisible] = useState(false);
+	//let [addEntryModalIsVisible, setAddEntryModalIsVisible] = useState(false);
 	let [entryIdBeingEdited, setEntryIdBeingEdited] = useState(-1);
 	let [pagerOffset, setPagerOffset] = useState(0);
 	let [entryThumbnailImageUrls, setEntryThumbnailImageUrls] = useState<{[key:number]:string}>();
 	
 	let addEntryRef = useRef<HTMLButtonElement>(null);
-	let imageUploadRef = useRef<HTMLInputElement>(null);
-  let entrySelectRef = useRef<HTMLSelectElement>(null);
+	//let imageUploadRef = useRef<HTMLInputElement>(null);
+  //let entrySelectRef = useRef<HTMLSelectElement>(null);
 
 	const navigate = useNavigate();
 
@@ -112,7 +108,6 @@ function EntryComponent({
 	async function handleAddEntry(event:MouseEvent<HTMLButtonElement>) {
 		console.log("handle add entry..");
  		try {
-			const now = new Date();
 			//const date = ((new Date()).toISOString()).substring(0, 16) + ':00'; 
 			//datetime needs to be more robust
 			const date = ((new Date()).toISOString()).substring(0, 16) + ':00Z'; 
@@ -127,7 +122,7 @@ function EntryComponent({
 				height: height,
 			});
 			console.log( 'new id =', id);
-			setAddEntryModalIsVisible(true);
+			//setAddEntryModalIsVisible(true);
 			navigate(`./add/${id}/image`);
 		} catch(error) {
 			console.error(`failed to add db entry. ${error}`);
@@ -192,7 +187,7 @@ function EntryComponent({
 			&& event.target.dataset.entryId
 		) {
 			const entryIdSpecified = parseInt(event.target.dataset.entryId);
-			if(entryIdBeingEdited == entryIdSpecified) {
+			if(entryIdBeingEdited === entryIdSpecified) {
 				setEntryIdBeingEdited(-1);
 			} else {
 				setEntryIdBeingEdited(entryIdSpecified);
@@ -309,7 +304,7 @@ function EntryComponent({
 					totalEntriesCount={totalEntriesCount || 0}
 					setPagerOffset={setPagerOffset}
 				/>
-				{ !entries || entries.length == 0 && <p>No entries yet...</p> }
+				{ ( !entries || entries.length === 0 ) && <p>No entries yet...</p> }
 				<ol start={pagerOffset+1}>
 				{
 					entries?.map( entry =>
@@ -364,7 +359,7 @@ function EntryComponent({
 									<div className="field">
 										<label className="label">Weight
 										{
-											globalState.settings.measurementSystem == 'imperial' ? 
+											globalState.settings.measurementSystem === 'imperial' ? 
 												' (lbs.)'
 												:
 												' (kgs.)'
@@ -384,7 +379,7 @@ function EntryComponent({
 									<div className="field">
 										<label className="label">Height
 										{
-											globalState.settings.measurementSystem == 'imperial' ? 
+											globalState.settings.measurementSystem === 'imperial' ? 
 												' (inches)'
 												:
 												' (centimeters)'
@@ -453,7 +448,7 @@ function EntryComponent({
 										{
 											(() => { 
 												if(entry.weight) {
-													return ( <>{entry.weight} {globalState.settings.measurementSystem == 'imperial' ? 'lbs.' : 'kgs.'}</> );
+													return ( <>{entry.weight} {globalState.settings.measurementSystem === 'imperial' ? 'lbs.' : 'kgs.'}</> );
 										  	} else {
 													return (<i>No weight defined</i>);
 												}
@@ -465,7 +460,7 @@ function EntryComponent({
 										{
 											(() => { 
 												if(entry.height) {
-													return ( <>{entry.height} {globalState.settings.measurementSystem == 'imperial' ? 'inches' : 'centimeters'}</> );
+													return ( <>{entry.height} {globalState.settings.measurementSystem === 'imperial' ? 'inches' : 'centimeters'}</> );
 										  	} else {
 													return (<i>No height defined</i>);
 												}
@@ -524,7 +519,7 @@ function EntryComponent({
 							<div className="column is-narrow">
 								<button 
 									type="button" 
-									className={`button ${entry.marks && Object.keys(entry.marks).length  == 3 ? 'is-success' : 'is-warning'}`}
+									className={`button ${entry.marks && Object.keys(entry.marks).length  === 3 ? 'is-success' : 'is-warning'}`}
 									title="Mark"
 									data-entry-id={entry.id} 
 									onClick={handleMarkEntry}

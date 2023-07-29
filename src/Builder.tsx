@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import React, { Dispatch, SetStateAction } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
@@ -8,9 +7,8 @@ import {
 	faAngleRight
 } from '@fortawesome/free-solid-svg-icons'
 
-import { db, Entry } from './db';
 import { GlobalState } from './App';
-import SetupModal from './components/SetupModal';
+//import SetupModal from './components/SetupModal';
 
 import styles from './Builder.module.scss';
 
@@ -46,9 +44,9 @@ function Builder({
 	globalState,
 	setGlobalState
 } : BuilderAttributes) {
-	let [setupModalIsVisible, setSetupModalIsVisible] = useState(false);
+	//let [setupModalIsVisible, setSetupModalIsVisible] = useState(false);
 
-	const initializedRef = useRef(false);
+	//const initializedRef = useRef(false);
 
 	//displays setup modal if setting(s) arent found
 	/* temporarily disabled

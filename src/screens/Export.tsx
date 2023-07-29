@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect, Dispatch, SetStateAction, ChangeEvent } from 'react';
-import  * as mathjs  from 'mathjs';
-import Dexie from "dexie";
+//////import  * as mathjs  from 'mathjs';
+//////import Dexie from "dexie";
 
 import * as d3 from 'd3';
-import { ScaleTime, ScaleLinear } from 'd3-scale'; //from DefinitelyTyped types
-import { Line } from 'd3-shape'; //from DefinitelyTyped types
+//////import { ScaleTime, ScaleLinear } from 'd3-scale'; //from DefinitelyTyped types
+//////import { Line } from 'd3-shape'; //from DefinitelyTyped types
 
 import { LoadingIndicator } from '../Common';
-import { db, Entry, Setting } from '../db';
+import { db, Entry } from '../db';
 import { GlobalState } from '../App';
-import EntriesValidator,  { ValidationResults, defaultValidationResults } from '../components/EntriesValidator';
+import EntriesValidator,  { ValidationResults } from '../components/EntriesValidator';
 
 //import './Export.css';
 
@@ -19,8 +19,6 @@ type ExportAttributes = {
 }
 
 const margin = { top: 50, right: 40, bottom: 10, left: 30 };
-const defaultChartDimensions = { width: 900, height: 250 };
-const smallScreenBreakpoint = 700;
 
 const MIN_FRAME_DURATION_MS = 5;
 const MAX_FRAME_DURATION_MS = 5000;
@@ -77,7 +75,7 @@ function drawInlineSVG(svgElem: SVGSVGElement): Promise<HTMLImageElement> {
 		console.log('drawInlineSVG');
   	//console.log(rawSVG);
 	  var svgURL = new XMLSerializer().serializeToString(svgElem);
-    const img = new Image;
+    const img = new Image();
     img.onload =  () => {
 				console.log('img.onload fired');
         resolve(img);
@@ -152,7 +150,7 @@ function Export({
 
 	const initializedRef = useRef<boolean>(false);
 	const videoElementRef = useRef<HTMLVideoElement|null>(null);
-	const videoSourceElementRef = useRef<HTMLSourceElement|null>(null);
+	//////const videoSourceElementRef = useRef<HTMLSourceElement|null>(null);
 	const frameDurationInputRef = useRef<HTMLInputElement|null>(null);
 	const overlayFrameNumberInputRef = useRef<HTMLInputElement|null>(null);
 	const overlayEntryInfoInputRef = useRef<HTMLInputElement|null>(null);
@@ -169,7 +167,7 @@ function Export({
 		console.log('intialize data from DB started');
 		initializedRef.current = true;
 		Promise.all([
-		  db.entries.orderBy('date').filter((entry) => entry.draft !== true && entry.includeInExport == true).toArray(),
+		  db.entries.orderBy('date').filter((entry) => entry.draft !== true && entry.includeInExport === true).toArray(),
 			db.settings.get('exportFrameDuration'),
 			db.settings.get('exportFirstFrameHoldDuration'),
 			db.settings.get('exportLastFrameHoldDuration'),
@@ -241,7 +239,8 @@ function Export({
 			image.src = blobUrl;
 		});
 	}
-	
+
+/*	
 	function setupD3ChartScales(entries:Entry[], width: number, height: number) {
 		//TODO: need to improve/clean up data 
 		const [minX=0, maxX=0] = d3.extent(entries, d => Date.parse(d.date));
@@ -269,11 +268,11 @@ function Export({
 
 		return [x, y, line];
 	};
-
+*/
 	function formatXAxis() {
 		(function() {
 			let xFormatShort = d3.utcFormat('%b');
-			let xFormatLong = d3.utcFormat('%b'); //redundant right now
+			//let xFormatLong = d3.utcFormat('%b'); //redundant right now
 			let prevYear = 0;
 			return (d:any) => {
 				if(prevYear !== d.getUTCFullYear()) {
@@ -540,7 +539,7 @@ function Export({
 							50
 							);
 					intermediateCanvasContext.fillStyle = prevFillStyle;
-					intermediateCanvasContext.fillText(`${entries[c].weight} ${globalState.settings.measurementSystem == 'imperial' ? 'lbs' : 'kgs'} on ${entries[c].date}`, 50, 61);
+					intermediateCanvasContext.fillText(`${entries[c].weight} ${globalState.settings.measurementSystem === 'imperial' ? 'lbs' : 'kgs'} on ${entries[c].date}`, 50, 61);
 				}
 
 				///draw intermediatecanvas onto videocanvas
@@ -552,7 +551,7 @@ function Export({
 				//commented out for now
 				//await delay(50);
 				/////console.log('resume recording');
-				if(c == 0) {
+				if(c === 0) {
 					videoCanvasContext.clearRect( 0, 0, scaledImageWidth, scaledImageHeight);
 					videoCanvasContext.drawImage(intermediateCanvas, 0, 0);
 					mediaRecorder.start();
@@ -561,10 +560,10 @@ function Export({
 				}
 				const startTime = Date.now();
 				//(canvasStream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack).requestFrame();
-				if(holdFirstFrameIsChecked && c == 0) {
+				if(holdFirstFrameIsChecked && c === 0) {
 					//optionally hold first frame longer
 					await delay(firstFrameHoldDurationMs);
-				} else if(holdLastFrameIsChecked && c == max-1) {
+				} else if(holdLastFrameIsChecked && c === max-1) {
 					//optionally hold lastframe longer
 					await delay(lastFrameHoldDurationMs);
 				} else {
@@ -669,9 +668,9 @@ function Export({
 			estimatedVideoDurationSeconds = (estimatedVideoDurationSeconds - (frameDuration/1000)) + (lastFrameHoldDuration/1000);
 		}
 		const minutes = Math.floor(estimatedVideoDurationSeconds/60);
-		const minutesLabel = minutes != 1 ? 'minutes' : 'minute';
+		const minutesLabel = minutes !== 1 ? 'minutes' : 'minute';
 		const seconds = estimatedVideoDurationSeconds % 60;
-		const secondsLabel = seconds != 1 ? 'seconds' : 'second';
+		const secondsLabel = seconds !== 1 ? 'seconds' : 'second';
 		if(estimatedVideoDurationSeconds < 60) {
 			estimatedVideoDurationString = `${seconds.toFixed(2)} ${secondsLabel}`;
 		} else {

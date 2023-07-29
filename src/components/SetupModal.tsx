@@ -7,11 +7,9 @@ import
 		Dispatch, 
 		SetStateAction, 
 		MouseEvent,
-		ChangeEvent 
 	} from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
 
-import { db, Entry, Setting } from '../db';
+import { db } from '../db';
 import { GlobalState } from '../App';
 
 import styles from './SetupModal.module.css';

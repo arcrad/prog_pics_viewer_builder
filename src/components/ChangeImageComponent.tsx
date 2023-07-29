@@ -9,14 +9,13 @@ import {
 	useNavigate,
 	useParams,
 } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
 	faUpload, 
 } from '@fortawesome/free-solid-svg-icons'
 
-import { db, Entry } from '../db';
-import { GlobalState } from '../App';
+import { db } from '../db';
+//import { GlobalState } from '../App';
 
 type ChangeImageComponentAttributes= {
 	closeModalOnLoad: boolean;
@@ -29,13 +28,13 @@ function ChangeImageComponent({
 } : ChangeImageComponentAttributes ) {
 	let [statusMessages, setStatusMessages] = useState<string[]>([]);
 	
-	let modalOverlayRef = useRef<HTMLDivElement>(null);
+	//let modalOverlayRef = useRef<HTMLDivElement>(null);
 	let imageUploadContainerRef = useRef<HTMLDivElement>(null);
 	let imageUploadRef = useRef<HTMLInputElement>(null);
 	let imageUploadFileNameRef = useRef<HTMLSpanElement>(null);
-  let loadImageButtonRef = useRef<HTMLButtonElement>(null);
-	let selectImageButtonRef = useRef<HTMLButtonElement>(null);
-	let fileHandleRef = useRef<any>(null);
+  //let loadImageButtonRef = useRef<HTMLButtonElement>(null);
+	//let selectImageButtonRef = useRef<HTMLButtonElement>(null);
+	//let fileHandleRef = useRef<any>(null);
 
 	let navigate = useNavigate();
 	
@@ -54,7 +53,7 @@ function ChangeImageComponent({
     		}
 			};
 		}
-	},[]);
+	});
 	
 	const handleImageLoad = async () => {
 		//console.dir(imageUploadRef.current);

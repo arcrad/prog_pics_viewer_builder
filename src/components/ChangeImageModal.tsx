@@ -1,41 +1,21 @@
 import 
 	React, 
 	{ 
-		useState, 
 		useEffect, 
 		useRef, 
-		Dispatch, 
-		SetStateAction, 
-		MouseEvent,
-		ChangeEvent 
 	} 
 from 'react';
 import {
 	useNavigate,
 } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
 
-import { db, Entry } from '../db';
-import { GlobalState } from '../App';
+//import { db, Entry } from '../db';
+//import { GlobalState } from '../App';
 import ChangeImageComponent from './ChangeImageComponent';
 
 import styles from './ChangeImageModal.module.css';
 
-type ChangeImageModalAttributes= {
-	//globalState: GlobalState,
-	//setGlobalState: Dispatch<SetStateAction<GlobalState>>,
-//	isModalVisible: boolean,
-//	setIsModalVisible: Dispatch<SetStateAction<boolean>>,
-};
-
-function ChangeImageModal({
-//	globalState, 
-//	setGlobalState,
-//	isModalVisible,
-//	setIsModalVisible,
-} : ChangeImageModalAttributes ) {
-	let [statusMessages, setStatusMessages] = useState<string[]>([]);
-	
+function ChangeImageModal() {
 	let modalOverlayRef = useRef<any>(null);
 
 	let navigate = useNavigate();

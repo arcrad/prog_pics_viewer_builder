@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, Dispatch, SetStateAction, MouseEvent} from 'react';
+import React, { useEffect, useRef, Dispatch, SetStateAction } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
 	faAngleDown, 
@@ -17,8 +17,8 @@ export function EntryValidationErrorsList({
 	showIsValid,
 	hideAlignedImageError
 }: EntryValidationErrorsListAttributes) {
-	const entryHasAllMarks = entry.marks && Object.keys(entry.marks).length == 3; 
-	const entryDoesntHaveWeight = entry.weight == null || String(entry.weight) == '';
+	const entryHasAllMarks = entry.marks && Object.keys(entry.marks).length === 3; 
+	const entryDoesntHaveWeight = entry.weight == null || String(entry.weight) === '';
 	const entryDoesntHaveDate = entry.date == null;
 	const entryDoesntHaveImageBlob = entry.imageBlob == null;
 	const entryDoesntHaveAlignedImageBlob = entry.alignedImageBlob == null;
@@ -73,7 +73,7 @@ export function PaginationControls({
 		midPageControls = Array.from({length: maxPage-1}, (x, i) => i+1).map( (listOffset) => {
 			return <li 
 					key={listOffset+1}
-					className={`pagination-link ${pagerOffset/pagerLimit == (listOffset) ? 'is-current' : ''}`}
+					className={`pagination-link ${pagerOffset/pagerLimit === (listOffset) ? 'is-current' : ''}`}
 					onClick={() => {
 						setPagerOffset((listOffset)*pagerLimit)
 					}}
@@ -87,7 +87,7 @@ export function PaginationControls({
 				[1,2,3].map( (listOffset) => {
 				return <li 
 						key={listOffset+1}
-						className={`pagination-link ${pagerOffset/pagerLimit == (listOffset) ? 'is-current' : ''}`}
+						className={`pagination-link ${pagerOffset/pagerLimit === (listOffset) ? 'is-current' : ''}`}
 						onClick={() => {
 							setPagerOffset((listOffset)*pagerLimit)
 						}}
@@ -105,7 +105,7 @@ export function PaginationControls({
 				[maxPage-3,maxPage-2,maxPage-1].map( (listOffset) => {
 					return <li 
 						key={listOffset+1}
-						className={`pagination-link ${pagerOffset/pagerLimit == listOffset ? 'is-current' : ''}`}
+						className={`pagination-link ${pagerOffset/pagerLimit === listOffset ? 'is-current' : ''}`}
 						onClick={() => {
 							setPagerOffset((listOffset)*pagerLimit)
 						}}
@@ -122,7 +122,7 @@ export function PaginationControls({
 				[-1,0,1].map( (listOffset) => {
 					return <li 
 						key={listOffset+1}
-						className={`pagination-link ${pagerOffset/pagerLimit == (curPage+listOffset) ? 'is-current' : ''}`}
+						className={`pagination-link ${pagerOffset/pagerLimit === (curPage+listOffset) ? 'is-current' : ''}`}
 						onClick={() => {
 							setPagerOffset((curPage+listOffset)*pagerLimit)
 						}}
@@ -163,7 +163,7 @@ export function PaginationControls({
 					</a>
 					<ul className="pagination-list">
 						<li 
-							className={`pagination-link ${pagerOffset == 0 ? 'is-current' : ''}`}
+							className={`pagination-link ${pagerOffset === 0 ? 'is-current' : ''}`}
 							onClick={() => {
 								setPagerOffset(0)
 							}}
@@ -176,7 +176,7 @@ export function PaginationControls({
 							&& Math.floor((totalEntriesCount-1)/pagerLimit) > 0
 							&&
 						<li 
-							className={`pagination-link ${totalEntriesCount && pagerOffset/pagerLimit == Math.ceil((totalEntriesCount)/pagerLimit)-1 ? 'is-current' : ''}`}
+							className={`pagination-link ${totalEntriesCount && pagerOffset/pagerLimit === Math.ceil((totalEntriesCount)/pagerLimit)-1 ? 'is-current' : ''}`}
 					onClick={() => {
 						if(totalEntriesCount) {
 							setPagerOffset(Math.floor((totalEntriesCount-1)/pagerLimit)*pagerLimit)
@@ -217,12 +217,12 @@ export function EntryOptionsDropdown({
 			let curElement = event.target;
 			let depth = 0;
 			while (curElement) {
-				if(curElement == triggerButtonRef.current) {
+				if(curElement === triggerButtonRef.current) {
 					console.warn('triggerButton found');
 					triggerButtonClicked = true;
 					break;
 				}
-				if(curElement == dropdownRef.current && depth < 4) {
+				if(curElement === dropdownRef.current && depth < 4) {
 					console.warn('dropdown found');
 					dropdownClicked = true;
 					break;

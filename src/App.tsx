@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 
-import { db, Entry, Setting } from './db';
+import { db, Setting } from './db';
 import IndexComponent from './components/IndexComponent';
 import EntryComponent from './screens/Entry';
 import Adjust from './screens/Adjust';
