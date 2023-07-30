@@ -12,10 +12,7 @@ import ViewBaseImageComponent from './ViewBaseImageComponent';
 
 //import styles from './ViewBaseImageModal.module.css';
 
-type ViewBaseImageModalAttributes = {
-};
-
-function ViewBaseImageModal({} : ViewBaseImageModalAttributes ) {
+function ViewBaseImageModal() {
 	let [isLoaded, setIsLoaded] = useState(false);
 
 	const navigate = useNavigate();

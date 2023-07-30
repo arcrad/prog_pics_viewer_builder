@@ -15,11 +15,11 @@ import {
 	faUpload, 
 	faTrashAlt,
 } from '@fortawesome/free-solid-svg-icons'
-import {importDB, exportDB, importInto, peakImportFile} from "dexie-export-import";
+import { exportDB, importInto } from "dexie-export-import";
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 
-import { db, Setting } from '../db';
+import { db } from '../db';
 import { GlobalState, Settings } from '../App';
 
 //import './Settings.css';
@@ -91,7 +91,7 @@ async function handleExportDbButtonClick(setExportDbDataRowsExported, setExportD
 			console.log('final zip generated!');
 	    saveAs(
 				blob, 
-				`${(new Date).toISOString().substring(0,10).replaceAll('-','')}-db_export.zip`
+				`${(new Date()).toISOString().substring(0,10).replaceAll('-','')}-db_export.zip`
 			);
 			setExportDbDataRowsExported(currentMaxRows);
 		});

@@ -4,18 +4,14 @@ import
 		useState, 
 		useEffect, 
 		useRef, 
-		Dispatch, 
-		SetStateAction, 
-		MouseEvent,
 		ChangeEvent 
 	} from 'react';
 import {
 	useParams
 } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
 
 import { db, Entry } from '../db';
-import { GlobalState } from '../App';
+//import { GlobalState } from '../App';
 import { getLocalDateStringFormattedForDateInput } from '../Common';
 //import './UpdateEntryDataComponent.css';
 
@@ -33,9 +29,9 @@ function UpdateEntryDataComponent({
 } : UpdateEntryDataComponentAttributes ) {
 	let [isLoaded, setIsLoaded] = useState<boolean>(false);
 	let [currentEntry, setCurrentEntry] = useState<Entry|null>(null);
-	let [currentEntryWeight, setCurrentEntryWeight] = useState(0);
-	let [currentEntryDate, setCurrentEntryDate] = useState("jan 1, 1970");
-	let [statusMessages, setStatusMessages] = useState<string[]>([]);
+	//let [currentEntryWeight, setCurrentEntryWeight] = useState(0);
+	//let [currentEntryDate, setCurrentEntryDate] = useState("jan 1, 1970");
+	//let [statusMessages, setStatusMessages] = useState<string[]>([]);
 	
 	const initialized = useRef<boolean>(false);
 

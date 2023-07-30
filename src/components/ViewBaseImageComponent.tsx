@@ -3,22 +3,12 @@ import
 	{ 
 		useState, 
 		useEffect, 
-		useLayoutEffect,
-		useRef, 
 		Dispatch, 
 		SetStateAction, 
-		MouseEvent,
-		ChangeEvent 
 	} from 'react';
 import {
 	useParams
 } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { 
-	faCrosshairs, 
-	faLocationCrosshairs, 
-} from '@fortawesome/free-solid-svg-icons'
 
 import { db, Entry } from '../db';
 //import { GlobalState } from './App';
@@ -67,6 +57,7 @@ function ViewBaseImageComponent({
 					<img 
 						src={currentEntry !== null ? URL.createObjectURL(new Blob([currentEntry.imageBlob.buffer])) : ''}
 						className={styles.image}
+						alt="Image for current entry."
 					/>
 				</div>
 			}

@@ -4,7 +4,7 @@ import  * as mathjs  from 'mathjs';
 import { LoadingIndicator } from '../Common';
 import { db, Entry, Setting } from '../db';
 import { GlobalState } from '../App';
-import EntriesValidator,  { ValidationResults, defaultValidationResults } from '../components/EntriesValidator';
+import EntriesValidator,  { ValidationResults } from '../components/EntriesValidator';
 
 const processingStateMap:{[key:string]:string} = {
 	'unstarted': 'Not Started',
@@ -29,7 +29,7 @@ function Viewer({
 	let [currentEntry, setCurrentEntry] = useState(0);
 	let [allEntriesHaveAlignedImage, setAllEntriesHaveAlignedImage] = useState(false);
 	let [entriesWithAlignedImageCount, setEntriesWithAlignedImageCount] = useState(0);
-	let [cancelProcessingRequested, setCancelProcessingRequested] = useState(false);
+	//let [cancelProcessingRequested, setCancelProcessingRequested] = useState(false);
 	let [validationResults, setValidationResults] = useState<ValidationResults>({});
 
 	const initializedRef = useRef(false);
@@ -293,7 +293,7 @@ function Viewer({
 	};
 
   function handleProcessAllEntries() {
-		if(!(processingState == 'unstarted' || processingState == 'complete')) {
+		if(!(processingState === 'unstarted' || processingState === 'complete')) {
 			return;
 		}
 		setProcessingState('started');
@@ -318,7 +318,7 @@ function Viewer({
 	};
 
 	function handleProcessUnprocessedEntries() {
-		if(!(processingState == 'unstarted' || processingState == 'complete')) {
+		if(!(processingState === 'unstarted' || processingState === 'complete')) {
 			return;
 		}
 		setProcessingState('started');
@@ -469,12 +469,16 @@ function Viewer({
 						Do all entries have an aligned image?  
 						{allEntriesHaveAlignedImage ? ' Yes' : <> No (Click <b>Process ... Entries</b> button)</>}
 					</p>
-					{ entries.length == 0 && <p>Currently no processed images...</p> }
+					{ entries.length === 0 && <p>Currently no processed images...</p> }
 					</div>
 					{
 						allEntriesHaveAlignedImage && 
 						<div className="block">
-							<img src={currentImage} style={{maxWidth: '50vw', maxHeight: '75vh'}}/>
+							<img
+								src={currentImage}
+								alt="Current processed entry"
+								style={{maxWidth: '50vw', maxHeight: '75vh'}}
+							/>
 							<p className="mb-2">{(new Date(entries[currentEntry].date)).toLocaleString()} ( ID: {entries[currentEntry].id} )</p>
 							<div className="field has-addons">
 								<div className="control">

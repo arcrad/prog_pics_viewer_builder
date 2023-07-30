@@ -21,9 +21,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 import { LoadingIndicator } from '../Common';
-import { db, Entry, Setting } from '../db';
+import { db, Setting } from '../db';
 import { GlobalState  } from '../App';
-import EntriesValidator,  { ValidationResults, defaultValidationResults } from '../components/EntriesValidator';
+import EntriesValidator,  { ValidationResults } from '../components/EntriesValidator';
 
 import styles from './Adjust.module.css';
 
@@ -49,7 +49,7 @@ function Adjust({
 	let [resizeCanary, setResizeCanary] = useState(0);
 	let [renderTrigger, setRenderTrigger] = useState(Date.now());
 	let [cropCornerCoordinatesInitialized, setCropCornerCoordinatesInitialized] = useState(false);
-	let [scaledImageData, setScaledImageData] = useState<Blob | null>(null);
+	//let [scaledImageData, setScaledImageData] = useState<Blob | null>(null);
 	let [scaledImageDataUrl, setScaledImageDataUrl] = useState<string>('');
 	let [validationResults, setValidationResults] = useState<ValidationResults>({});
 	let [aspectRatioIsLocked, setAspectRatioIsLocked] = useState(true);
@@ -90,7 +90,7 @@ function Adjust({
 	const initialized = useRef<boolean>(false);
 	const loadingIndicatorRef = useRef<HTMLDivElement>(null);
 
-	const needToResetCornerCoordinatesRef = useRef<boolean>(false);
+	//const needToResetCornerCoordinatesRef = useRef<boolean>(false);
 
 	const originalCoordinatesFromDbRef = useRef<any[]>([]);
 	const activeCornerControlRef = useRef('none');
@@ -290,7 +290,7 @@ function Adjust({
 			imageSelectRef.current
 			&& imageSelectRef.current.value
 		) {
-			if(currentEntry && currentEntry.id == parseInt(imageSelectRef.current.value)) {
+			if(currentEntry && currentEntry.id === parseInt(imageSelectRef.current.value)) {
 				console.error('same image selected');
 			} else {
 				currentCropImageContainerRef.current?.classList.add(styles.notVisible);
@@ -334,7 +334,7 @@ function Adjust({
 						);
 						if(newEntry && newEntry.imageBlob) {
 							//setScaledImageData(newEntry.image);
-							setScaledImageData(newEntry.imageBlob);
+							//setScaledImageData(newEntry.imageBlob);
 							setScaledImageDataUrl(newEntry.imageBlob ? URL.createObjectURL(new Blob([newEntry.imageBlob.buffer])) : '');
 						}
 						initialized.current = false;
@@ -538,15 +538,15 @@ function Adjust({
 
 	useEffect( () => {
 		//console.log('useEffect handler called, trying to call updateCropCoordinatesinDb()');
-		if(cropCornerCoordinatesInitialized && activeCornerControlRef.current != 'none') {
+		if(cropCornerCoordinatesInitialized && activeCornerControlRef.current !== 'none') {
 			//console.log('cropCornerCoordinates are initialized and activeCornerControlRef is not none, updating db');
 			updateCropCoordinatesInDb();
 			//ensure activeCornerControlRefRef is reset (corner reset case)
-			activeCornerControlRef.current = activeCornerControlRef.current == 'all' ? 'none' : activeCornerControlRef.current;
+			activeCornerControlRef.current = activeCornerControlRef.current === 'all' ? 'none' : activeCornerControlRef.current;
 		} else {
 			console.warn('cropCornerCoordinates not intialized yet and/or activeCornerControlRef is not set');
 		}
-	}, [renderTrigger]);
+	}, [renderTrigger, cropCornerCoordinatesInitialized]);
 
 	useEffect( () => {
 		function updateResizeCanary() {
@@ -562,7 +562,7 @@ function Adjust({
 	useEffect( () => {
 		//handle resize
 		//clearTimeout(resizeDebounceTimeoutId.current);
-		if( resizeCanary > 0 && resizeDebounceTimeoutId.current == 0) {
+		if( resizeCanary > 0 && resizeDebounceTimeoutId.current === 0) {
 			resizeDebounceTimeoutId.current = window.setTimeout( () => {
 				console.log('handle resize');
 				loadCropCoordinatesFromDb().then( () => {
@@ -734,7 +734,7 @@ function Adjust({
 		}
 		
 		function handleAdjustCropMarkerEnd(event: any) {
-			if(activeCornerControlRef.current != 'all') {
+			if(activeCornerControlRef.current !== 'all') {
 				activeCornerControlRef.current = 'none';
 			}
 		}
@@ -785,7 +785,7 @@ function Adjust({
 					//setScaledImageData(scaledImageCanvas.toDataURL());
 					scaledImageCanvas.toBlob( (blob) => {
 						if(blob) {
-							setScaledImageData(blob);
+							//setScaledImageData(blob);
 							setScaledImageDataUrl(blob ? URL.createObjectURL(blob) : '');
 						}
 					});	
@@ -1047,6 +1047,7 @@ function Adjust({
 					<img 
 						src={scaledImageDataUrl}
 						ref={currentCropImageRef}
+						alt="Adjustment container"
 						onLoad={ () => {
 							console.log('img onload fired!');
 							//updateScaledCornerCropCoordinates();
@@ -1073,6 +1074,7 @@ function Adjust({
 					<img 
 						src={ scaledImageDataUrl }
 						data-render-trigger={renderTrigger}
+						alt="Viewable area left after cropping"
 						style={{ 
 							maxWidth: '100%', 
 							maxHeight: '90vh',
