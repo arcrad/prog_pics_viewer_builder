@@ -160,6 +160,7 @@ function Viewer({
 				reject();
 			}
 			console.log(`start processing entry with id = ${entryToProcess.id}`);
+			console.dir(entryToProcess);
 			let baseImage:HTMLImageElement|null = new Image();
 			//baseImage = new Image();
 			baseImage.onload = async () => {
@@ -171,6 +172,17 @@ function Viewer({
 				//console.log('marks =', entryToProcess.marks);
 				//console.log('mark A = ', entryToProcess.marks?.A);
 				//console.log('dest marks = ', sortedEntriesRef.current[0].marks);
+				//const chosenImageWidthScaleRatio = scaleWidthSettingRef.current/chosenEntryImageNaturalWidth;
+				//const chosenImageHeightScaleRatio = scaleHeightSettingRef.current/chosenEntryImageNaturalHeight;
+				const widthScaleRatio = scaleWidthSettingRef.current/entryToProcess.imageNaturalWidth;
+				const heightScaleRatio = scaleHeightSettingRef.current/entryToProcess.imageNaturalHeight;
+				//const finalWidthScaleRatio = chosenImageWidthScaleRatio*widthScaleRatio;
+				const finalWidthScaleRatio = widthScaleRatio;
+				//const finalHeightScaleRatio = chosenImageHeightScaleRatio*heightScaleRatio;
+				const finalHeightScaleRatio = heightScaleRatio;
+				//console.log(`chosenWidthScaleRatio = ${chosenImageWidthScaleRatio}, chosenHeightScaleRatio=${chosenImageHeightScaleRatio}`);
+				//console.log(`widthScaleRatio = ${widthScaleRatio}, heightScaleRatio=${heightScaleRatio}`);
+				console.log(`finalWidthScaleRatio = ${finalWidthScaleRatio}, finalHeightScaleRatio=${finalHeightScaleRatio}`);
 				//create reference point matrices
 				//do affine transformation
 				const invertedSourceMatrix = mathjs.inv([
@@ -192,22 +204,29 @@ function Viewer({
 				]);
 				const destinationMatrix = [
 					[
-						chosenEntryRef.current?.marks?.A.x || 0, 
-						chosenEntryRef.current?.marks?.B.x || 0, 
-						chosenEntryRef.current?.marks?.C.x || 0
+						chosenEntryRef.current?.marks?.A.x * finalWidthScaleRatio || 0, 
+						chosenEntryRef.current?.marks?.B.x * finalWidthScaleRatio || 0, 
+						chosenEntryRef.current?.marks?.C.x * finalWidthScaleRatio || 0
 					],
 					[
-						chosenEntryRef.current?.marks?.A.y || 0, 
-						chosenEntryRef.current?.marks?.B.y || 0, 
-						chosenEntryRef.current?.marks?.C.y || 0
+						chosenEntryRef.current?.marks?.A.y * finalHeightScaleRatio || 0, 
+						chosenEntryRef.current?.marks?.B.y * finalHeightScaleRatio || 0, 
+						chosenEntryRef.current?.marks?.C.y * finalHeightScaleRatio || 0
 					]
 				];
 				const xformMatrix = mathjs.multiply(destinationMatrix, invertedSourceMatrix);	
+				console.log('xformMatrix=');	
 				//console.dir(xformMatrix);
+				console.log(`a=${xformMatrix[0][0]}`);
+				console.log(`b=${xformMatrix[1][0]}`);
+				console.log(`c=${xformMatrix[0][1]}`);
+				console.log(`d=${xformMatrix[1][1]}`);
+				console.log(`e=${xformMatrix[0][2]}`);
+				console.log(`f=${xformMatrix[1][2]}`);
 				//console.dir([...xformMatrix[0],...xformMatrix[1]]);
 				let warpedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
-				warpedImageCanvas.width = chosenEntryImageNaturalWidth;
-				warpedImageCanvas.height = chosenEntryImageNaturalHeight;
+				warpedImageCanvas.width = scaleWidthSettingRef.current;//chosenEntryImageNaturalWidth*widthScaleRatio;
+				warpedImageCanvas.height = scaleHeightSettingRef.current;//chosenEntryImageNaturalHeight*heightScaleRatio;
 				let warpedImageCanvasContext = warpedImageCanvas.getContext('2d');
 				if(warpedImageCanvasContext) {
 					warpedImageCanvasContext.setTransform(
@@ -225,8 +244,11 @@ function Viewer({
 						baseImage.naturalWidth, 
 						baseImage.naturalHeight
 					);
+					warpedImageCanvasContext.resetTransform();
+						
 				}
 				//scale baseImage
+				/*
 				let scaledImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
 				scaledImageCanvas.width = scaleWidthSettingRef.current;
 				scaledImageCanvas.height = scaleHeightSettingRef.current; 
@@ -241,10 +263,12 @@ function Viewer({
 						scaleHeightSettingRef.current
 					);
 				}
+				*/
 				//calculate cropped image dimensions
 				const croppedImageWidth = originalCoordinatesFromDbRef.current[2].value - originalCoordinatesFromDbRef.current[0].value;
 				const croppedImageHeight = originalCoordinatesFromDbRef.current[7].value - originalCoordinatesFromDbRef.current[1].value;
 				//create cropped image
+				/*
 				let croppedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
 				croppedImageCanvas.width = croppedImageWidth;
 				croppedImageCanvas.height = croppedImageHeight;
@@ -253,7 +277,7 @@ function Viewer({
 				if(croppedImageCanvasContext) {
 					console.log('drawImage to croppedImageCanvasContxt');
 					croppedImageCanvasContext.drawImage(
-						scaledImageCanvas,
+						warpedImageCanvas,
 						originalCoordinatesFromDbRef.current[0].value,
 						originalCoordinatesFromDbRef.current[1].value,
 						croppedImageWidth,
@@ -264,7 +288,8 @@ function Viewer({
 						croppedImageHeight
 					);
 				}
-				croppedImageCanvas.toBlob( async (blob) => {
+				*/
+				warpedImageCanvas.toBlob( async (blob) => {
 					if(entryToProcess.id) {
 						db.entries.update(entryToProcess.id, {
 							alignedImageBlob: new Uint8Array(await blob.arrayBuffer())
@@ -276,8 +301,8 @@ function Viewer({
 							//need to determine if this is necessary
 							baseImage = null;
 							warpedImageCanvas = null;
-							scaledImageCanvas = null;
-							croppedImageCanvas = null;
+							//scaledImageCanvas = null;
+							//croppedImageCanvas = null;
 							blob = null;
 							setEntriesProcessed( cs => cs+1);
 							console.log('processed entry! id=', entryToProcess.id);
