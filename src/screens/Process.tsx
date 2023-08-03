@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import  * as mathjs  from 'mathjs';
+//import { OffscreenCanvas } from '@types/offscreencanvas';
 
 import { LoadingIndicator } from '../Common';
 import { db, Entry, Setting } from '../db';
@@ -205,9 +206,9 @@ function Viewer({
 				const xformMatrix = mathjs.multiply(destinationMatrix, invertedSourceMatrix);	
 				//console.dir(xformMatrix);
 				//console.dir([...xformMatrix[0],...xformMatrix[1]]);
-				let warpedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
-				warpedImageCanvas.width = chosenEntryImageNaturalWidth;
-				warpedImageCanvas.height = chosenEntryImageNaturalHeight;
+				let warpedImageCanvas:OffscreenCanvas = new OffscreenCanvas(chosenEntryImageNaturalWidth, chosenEntryImageNaturalHeight);
+				//warpedImageCanvas.width = chosenEntryImageNaturalWidth;
+				//warpedImageCanvas.height = chosenEntryImageNaturalHeight;
 				let warpedImageCanvasContext = warpedImageCanvas.getContext('2d');
 				if(warpedImageCanvasContext) {
 					warpedImageCanvasContext.setTransform(
@@ -227,9 +228,7 @@ function Viewer({
 					);
 				}
 				//scale baseImage
-				let scaledImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
-				scaledImageCanvas.width = scaleWidthSettingRef.current;
-				scaledImageCanvas.height = scaleHeightSettingRef.current; 
+				let scaledImageCanvas:OffscreenCanvas = new OffscreenCanvas(scaleWidthSettingRef.current, scaleHeightSettingRef.current);
 				let scaledImageCanvasContext = scaledImageCanvas.getContext('2d');
 				if(scaledImageCanvasContext) {
 					console.log(`scale image width=${scaleWidthSettingRef.current} height =${scaleHeightSettingRef.current}`);
@@ -245,9 +244,10 @@ function Viewer({
 				const croppedImageWidth = originalCoordinatesFromDbRef.current[2].value - originalCoordinatesFromDbRef.current[0].value;
 				const croppedImageHeight = originalCoordinatesFromDbRef.current[7].value - originalCoordinatesFromDbRef.current[1].value;
 				//create cropped image
+//				let croppedImageCanvas:OffscreenCanvas = new OffscreenCanvas(croppedImageWidth, croppedImageHeight);
 				let croppedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
-				croppedImageCanvas.width = croppedImageWidth;
-				croppedImageCanvas.height = croppedImageHeight;
+        croppedImageCanvas.width = croppedImageWidth;
+        croppedImageCanvas.height = croppedImageHeight;
 				console.log(`croppedImageCanvas.width = ${croppedImageWidth}, croppedImageCanvas.height = ${croppedImageHeight}`);
 				let croppedImageCanvasContext = croppedImageCanvas.getContext('2d');
 				if(croppedImageCanvasContext) {
