@@ -44,7 +44,7 @@ function Viewer({
 	const checkAllEntriesHaveAlignedImage = (_entries:Entry[]) => {
 		let entriesWithAlignedImageCount:number = 0;
 		const allEntriesHaveAlignedImage:boolean = _entries.reduce( (accumulator, entry) => {
-			console.log('checking entries for alignedimage');
+			console.log('checking entries for aligned image');
 			if(!entry.alignedImageBlob) {
 				console.log('entry doesnt have aligned image');
 				accumulator = false;
@@ -203,21 +203,21 @@ function Viewer({
 						chosenEntryRef.current?.marks?.C.y || 0
 					]
 				];
-				const xformMatrix = mathjs.multiply(destinationMatrix, invertedSourceMatrix);	
-				//console.dir(xformMatrix);
-				//console.dir([...xformMatrix[0],...xformMatrix[1]]);
+				const transformMatrix = mathjs.multiply(destinationMatrix, invertedSourceMatrix);	
+				//console.dir(transformMatrix);
+				//console.dir([...transformMatrix[0],...transformMatrix[1]]);
 				let warpedImageCanvas:OffscreenCanvas = new OffscreenCanvas(chosenEntryImageNaturalWidth, chosenEntryImageNaturalHeight);
 				//warpedImageCanvas.width = chosenEntryImageNaturalWidth;
 				//warpedImageCanvas.height = chosenEntryImageNaturalHeight;
 				let warpedImageCanvasContext = warpedImageCanvas.getContext('2d', {alpha: false});
 				if(warpedImageCanvasContext) {
 					warpedImageCanvasContext.setTransform(
-						xformMatrix[0][0],
-						xformMatrix[1][0],
-						xformMatrix[0][1],
-						xformMatrix[1][1],
-						xformMatrix[0][2],
-						xformMatrix[1][2]
+						transformMatrix[0][0],
+						transformMatrix[1][0],
+						transformMatrix[0][1],
+						transformMatrix[1][1],
+						transformMatrix[0][2],
+						transformMatrix[1][2]
 					);
 					warpedImageCanvasContext.drawImage(
 						baseImage, 
@@ -245,11 +245,10 @@ function Viewer({
 				//hint GC 
 				warpedImageCanvas = null;
 				warpedImageCanvasContext = null;
+				//create cropped image
 				//calculate cropped image dimensions
 				const croppedImageWidth = originalCoordinatesFromDbRef.current[2].value - originalCoordinatesFromDbRef.current[0].value;
 				const croppedImageHeight = originalCoordinatesFromDbRef.current[7].value - originalCoordinatesFromDbRef.current[1].value;
-				//create cropped image
-//				let croppedImageCanvas:OffscreenCanvas = new OffscreenCanvas(croppedImageWidth, croppedImageHeight);
 				let croppedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
         croppedImageCanvas.width = croppedImageWidth;
         croppedImageCanvas.height = croppedImageHeight;
@@ -281,11 +280,11 @@ function Viewer({
 							if(baseImage && baseImage.src) {
 								URL.revokeObjectURL(baseImage.src);
 							}
-							//attempt to guide garbage collector to free the resources
-							//need to determine if this is necessary
+							//hint GC	
 							croppedImageCanvas = null;
 							croppedImageCanvasContext = null;
 							blob = null;
+							//increment progress counter
 							setEntriesProcessed( cs => cs+1);
 							//console.log('processed entry! id=', entryToProcess.id);
 							resolve(0);
