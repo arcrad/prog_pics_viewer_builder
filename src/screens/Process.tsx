@@ -160,7 +160,7 @@ function Viewer({
 			if(!entryToProcess || !entryToProcess.imageBlob) {
 				reject();
 			}
-			console.log(`start processing entry with id = ${entryToProcess.id}`);
+			//console.log(`start processing entry with id = ${entryToProcess.id}`);
 			let baseImage:HTMLImageElement|null = new Image();
 			//baseImage = new Image();
 			baseImage.onload = async () => {
@@ -209,7 +209,7 @@ function Viewer({
 				let warpedImageCanvas:OffscreenCanvas = new OffscreenCanvas(chosenEntryImageNaturalWidth, chosenEntryImageNaturalHeight);
 				//warpedImageCanvas.width = chosenEntryImageNaturalWidth;
 				//warpedImageCanvas.height = chosenEntryImageNaturalHeight;
-				let warpedImageCanvasContext = warpedImageCanvas.getContext('2d');
+				let warpedImageCanvasContext = warpedImageCanvas.getContext('2d', {alpha: false});
 				if(warpedImageCanvasContext) {
 					warpedImageCanvasContext.setTransform(
 						xformMatrix[0][0],
@@ -227,11 +227,13 @@ function Viewer({
 						baseImage.naturalHeight
 					);
 				}
+				//hint GC
+				baseImage = null;
 				//scale baseImage
 				let scaledImageCanvas:OffscreenCanvas = new OffscreenCanvas(scaleWidthSettingRef.current, scaleHeightSettingRef.current);
-				let scaledImageCanvasContext = scaledImageCanvas.getContext('2d');
+				let scaledImageCanvasContext = scaledImageCanvas.getContext('2d', {alpha: false});
 				if(scaledImageCanvasContext) {
-					console.log(`scale image width=${scaleWidthSettingRef.current} height =${scaleHeightSettingRef.current}`);
+					//console.log(`scale image width=${scaleWidthSettingRef.current} height =${scaleHeightSettingRef.current}`);
 					scaledImageCanvasContext.drawImage(
 						warpedImageCanvas, 
 						0, 
@@ -240,6 +242,9 @@ function Viewer({
 						scaleHeightSettingRef.current
 					);
 				}
+				//hint GC 
+				warpedImageCanvas = null;
+				warpedImageCanvasContext = null;
 				//calculate cropped image dimensions
 				const croppedImageWidth = originalCoordinatesFromDbRef.current[2].value - originalCoordinatesFromDbRef.current[0].value;
 				const croppedImageHeight = originalCoordinatesFromDbRef.current[7].value - originalCoordinatesFromDbRef.current[1].value;
@@ -248,10 +253,10 @@ function Viewer({
 				let croppedImageCanvas:HTMLCanvasElement|null = document.createElement('canvas');
         croppedImageCanvas.width = croppedImageWidth;
         croppedImageCanvas.height = croppedImageHeight;
-				console.log(`croppedImageCanvas.width = ${croppedImageWidth}, croppedImageCanvas.height = ${croppedImageHeight}`);
-				let croppedImageCanvasContext = croppedImageCanvas.getContext('2d');
+				//console.log(`croppedImageCanvas.width = ${croppedImageWidth}, croppedImageCanvas.height = ${croppedImageHeight}`);
+				let croppedImageCanvasContext = croppedImageCanvas.getContext('2d', {alpha: false});
 				if(croppedImageCanvasContext) {
-					console.log('drawImage to croppedImageCanvasContxt');
+					//console.log('drawImage to croppedImageCanvasContext');
 					croppedImageCanvasContext.drawImage(
 						scaledImageCanvas,
 						originalCoordinatesFromDbRef.current[0].value,
@@ -264,6 +269,10 @@ function Viewer({
 						croppedImageHeight
 					);
 				}
+				//hint GC
+				scaledImageCanvas = null;
+				scaledImageCanvasContext = null;
+			  //save final processed image to db	
 				croppedImageCanvas.toBlob( async (blob) => {
 					if(entryToProcess.id) {
 						db.entries.update(entryToProcess.id, {
@@ -274,13 +283,11 @@ function Viewer({
 							}
 							//attempt to guide garbage collector to free the resources
 							//need to determine if this is necessary
-							baseImage = null;
-							warpedImageCanvas = null;
-							scaledImageCanvas = null;
 							croppedImageCanvas = null;
+							croppedImageCanvasContext = null;
 							blob = null;
 							setEntriesProcessed( cs => cs+1);
-							console.log('processed entry! id=', entryToProcess.id);
+							//console.log('processed entry! id=', entryToProcess.id);
 							resolve(0);
 						});
 					}

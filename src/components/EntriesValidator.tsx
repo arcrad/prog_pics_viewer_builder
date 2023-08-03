@@ -75,7 +75,7 @@ function EntriesValidator({
 	
 	useEffect( () => {
 		async function doValidations() {
-			console.log('do validation, entries updated');
+			//console.log('do validation, entries updated');
 			let newValidationResults:ValidationResults = {
 				moreThanZeroEntries: true,
 				allEntriesHaveImageBlob: true,
@@ -139,13 +139,13 @@ function EntriesValidator({
 				//check for crop/scaling image chosen 
 				await db.settings.get('chosenEntryIdForAdjustments').then( async (_chosenEntryIdForAdjustments) => {
 					if(_chosenEntryIdForAdjustments == null) {
-					console.warn(`validation: _chosenEntryIdForAdjustments = ${_chosenEntryIdForAdjustments}`);
+					//console.warn(`validation: _chosenEntryIdForAdjustments = ${_chosenEntryIdForAdjustments}`);
 						newValidationResults.adjustmentImageCropAndScalingChosen = false;
 					}
 					if(_chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
 						await db.entries.get(parseInt(_chosenEntryIdForAdjustments.value)).then( (potentialChosenEntry) => {
-								console.log('potentialChosenEntry = ');
-								console.dir(potentialChosenEntry);
+								//console.log('potentialChosenEntry = ');
+								//console.dir(potentialChosenEntry);
 								if(potentialChosenEntry != null) {
 									newValidationResults.adjustmentImageCropAndScalingIsValid = true;
 								} else {
@@ -155,8 +155,8 @@ function EntriesValidator({
 					}
 				});
 				setValidationResults(newValidationResults);
-				console.dir(newValidationResults);
-				console.warn('setvalidationresults');
+				//console.dir(newValidationResults);
+				//console.warn('setvalidationresults');
 			}
 		}
 		doValidations();
