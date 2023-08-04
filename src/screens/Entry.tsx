@@ -27,6 +27,7 @@ import {
 
 import { db } from '../db';
 import { GlobalState } from '../App';
+import StatsComponent from '../components/StatsComponent'; 
 import ViewBaseImageModal from '../components/ViewBaseImageModal';
 import ChangeImageModal from '../components/ChangeImageModal';
 import MarkImageModal from '../components/MarkImageModal';
@@ -295,6 +296,9 @@ function EntryComponent({
 						</button>
 					</div>
 					<p className="has-text-centered mt-3">Total Entries: { totalEntriesCount }</p>
+				</div>
+				<div className="section">
+					<StatsComponent expanded={true}/>
 				</div>
 				<PaginationControls
 					curPage={pagerOffset/pagerLimit}

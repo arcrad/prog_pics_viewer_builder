@@ -17,7 +17,7 @@ import {
 import { db } from '../db';
 //import { GlobalState } from '../App';
 
-type ChangeImageComponentAttributes= {
+type ChangeImageComponentAttributes = {
 	closeModalOnLoad: boolean;
 	afterLoadImageFn?: () => void;
 };
