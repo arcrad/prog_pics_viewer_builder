@@ -298,17 +298,12 @@ function EntryComponent({
 					<p className="has-text-centered mt-3">Total Entries: { totalEntriesCount }</p>
 				</div>
 				<div className="section">
-					<StatsComponent expanded={true} data={{
-						labels: ['Jan','Feb','March','Apr'],
-						datasets: [
-							{
-      					label: 'Dataset 1',
-								data: [69,42, 420, 4269],
-								borderColor: 'rgb(255, 99, 132)',
-								backgroundColor: 'rgba(255, 99, 132, 0.5)',
-    					}
-						]
-					}}/>
+					<StatsComponent 
+							expanded={true}
+							globalState={globalState}
+							pagerOffset={pagerOffset}
+							pagerLimit={pagerLimit}
+					/>
 				</div>
 				<PaginationControls
 					curPage={pagerOffset/pagerLimit}
