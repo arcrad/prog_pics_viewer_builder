@@ -81,7 +81,11 @@ function StatsComponent({
 	if(entries) {	
 	//console.log('stats component entries=');
 	//console.table(entries);
-		setChartLabels(entries.map( (entry) => entry.date));
+		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];	
+		setChartLabels(entries.map( (entry) => {
+				let curDate = new Date(entry.date);
+				return months[curDate.getMonth()] + ' ' + curDate.getDate();
+			}));
 		setChartWeightData(entries.map( (entry) => entry.weight));
 	}
 	},[entries]);
@@ -90,6 +94,8 @@ function StatsComponent({
 			<p>{showAllData ? 'showing all data' : 'showing paged data'}</p>
 			<button onClick={ () => setShowAllData(!showAllData)}>{ showAllData ? 'show paginated data' : 'show all data'}</button>
 			<p>stats {expanded ? 'expanded' : 'not expanded'}</p>
+			{ (!entries || entries.length < 1) && <div> loading graph data...</div> }
+			{ entries && entries.length > 0 &&
 			<Line data={{
 						labels: chartLabels,
 						datasets: [
@@ -101,6 +107,7 @@ function StatsComponent({
     					}
 						]
 }} />
+		}
 		</div>
 	);
 }

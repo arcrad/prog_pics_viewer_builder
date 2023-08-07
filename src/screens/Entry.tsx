@@ -297,13 +297,20 @@ function EntryComponent({
 					</div>
 					<p className="has-text-centered mt-3">Total Entries: { totalEntriesCount }</p>
 				</div>
-				<div className="section">
-					<StatsComponent 
-							expanded={true}
-							globalState={globalState}
-							pagerOffset={pagerOffset}
-							pagerLimit={pagerLimit}
-					/>
+				<div >
+					<div
+				 		style={{
+							border: '1px solid red',
+							position: 'relative',
+						}}
+					> 
+						<StatsComponent 
+								expanded={true}
+								globalState={globalState}
+								pagerOffset={pagerOffset}
+								pagerLimit={pagerLimit}
+						/>
+					</div>
 				</div>
 				<PaginationControls
 					curPage={pagerOffset/pagerLimit}
