@@ -45,18 +45,17 @@ const testData = {
 
 type StatsComponentProps = {
 	globalState: GlobalState;
-	expanded: boolean;
 	pagerOffset: number;
 	pagerLimit: number;
 };
 
 function StatsComponent({
 	globalState,
-	expanded,
 	pagerOffset,
 	pagerLimit
 }: StatsComponentProps) {
 	let [showAllData, setShowAllData] = useState(true);
+	let [expanded, setExpanded] = useState(true);
 	let [chartLabels, setChartLabels] = useState([]);
 	let [chartWeightData, setChartWeightData] = useState([]);
 	
@@ -91,11 +90,12 @@ function StatsComponent({
 	},[entries]);
 	return (
 		<div>
+			<p>stats {expanded ? 'expanded' : 'not expanded'}</p>
+			<button onClick={ () => setExpanded(!expanded)}>{ expanded ? 'Hide Stats' : 'Show Stats'}</button>
 			<p>{showAllData ? 'showing all data' : 'showing paged data'}</p>
 			<button onClick={ () => setShowAllData(!showAllData)}>{ showAllData ? 'show paginated data' : 'show all data'}</button>
-			<p>stats {expanded ? 'expanded' : 'not expanded'}</p>
 			{ (!entries || entries.length < 1) && <div> loading graph data...</div> }
-			{ entries && entries.length > 0 &&
+			{ expanded && entries && entries.length > 0 &&
 			<Line data={{
 						labels: chartLabels,
 						datasets: [

@@ -305,7 +305,6 @@ function EntryComponent({
 						}}
 					> 
 						<StatsComponent 
-								expanded={true}
 								globalState={globalState}
 								pagerOffset={pagerOffset}
 								pagerLimit={pagerLimit}
