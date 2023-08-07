@@ -107,6 +107,7 @@
 +add unit labels as-needed based on measurementSystem setting
 	--2023-01-22: started adding where applicable 
 
++refine entry image URL generation so URLs arent created/revoked unnecessarily
 
 ----------------------------------------------------------------
 
@@ -128,3 +129,5 @@ suggestions from a redditor:
 +onion skin image capture mode
 	--possible to use canvas to display camera input and then can customize the overlay? 
 
++make entries data push down from top level app/component and not refetch in all screens 
+	--have to review feasibility of doing this and any side effects resulting 
