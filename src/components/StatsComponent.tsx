@@ -90,24 +90,29 @@ function StatsComponent({
 	},[entries]);
 	return (
 		<div>
-			<p>stats {expanded ? 'expanded' : 'not expanded'}</p>
+			<div>
 			<button onClick={ () => setExpanded(!expanded)}>{ expanded ? 'Hide Stats' : 'Show Stats'}</button>
-			<p>{showAllData ? 'showing all data' : 'showing paged data'}</p>
+			<div className={expanded ? '' : 'is-hidden'}>
+			<p>{showAllData ? 'Displaying all data' : 'Displaying data from current page only'}</p>
 			<button onClick={ () => setShowAllData(!showAllData)}>{ showAllData ? 'show paginated data' : 'show all data'}</button>
 			{ (!entries || entries.length < 1) && <div> loading graph data...</div> }
-			{ expanded && entries && entries.length > 0 &&
-			<Line data={{
+			{ entries && entries.length > 0 &&
+				<Line 
+					data={{
 						labels: chartLabels,
 						datasets: [
 							{
-      					label: 'Weight',
+								label: 'Weight',
 								data: chartWeightData,
 								borderColor: 'rgb(255, 99, 132)',
 								backgroundColor: 'rgba(255, 99, 132, 0.5)',
-    					}
+							}
 						]
-}} />
-		}
+					}}
+				/>
+			}
+			</div>
+			</div>
 		</div>
 	);
 }
