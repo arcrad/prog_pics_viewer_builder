@@ -111,10 +111,8 @@ function StatsComponent({
 			<div className={expanded ? '' : 'is-hidden'}>
 			<p>{showAllData ? 'Displaying all data' : 'Displaying data from current page only'}</p>
 			<button onClick={ () => setShowAllData(!showAllData)}>{ showAllData ? 'show paginated data' : 'show all data'}</button>
-			{ (!entriesHaveLoaded || !entries || entries.length < 1) && 
-				<LoadingIndicator loadingText="Loading graph data..."/>
-			}
-			{ entriesHaveLoaded && entries && entries.length > 0 &&
+			<div style={{position: 'relative'}}>
+			<div style={{position: 'relative'}}>
 				<Line 
 					data={{
 						labels: chartLabels,
@@ -128,7 +126,23 @@ function StatsComponent({
 						]
 					}}
 				/>
-			}
+		</div>
+			<div style={{
+					position: 'absolute',
+					top: '0',
+					left: '0',
+					width: '100%',
+					height: '100%',
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					backgroundColor: 'rgba(0,0,0,0.25)'
+				}}
+				className={ (!entriesHaveLoaded || !entries || entries.length < 1) ? '' : 'is-hidden'}
+				>
+					<LoadingIndicator style={{margin: 'auto auto'}} loadingText="Loading graph data..."/>
+				</div>
+			</div>
 			</div>
 			</div>
 		</div>
