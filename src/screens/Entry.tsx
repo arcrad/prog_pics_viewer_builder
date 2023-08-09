@@ -298,13 +298,11 @@ function EntryComponent({
 					<p className="has-text-centered mt-3">Total Entries: { totalEntriesCount }</p>
 				</div>
 				<div className="columns">
-					<div className="column">
-&nbsp;
+					<div className="column is-hidden-mobile">
 					</div>
 					<div
 						className="column is-full-mobile is-four-fifths-tablet is-two-thirds-fullhd"
 				 		style={{
-							border: '1px solid red',
 							position: 'relative',
 						}}
 					> 
@@ -314,8 +312,7 @@ function EntryComponent({
 								pagerLimit={pagerLimit}
 						/>
 					</div>
-					<div className="column">
-&nbsp;
+					<div className="column is-hidden-mobile">
 					</div>
 				</div>
 				<PaginationControls

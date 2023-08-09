@@ -103,9 +103,9 @@ function StatsComponent({
 	return (
 		<div>
 			<div>
-			<div className="level is-mobile">
+			<div className="level is-mobile mb-1">
 				<div className="level-item">
-					<button className="button" onClick={ () => setExpanded(!expanded)}>{ expanded ? 'Hide Stats' : 'Show Stats'}</button>
+					<button className="button is-info" onClick={ () => setExpanded(!expanded)}>{ expanded ? 'Hide Stats' : 'Show Stats'}</button>
 				</div>
 			</div>
 			<div className={expanded ? '' : 'is-hidden'}>
