@@ -103,9 +103,12 @@ function StatsComponent({
 	return (
 		<div>
 			<div>
-			<button onClick={ () => setExpanded(!expanded)}>{ expanded ? 'Hide Stats' : 'Show Stats'}</button>
+			<div className="level is-mobile">
+				<div className="level-item">
+					<button className="button" onClick={ () => setExpanded(!expanded)}>{ expanded ? 'Hide Stats' : 'Show Stats'}</button>
+				</div>
+			</div>
 			<div className={expanded ? '' : 'is-hidden'}>
-			<p>{entriesHaveLoaded ? 'entries have loaded!' : 'entries are loading...'}</p>
 			<p>{showAllData ? 'Displaying all data' : 'Displaying data from current page only'}</p>
 			<button onClick={ () => setShowAllData(!showAllData)}>{ showAllData ? 'show paginated data' : 'show all data'}</button>
 			{ (!entriesHaveLoaded || !entries || entries.length < 1) && 
