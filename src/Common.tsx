@@ -273,7 +273,13 @@ export function EntryOptionsDropdown({
 	);
 }
 
-export function LoadingIndicator() {
+export type LoadingIndicatorProps = {
+	loadingText?: string
+};
+
+export function LoadingIndicator({
+	loadingText
+}:LoadingIndicatorProps) {
 	return ( 	
 				<div className="is-flex is-justify-content-center">
 					<div className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center">
@@ -282,7 +288,7 @@ export function LoadingIndicator() {
 							}}
 							className="loading-indicator">
 						</div>
-						<p className="has-text-centered my-3">Loading...</p>
+						<p className="has-text-centered my-3">{ loadingText ? loadingText : 'Loading...' }</p>
 					</div>
 				</div>
 	);

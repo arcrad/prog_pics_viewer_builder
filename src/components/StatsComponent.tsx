@@ -56,7 +56,7 @@ function StatsComponent({
 	pagerLimit
 }: StatsComponentProps) {
 	let [showAllData, setShowAllData] = useState(false);
-	let [expanded, setExpanded] = useState(true);
+	let [expanded, setExpanded] = useState(false);
 	let [chartLabels, setChartLabels] = useState([]);
 	let [chartWeightData, setChartWeightData] = useState([]);
 	let [entriesHaveLoaded, setEntriesHaveLoaded] = useState(false);
@@ -109,7 +109,7 @@ function StatsComponent({
 			<p>{showAllData ? 'Displaying all data' : 'Displaying data from current page only'}</p>
 			<button onClick={ () => setShowAllData(!showAllData)}>{ showAllData ? 'show paginated data' : 'show all data'}</button>
 			{ (!entriesHaveLoaded || !entries || entries.length < 1) && 
-				<LoadingIndicator/>
+				<LoadingIndicator loadingText="Loading graph data..."/>
 			}
 			{ entriesHaveLoaded && entries && entries.length > 0 &&
 				<Line 
