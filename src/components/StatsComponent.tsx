@@ -62,10 +62,8 @@ function StatsComponent({
 	let [entriesHaveLoaded, setEntriesHaveLoaded] = useState(false);
 	
 	const entries = useLiveQuery(
-		//() => db.entries.orderBy('date').filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).reverse().offset(pagerOffset).limit(pagerLimit).toArray()
 		() => {
 			setEntriesHaveLoaded(false);
-			//const allEntriesDexieData = db.entries.orderBy('date').filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).reverse();
   		const allEntriesDexieData = db.entries
 				.where('isDraft').notEqual(1)
 				.reverse();

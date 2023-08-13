@@ -104,7 +104,7 @@ function AddEntryModal({
 			if(entryId != null) {
 				const currentEntry = await db.entries.get(parseInt(entryId));
 				//console.dir(currentEntry);
-				if(currentEntry && currentEntry.draft) {
+				if(currentEntry && currentEntry.isDraft === 1) {
 					const numberDeleted = await db.entries
 						.where("id").equals(parseInt(entryId))
 						.delete();
@@ -122,8 +122,8 @@ function AddEntryModal({
 	let handleSaveButton = () => {
 		if(entryId != null) {
 			db.entries.update(parseInt(entryId), {
-				includeInExport: true,
-				draft: false
+				includedInExport: 1,
+				isDraft: 0
 			});
 		}
 		closeModal();

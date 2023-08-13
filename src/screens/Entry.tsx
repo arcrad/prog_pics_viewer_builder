@@ -261,8 +261,8 @@ function EntryComponent({
 				newValue = ((new Date(event.target.value)).toISOString()).substring(0, 16) + ':00Z'; 
 			} else if(event.target.dataset.entryKeyToModify === 'notes') {
 				//setCurrentEntryNotes(event.target.value);
-			} else if(event.target.dataset.entryKeyToModify === 'includeInExport') {
-				newValue = event.target.checked;
+			} else if(event.target.dataset.entryKeyToModify === 'includedInExport') {
+				newValue = event.target.checked ? 1 : 0;
 			}
 			clearTimeout(debounceInputTimeout.current);
 			let modifyDbValueHandler = () => {
@@ -443,9 +443,9 @@ function EntryComponent({
 										<label className="checkbox">
 												<input 
 													type="checkbox" 
-													defaultChecked={entry.includeInExport} 
+													defaultChecked={entry.includedInExport === 1 ? true : false} 
 													data-entry-id={entry.id} 
-													data-entry-key-to-modify="includeInExport" 
+													data-entry-key-to-modify="includedInExport" 
 													onChange={handleEntryInputChange}
 												/> Include in Export?
 										</label>
