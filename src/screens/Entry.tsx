@@ -69,7 +69,6 @@ function EntryComponent({
 	const pagerLimit = 10;
 
 	const totalEntriesCount = useLiveQuery(
-		//() => db.entries.filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).count()
 		() => db.entries
 			.where('isDraft').anyOf(globalState.settings.showDraftsInEntries ? [1,0] : [0])
 			.count()
@@ -78,13 +77,12 @@ function EntryComponent({
 		] 
 	);
 	const entries = useLiveQuery(
-		//() => db.entries.orderBy('date').filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).reverse().offset(pagerOffset).limit(pagerLimit).toArray()
-  		() => db.entries
-				.where('isDraft').anyOf(globalState.settings.showDraftsInEntries ? [1,0] : [0])
-				.reverse() 
-				.offset(pagerOffset)
-				.limit(pagerLimit)
-				.sortBy('date')
+		() => db.entries
+			.where('isDraft').anyOf(globalState.settings.showDraftsInEntries ? [1,0] : [0])
+			.reverse() 
+			.offset(pagerOffset)
+			.limit(pagerLimit)
+			.sortBy('date')
 		, [
 			pagerOffset, 
 			pagerLimit,
@@ -132,7 +130,7 @@ function EntryComponent({
 			}
 			const id = await db.entries.add({
 				date: date,
-				draft: true,
+				isDraft: 1,
 				height: height,
 			});
 			console.log( 'new id =', id);
@@ -153,6 +151,7 @@ function EntryComponent({
 		if(event.target && event.target instanceof HTMLButtonElement && event.target.dataset.entryId) {
 			console.log(`entryId to delete = ${event.target.dataset.entryId}`);
 			try {
+				//TODO: why using anyOf() here? 
 				const numberDeleted = await db.entries
 					.where("id").anyOf(parseInt(event.target.dataset.entryId))
 					.delete();
@@ -175,7 +174,7 @@ function EntryComponent({
 				try {
 					const id = await db.entries.add({
 						date: date,//entryToDuplicate.date,
-						draft: entryToDuplicate.draft,
+						isDraft: entryToDuplicate.isDraft,
 						weight: entryToDuplicate.weight,
 						notes: entryToDuplicate.notes,
 						imageBlob: entryToDuplicate.imageBlob,
@@ -183,7 +182,7 @@ function EntryComponent({
 						imageNaturalHeight: entryToDuplicate.imageNaturalHeight,
 						thumbImageBlob: entryToDuplicate.thumbImageBlob,
 						marks: entryToDuplicate.marks,
-						includeInExport: entryToDuplicate.includeInExport
+						includedInExport: entryToDuplicate.includedInExport
 					});
 					console.log( 'new id =', id);
 				} catch(error) {
@@ -469,7 +468,7 @@ function EntryComponent({
 								<>
 		 							<p>
 										<strong>Date: </strong>
-										{(new Date(entry.date)).toLocaleString()} { entry.draft ? '[draft]' : ''}
+										{(new Date(entry.date)).toLocaleString()} { entry.isDraft === 1 ? '[draft]' : ''}
 									</p>
 									<p>
 										<strong>ID: </strong> 
@@ -509,7 +508,7 @@ function EntryComponent({
 										}
 									</p>
 									{
-										!entry.includeInExport ? 
+										entry.includedInExport === 0 ? 
 											<p><i>Entry is not included in export.</i></p>
 											:
 											''

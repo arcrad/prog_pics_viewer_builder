@@ -432,11 +432,10 @@ function Adjust({
 	};
  
 	const entries = useLiveQuery(
-		//() => db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray()
-  		() => db.entries
-				.where('isDraft').notEqual(1)
-				.reverse()
-				.sortBy('date')
+		() => db.entries
+			.where('isDraft').notEqual(1)
+			.reverse()
+			.sortBy('date')
 	);
 
 	let chosenEntryIdForAdjustments = useLiveQuery( () => {
@@ -487,10 +486,8 @@ function Adjust({
 				db.settings.get('bottomRightCornerCropCoordinateY'),
 				db.settings.get('bottomLeftCornerCropCoordinateX'),
 				db.settings.get('bottomLeftCornerCropCoordinateY'),
-				//db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray(),
 				db.settings.get('scaleWidth'),
 				db.settings.get('scaleHeight'),
-				//db.entries.get( parseInt(_chosenEntryIdForAdjustments?.value as string) )
 				db.settings.get('chosenEntryIdForAdjustments')
 			]).then(([
 				_topLeftCornerCropCoordinateX,
@@ -501,10 +498,8 @@ function Adjust({
 				_bottomRightCornerCropCoordinateY,
 				_bottomLeftCornerCropCoordinateX,
 				_bottomLeftCornerCropCoordinateY,
-				//_entries,
 				_scaleWidthSetting,
 				_scaleHeightSetting,
-				//_currentEntry
 				_chosenEntryIdForAdjustments
 			]) => {
 				console.group('got data from db'); 

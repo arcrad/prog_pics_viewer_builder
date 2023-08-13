@@ -63,9 +63,14 @@ function EntriesValidator({
 	displayOnlyTheseValidations
 } : EntriesValidatorAttributes ) {
 	const entries = useLiveQuery(
+		/*
 		() => db
 			.entries
 			.filter((entry) => entry.draft !== true)
+			.toArray()
+		*/
+		() => db.entries
+			.where('isDraft').notEqual(1)
 			.toArray()
 	);
 	
