@@ -69,13 +69,26 @@ function EntryComponent({
 	const pagerLimit = 10;
 
 	const totalEntriesCount = useLiveQuery(
-		() => db.entries.filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).count()
+		//() => db.entries.filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).count()
+		() => db.entries
+			.where('isDraft').anyOf(globalState.settings.showDraftsInEntries ? [1,0] : [0])
+			.count()
+		, [
+			globalState.settings.showDraftsInEntries
+		] 
 	);
 	const entries = useLiveQuery(
-		() => db.entries.orderBy('date').filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).reverse().offset(pagerOffset).limit(pagerLimit).toArray()
+		//() => db.entries.orderBy('date').filter((entry) => globalState.settings.showDraftsInEntries || entry.draft !== true).reverse().offset(pagerOffset).limit(pagerLimit).toArray()
+  		() => db.entries
+				.where('isDraft').anyOf(globalState.settings.showDraftsInEntries ? [1,0] : [0])
+				.reverse() 
+				.offset(pagerOffset)
+				.limit(pagerLimit)
+				.sortBy('date')
 		, [
 			pagerOffset, 
-			pagerLimit
+			pagerLimit,
+			globalState.settings.showDraftsInEntries 
 		]
 	);
 

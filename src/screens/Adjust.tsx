@@ -432,7 +432,11 @@ function Adjust({
 	};
  
 	const entries = useLiveQuery(
-		() => db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray()
+		//() => db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray()
+  		() => db.entries
+				.where('isDraft').notEqual(1)
+				.reverse()
+				.sortBy('date')
 	);
 
 	let chosenEntryIdForAdjustments = useLiveQuery( () => {

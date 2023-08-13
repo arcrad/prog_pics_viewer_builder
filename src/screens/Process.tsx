@@ -80,7 +80,8 @@ function Viewer({
 				db.settings.get('bottomRightCornerCropCoordinateY'),
 				db.settings.get('bottomLeftCornerCropCoordinateX'),
 				db.settings.get('bottomLeftCornerCropCoordinateY'),
-				db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray(),
+				//db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray(),
+  			db.entries.where('isDraft').notEqual(1).reverse().sortBy('date'),
 				db.settings.get('scaleWidth'),
 				db.settings.get('scaleHeight'),
 				db.entries.get( parseInt(_chosenEntryIdForAdjustments?.value as string) )
@@ -311,11 +312,16 @@ function Viewer({
 			}
 			setProcessingState('complete');
 			console.log('all entries have been processed');
-			db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray().then( (_entries) => {
-				const [_allEntriesHaveAlignedImage, _entriesWithAlignedImageCount] = checkAllEntriesHaveAlignedImage(_entries);
-				setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage as boolean);
+			//db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray().then( (_entries) => {
+  		db.entries
+				.where('isDraft').notEqual(1)
+				.reverse()
+				.sortBy('date')
+				.then( (_entries) => {
+					const [_allEntriesHaveAlignedImage, _entriesWithAlignedImageCount] = checkAllEntriesHaveAlignedImage(_entries);
+					setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage as boolean);
 					setEntriesWithAlignedImageCount(_entriesWithAlignedImageCount as number);
-				setEntries(_entries);
+					setEntries(_entries);
 			});	
 		}	
 		if(chosenEntryRef.current && chosenEntryRef.current.imageBlob) {
@@ -341,11 +347,16 @@ function Viewer({
 			}
 			setProcessingState('complete');
 			console.log('all unprocessed entries have been processed');
-			db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray().then( (_entries) => {
-				const [_allEntriesHaveAlignedImage, _entriesWithAlignedImageCount] = checkAllEntriesHaveAlignedImage(_entries);
-				setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage as boolean);
+			//db.entries.orderBy('date').filter((entry) => entry.draft !== true).reverse().toArray().then( (_entries) => {
+  		db.entries
+				.where('isDraft').notEqual(1)
+				.reverse()
+				.sortBy('date')
+				.then( (_entries) => {
+					const [_allEntriesHaveAlignedImage, _entriesWithAlignedImageCount] = checkAllEntriesHaveAlignedImage(_entries);
+					setAllEntriesHaveAlignedImage(_allEntriesHaveAlignedImage as boolean);
 					setEntriesWithAlignedImageCount(_entriesWithAlignedImageCount as number);
-				setEntries(_entries);
+					setEntries(_entries);
 			});	
 		}	
 		if(chosenEntryRef.current && chosenEntryRef.current.imageBlob) {

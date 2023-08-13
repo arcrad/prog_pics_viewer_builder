@@ -12,7 +12,7 @@ export type MarkCollection = {
 
 export type Entry = {
 	id?: number;
-	draft?: boolean;
+	isDraft?: number; //boolean
 	date: string;
 	weight?: number;
 	height?: number;
@@ -23,7 +23,7 @@ export type Entry = {
 	thumbImageBlob?: UInt8Array;
 	alignedImageBlob?: UInt8Array;
 	marks?: MarkCollection;
-	includeInExport?: boolean;
+	includedInExport: number; //boolean
 };
 
 export type Setting = {
@@ -37,9 +37,36 @@ export class TypedDexie extends Dexie {
 
 	constructor() {
 		super('db');
-		this.version(39).stores({
+		/*
+ 		this.version(39).stores({
 			entries: '++id, draft, date, weight, notes, marks',
 			settings: 'key, value'
+		});
+		*/
+		this.version(40).stores({
+			entries: '++id, isDraft, date, weight, notes, marks',
+			settings: 'key, value'
+		}).upgrade( txn => {
+			return txn.table('entries').toCollection().modify( entry => {
+				entry.isDraft = entry.draft ? 1 : 0;
+			});
+		});
+		this.version(41).stores({
+			entries: '++id, isDraft, date, weight, notes, marks, includedInExport',
+			settings: 'key, value'
+		}).upgrade( txn => {
+			return txn.table('entries').toCollection().modify( entry => {
+				entry.includedInExport = entry.includeInExport ? 1 : 0;
+			});
+		});
+		this.version(42).stores({
+			entries: '++id, isDraft, date, weight, notes, marks, includedInExport',
+			settings: 'key, value'
+		}).upgrade( txn => {
+			return txn.table('entries').toCollection().modify( entry => {
+				delete entry.draft;
+				delete entry.includeInExport;
+			});
 		});
 	}
 }

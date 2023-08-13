@@ -214,14 +214,22 @@ function SettingsComponent({
 			let settingKeyToUpdate = event.target.dataset.settingKeyToUpdate;
 			let newValue = event.target.value;
 			console.log('settingKeyToUpdate = ', settingKeyToUpdate);
-			console.log('value = ', newValue);
+			console.log('raw value = ', newValue);
+			//hacky way to handle converting boolean strings to true booleans (TODO: implement proper type denotion for settings values)
+			let newValueToStore:string|number|boolean = newValue;
+			if(newValue === 'true') {
+				newValueToStore = true;
+			}
+			if(newValue === 'false') {
+				newValueToStore = false;
+			}
 			//setup db update handler
 			clearTimeout(debounceInputTimeout.current);
 			let modifyDbValueHandler = () => {
-				console.log(`fire settings update db with new input newValue=${newValue}, settingKeyToUpdate=${settingKeyToUpdate}`);
+				console.log(`fire settings update db with new input newValue=${newValueToStore}, settingKeyToUpdate=${settingKeyToUpdate}`);
 				if(event.target.dataset.settingKeyToUpdate) {
 					db.settings.update(settingKeyToUpdate, {
-						value: newValue
+						value: newValueToStore
 					});
 				}
 			};
