@@ -109,6 +109,13 @@
 
 +refine entry image URL generation so URLs arent created/revoked unnecessarily
 
++make it so that changing marks on an entry sets the entry to 'unprocessed'
+
++develop method to display filter by entries with validation issues
+
++add UI toggle to display drafts on entries screen 
+
+
 ----------------------------------------------------------------
 
 long-term: 
