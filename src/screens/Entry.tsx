@@ -70,7 +70,7 @@ function EntryComponent({
 
 	const totalEntriesCount = useLiveQuery(
 		() => db.entries
-			.where('isDraft').anyOf(globalState.settings.showDraftsInEntries ? [1,0] : [0])
+			.where('isDraft').below(globalState.settings.showDraftsInEntries ? 2 : 1)
 			.count()
 		, [
 			globalState.settings.showDraftsInEntries
@@ -78,7 +78,8 @@ function EntryComponent({
 	);
 	const entries = useLiveQuery(
 		() => db.entries
-			.where('isDraft').anyOf(globalState.settings.showDraftsInEntries ? [1,0] : [0])
+			//.where('isDraft').anyOf(globalState.settings.showDraftsInEntries ? [1,0] : [0])
+			.where('isDraft').below(globalState.settings.showDraftsInEntries ? 2 : 1)
 			.reverse() 
 			.offset(pagerOffset)
 			.limit(pagerLimit)

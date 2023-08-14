@@ -433,7 +433,7 @@ function Adjust({
  
 	const entries = useLiveQuery(
 		() => db.entries
-			.where('isDraft').notEqual(1)
+			.where('isDraft').equals(0)
 			.reverse()
 			.sortBy('date')
 	);

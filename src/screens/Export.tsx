@@ -167,7 +167,7 @@ function Export({
 		console.log('intialize data from DB started');
 		initializedRef.current = true;
 		Promise.all([
-  		db.entries.where('isDraft').notEqual(1).filter((entry) => entry.includedInExport === 1).sortBy('date'),
+  		db.entries.where('isDraft').equals(0).filter((entry) => entry.includedInExport === 1).sortBy('date'),
 			db.settings.get('exportFrameDuration'),
 			db.settings.get('exportFirstFrameHoldDuration'),
 			db.settings.get('exportLastFrameHoldDuration'),

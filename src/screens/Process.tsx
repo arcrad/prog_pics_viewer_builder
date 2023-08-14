@@ -80,7 +80,7 @@ function Viewer({
 				db.settings.get('bottomRightCornerCropCoordinateY'),
 				db.settings.get('bottomLeftCornerCropCoordinateX'),
 				db.settings.get('bottomLeftCornerCropCoordinateY'),
-  			db.entries.where('isDraft').notEqual(1).reverse().sortBy('date'),
+  			db.entries.where('isDraft').equals(0).reverse().sortBy('date'),
 				db.settings.get('scaleWidth'),
 				db.settings.get('scaleHeight'),
 				db.entries.get( parseInt(_chosenEntryIdForAdjustments?.value as string) )
@@ -312,7 +312,8 @@ function Viewer({
 			setProcessingState('complete');
 			console.log('all entries have been processed');
   		db.entries
-				.where('isDraft').notEqual(1)
+				.where('isDraft')
+				.equals(0)
 				.reverse()
 				.sortBy('date')
 				.then( (_entries) => {
@@ -346,7 +347,8 @@ function Viewer({
 			setProcessingState('complete');
 			console.log('all unprocessed entries have been processed');
   		db.entries
-				.where('isDraft').notEqual(1)
+				.where('isDraft')
+				.equals(0)
 				.reverse()
 				.sortBy('date')
 				.then( (_entries) => {

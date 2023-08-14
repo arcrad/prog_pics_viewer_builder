@@ -65,7 +65,8 @@ function StatsComponent({
 		() => {
 			setEntriesHaveLoaded(false);
   		const allEntriesDexieData = db.entries
-				.where('isDraft').notEqual(1)
+				.where('isDraft')
+				.equals(0)
 				.reverse();
 			if(showAllData) {
 				return allEntriesDexieData.sortBy('date', (data) => {

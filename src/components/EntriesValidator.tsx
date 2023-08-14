@@ -69,8 +69,10 @@ function EntriesValidator({
 			.filter((entry) => entry.draft !== true)
 			.toArray()
 		*/
+		//TODO: investigate further why using equal() here throws UnknownError
 		() => db.entries
-			.where('isDraft').notEqual(1)
+			.where('isDraft')
+			.notEqual(1)
 			.toArray()
 	);
 	
