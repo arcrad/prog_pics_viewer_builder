@@ -59,49 +59,71 @@ function StatsComponent({
 	let [expanded, setExpanded] = useState(false);
 	let [chartLabels, setChartLabels] = useState([]);
 	let [chartWeightData, setChartWeightData] = useState([]);
-	let [entriesHaveLoaded, setEntriesHaveLoaded] = useState(false);
+	let [allEntriesHaveLoaded, setAllEntriesHaveLoaded] = useState(false);
+	let [pagedEntriesHaveLoaded, setPagedEntriesHaveLoaded] = useState(false);
 	
-	const entries = useLiveQuery(
+	const allEntries = useLiveQuery(
 		() => {
-			setEntriesHaveLoaded(false);
-  		const allEntriesDexieData = db.entries
+			setAllEntriesHaveLoaded(false);
+  		return db.entries
 				.where('isDraft')
 				.equals(0)
-				.reverse();
-			if(showAllData) {
-				return allEntriesDexieData.sortBy('date', (data) => {
-					setEntriesHaveLoaded(true);
+				.reverse()
+				.sortBy('date', (data) => {
+					setAllEntriesHaveLoaded(true);
 					return data;
 				});
-				//return [returnArray, true];
-			} else {
-				return allEntriesDexieData.offset(pagerOffset).limit(pagerLimit).sortBy('date', (data) => {
-					setEntriesHaveLoaded(true);
-					return data;
-				});
-				//return [returnArray, true];
-			}
 		}
 		, [
-			showAllData,
+		]
+	);
+
+	const pagedEntries = useLiveQuery(
+		() => {
+			setPagedEntriesHaveLoaded(false);
+  		return db.entries
+				.where('isDraft')
+				.equals(0)
+				.reverse()
+				.offset(pagerOffset).limit(pagerLimit).sortBy('date', (data) => {
+					setPagedEntriesHaveLoaded(true);
+					return data;
+				});
+		}
+		, [
 			pagerOffset, 
 			pagerLimit
 		]
 	);
 
 	useEffect( () => {
-	console.log('stats component entries=');
-	console.dir(entries);
+	//console.log('stats component allEntries=');
+	//console.dir(allEntries);
 
-	if(Array.isArray(entries) && entries) {	
+	if(showAllData && Array.isArray(allEntries) && allEntries) {	
 		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];	
-		setChartLabels(entries.map( (entry) => {
+		setChartLabels(allEntries.map( (entry) => {
 				let curDate = new Date(entry.date);
 				return months[curDate.getMonth()] + ' ' + curDate.getDate();
 			}));
-		setChartWeightData(entries.map( (entry) => entry.weight));
+		setChartWeightData(allEntries.map( (entry) => entry.weight));
 	}
-	},[entries]);
+	},[showAllData, allEntries]);
+	
+	useEffect( () => {
+	//console.log('stats component pagedEntries=');
+	//console.dir(pagedEntries);
+
+	if(!showAllData && Array.isArray(pagedEntries) && pagedEntries) {	
+		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];	
+		setChartLabels(pagedEntries.map( (entry) => {
+				let curDate = new Date(entry.date);
+				return months[curDate.getMonth()] + ' ' + curDate.getDate();
+			}));
+		setChartWeightData(pagedEntries.map( (entry) => entry.weight));
+	}
+	},[showAllData, pagedEntries]);
+	
 	return (
 		<div>
 			<div>
@@ -115,19 +137,36 @@ function StatsComponent({
 			<button onClick={ () => setShowAllData(!showAllData)}>{ showAllData ? 'show paginated data' : 'show all data'}</button>
 			<div style={{position: 'relative'}}>
 			<div style={{position: 'relative'}}>
-				<Line 
-					data={{
-						labels: chartLabels,
-						datasets: [
-							{
-								label: 'Weight',
-								data: chartWeightData,
-								borderColor: 'rgb(255, 99, 132)',
-								backgroundColor: 'rgba(255, 99, 132, 0.5)',
-							}
-						]
-					}}
-				/>
+				{ showAllData &&
+					<Line 
+						data={{
+							labels: chartLabels,
+							datasets: [
+								{
+									label: 'Weight',
+									data: chartWeightData,
+									borderColor: 'rgb(255, 99, 132)',
+									backgroundColor: 'rgba(255, 99, 132, 0.5)',
+								}
+							]
+						}}
+					/>
+				}	
+				{ !showAllData &&
+					<Line 
+						data={{
+							labels: chartLabels,
+							datasets: [
+								{
+									label: 'Weight',
+									data: chartWeightData,
+									borderColor: 'rgb(255, 99, 132)',
+									backgroundColor: 'rgba(255, 99, 132, 0.5)',
+								}
+							]
+						}}
+					/>
+				}	
 		</div>
 			<div style={{
 					position: 'absolute',
@@ -140,7 +179,7 @@ function StatsComponent({
 					justifyContent: 'center',
 					backgroundColor: 'rgba(0,0,0,0.25)'
 				}}
-				className={ (!entriesHaveLoaded || !entries || entries.length < 1) ? '' : 'is-hidden'}
+				className={ ( (showAllData && !allEntriesHaveLoaded ) || (!showAllData && !pagedEntriesHaveLoaded) ) ? '' : 'is-hidden'}
 				>
 					<LoadingIndicator style={{margin: 'auto auto'}} loadingText="Loading graph data..."/>
 				</div>
