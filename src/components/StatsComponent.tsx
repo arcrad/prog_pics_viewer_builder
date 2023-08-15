@@ -32,6 +32,10 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+const chartOptions = {
+	maintainAspectRatio: false
+};
+
 const testData = {
 						labels: ['Jan','Feb','March','Apr'],
 						datasets: [
@@ -136,9 +140,9 @@ function StatsComponent({
 			<p>{showAllData ? 'Displaying all data' : 'Displaying data from current page only'}</p>
 			<button onClick={ () => setShowAllData(!showAllData)}>{ showAllData ? 'show paginated data' : 'show all data'}</button>
 			<div style={{position: 'relative'}}>
-			<div style={{position: 'relative'}}>
-				{ showAllData &&
+			<div style={{position: 'relative', height: '35vh'}}>
 					<Line 
+						options={chartOptions}
 						data={{
 							labels: chartLabels,
 							datasets: [
@@ -151,23 +155,7 @@ function StatsComponent({
 							]
 						}}
 					/>
-				}	
-				{ !showAllData &&
-					<Line 
-						data={{
-							labels: chartLabels,
-							datasets: [
-								{
-									label: 'Weight',
-									data: chartWeightData,
-									borderColor: 'rgb(255, 99, 132)',
-									backgroundColor: 'rgba(255, 99, 132, 0.5)',
-								}
-							]
-						}}
-					/>
-				}	
-		</div>
+			</div>
 			<div style={{
 					position: 'absolute',
 					top: '0',
