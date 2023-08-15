@@ -137,9 +137,7 @@ function StatsComponent({
 				</div>
 			</div>
 			<div className={expanded ? '' : 'is-hidden'}>
-			<p>{showAllData ? 'Displaying all data' : 'Displaying data from current page only'}</p>
-			<button onClick={ () => setShowAllData(!showAllData)}>{ showAllData ? 'show paginated data' : 'show all data'}</button>
-			<div style={{position: 'relative'}}>
+			<div style={{position: 'relative'}} className="mb-2">
 			<div style={{position: 'relative', height: '35vh'}}>
 					<Line 
 						options={chartOptions}
@@ -170,6 +168,16 @@ function StatsComponent({
 				className={ ( (showAllData && !allEntriesHaveLoaded ) || (!showAllData && !pagedEntriesHaveLoaded) ) ? '' : 'is-hidden'}
 				>
 					<LoadingIndicator style={{margin: 'auto auto'}} loadingText="Loading graph data..."/>
+				</div>
+			</div>
+			<div className="field is-grouped">
+				<div className="control">
+					<button
+						className="button is-info is-small" 
+						onClick={ () => setShowAllData(!showAllData)}
+					>
+						{ showAllData ? 'Show Paged Data' : 'Show All Data'}
+					</button>
 				</div>
 			</div>
 			</div>
