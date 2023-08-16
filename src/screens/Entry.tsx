@@ -45,6 +45,21 @@ type EntryAttributes = {
 	setGlobalState: Dispatch<SetStateAction<GlobalState>>
 };
 
+async function sha256(msgBuffer) {
+	// encode as UTF-8
+	//const msgBuffer = new TextEncoder().encode(message);                    
+
+	// hash the message
+	const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+	// convert ArrayBuffer to Array
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+	// convert bytes to hex string                  
+	const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+	return hashHex;
+}
+
 function EntryComponent({
 	globalState, 
 	setGlobalState
@@ -105,6 +120,11 @@ function EntryComponent({
 		//generate new urls 
 		if(entries) {
 			const entryThumbnailUrls = entries.reduce( (accumulator, currentEntry) => {
+				//const enc = new TextDecoder("utf-8");
+				//enc.decode(currentEntry.imageBlob.buffer);
+				//console.log('sha256=');
+				//console.log(sha256(currentEntry.imageBlob.buffer));
+				/////sha256(currentEntry.imageBlob.buffer).then( (hashString) => { console.log(`sha256=${hashString}`) } );
 				if(currentEntry.thumbImageBlob) {
 					let newData = {
 						[currentEntry.id as number]: URL.createObjectURL(new Blob([currentEntry.thumbImageBlob.buffer]))
