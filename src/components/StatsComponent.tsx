@@ -61,10 +61,16 @@ function StatsComponent({
 }: StatsComponentProps) {
 	let [showAllData, setShowAllData] = useState(false);
 	let [expanded, setExpanded] = useState(false);
-	let [chartLabels, setChartLabels] = useState([]);
-	let [chartWeightData, setChartWeightData] = useState([]);
+	
 	let [allEntriesHaveLoaded, setAllEntriesHaveLoaded] = useState(false);
 	let [pagedEntriesHaveLoaded, setPagedEntriesHaveLoaded] = useState(false);
+
+	let [pointStyle, setPointStyle] = useState('circle');
+	let [chartLabels, setChartLabels] = useState([]);
+	let [chartWeightData, setChartWeightData] = useState([]);
+	let [chartMovingAverageWeightData, setChartMovingAverageWeightData] = useState([]);
+
+	let movingAverageWindowSize = 7;
 	
 	const allEntries = useLiveQuery(
 		() => {
@@ -111,6 +117,18 @@ function StatsComponent({
 				return months[curDate.getMonth()] + ' ' + curDate.getDate();
 			}));
 		setChartWeightData(allEntries.map( (entry) => entry.weight));
+		setChartMovingAverageWeightData(allEntries.map( (entry, index, entries) => {
+			let entriesInWindow = entries.slice(
+				index-((movingAverageWindowSize-1)/2) > -1 ? index-((movingAverageWindowSize-1)/2) : 0, 
+				(index+((movingAverageWindowSize-1)/2) < entries.length ? index+((movingAverageWindowSize-1)/2) : entries.length) + 1
+			)
+			//console.log("entriesInWindow=");
+			//console.dir(entriesInWindow);
+			let windowSum = entriesInWindow.reduce( (total, curVal, curIndex) => total+Number(curVal.weight), 0 );
+			//console.log(`windowSum = ${windowSum} avg=${windowSum/entriesInWindow.length}`);
+			return windowSum/entriesInWindow.length;
+		}));
+		setPointStyle(false);
 	}
 	},[showAllData, allEntries]);
 	
@@ -125,6 +143,18 @@ function StatsComponent({
 				return months[curDate.getMonth()] + ' ' + curDate.getDate();
 			}));
 		setChartWeightData(pagedEntries.map( (entry) => entry.weight));
+		setChartMovingAverageWeightData(pagedEntries.map( (entry, index, entries) => {
+			let entriesInWindow = entries.slice(
+				index-((movingAverageWindowSize-1)/2) > -1 ? index-((movingAverageWindowSize-1)/2) : 0, 
+				(index+((movingAverageWindowSize-1)/2) < entries.length ? index+((movingAverageWindowSize-1)/2) : entries.length) + 1
+			)
+			//console.log("entriesInWindow=");
+			//console.dir(entriesInWindow);
+			let windowSum = entriesInWindow.reduce( (total, curVal, curIndex) => total+Number(curVal.weight), 0 );
+			//console.log(`windowSum = ${windowSum} avg=${windowSum/entriesInWindow.length}`);
+			return windowSum/entriesInWindow.length;
+		}));
+		setPointStyle('circle');
 	}
 	},[showAllData, pagedEntries]);
 	
@@ -145,11 +175,19 @@ function StatsComponent({
 							labels: chartLabels,
 							datasets: [
 								{
+									label: '7-Day Average',
+									data: chartMovingAverageWeightData,
+									borderColor: 'rgb(128, 64, 192)',
+									backgroundColor: 'rgba(55, 99, 232, 0.5)',
+									pointStyle: pointStyle 
+								},
+								{
 									label: 'Weight',
 									data: chartWeightData,
 									borderColor: 'rgb(255, 99, 132)',
 									backgroundColor: 'rgba(255, 99, 132, 0.5)',
-								}
+									pointStyle: pointStyle
+								},
 							]
 						}}
 					/>
