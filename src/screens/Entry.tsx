@@ -534,6 +534,11 @@ function EntryComponent({
 											:
 											''
 									}
+									<p>
+									{
+										'imageHash = ' + entry.imageHash
+									}
+									</p>
 								</>
 							}
 							</div>

@@ -16,6 +16,7 @@ import {
 
 import { db } from '../db';
 //import { GlobalState } from '../App';
+import { generateSHA256 } from '../Common';
 
 type ChangeImageComponentAttributes = {
 	closeModalOnLoad: boolean;
