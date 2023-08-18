@@ -74,6 +74,7 @@ function Builder({
 		db.on("versionchange", function(event) {
 			console.warn('db versionchange detected');
 			setDbUpgradeIndicatorIsVisible(true);
+			document.body.classList.add('bodyLocked');
 			/*
 			if (confirm ("Another page tries to upgrade the database to version " +
 										event.newVersion + ". Accept?")) {
@@ -91,11 +92,13 @@ function Builder({
 			// Will trigger each time db is successfully opened.
 			console.warn('the DB is now open and ready');
 			setDbUpgradeIndicatorIsVisible(false);
+			document.body.classList.remove('bodyLocked');
 		}, true);
 	}, []);
 	
 	return (
 			<>
+				<div className={styles.bodyLocked}></div>
 		{/*<div className="columns">
 			<div className="column">*/}
 				<nav role="navigation" aria-label="main navigation">
