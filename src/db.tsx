@@ -70,7 +70,7 @@ export class TypedDexie extends Dexie {
 				delete entry.includeInExport;
 			});
 		});
-		this.version(70).stores({
+		this.version(77).stores({
 			entries: '++id, isDraft, date, weight, notes, marks, includedInExport, imageHash',
 			settings: 'key, value'
 		}).upgrade( txn => {

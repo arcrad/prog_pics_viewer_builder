@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
@@ -7,7 +7,9 @@ import {
 	faAngleRight
 } from '@fortawesome/free-solid-svg-icons'
 
+import { db } from './db';
 import { GlobalState } from './App';
+import { LoadingIndicator } from './Common';
 //import SetupModal from './components/SetupModal';
 
 import styles from './Builder.module.scss';
@@ -45,9 +47,9 @@ function Builder({
 	setGlobalState
 } : BuilderAttributes) {
 	//let [setupModalIsVisible, setSetupModalIsVisible] = useState(false);
-
+	let [dbUpgradeIndicatorIsVisible, setDbUpgradeIndicatorIsVisible] = useState(false);
 	//const initializedRef = useRef(false);
-
+	
 	//displays setup modal if setting(s) arent found
 	/* temporarily disabled
 	useEffect( () => {
@@ -68,6 +70,30 @@ function Builder({
 		});
 	}, []);*/
 
+	useEffect( () => {
+		db.on("versionchange", function(event) {
+			console.warn('db versionchange detected');
+			setDbUpgradeIndicatorIsVisible(true);
+			/*
+			if (confirm ("Another page tries to upgrade the database to version " +
+										event.newVersion + ". Accept?")) {
+				// Refresh current webapp so that it starts working with newer DB schema.
+				window.location.reload();
+			} else {
+				// Will let user finish its work in this window and
+				// block the other window from upgrading.
+				return false;
+			}
+			*/
+		});
+
+		db.on("ready", function () {
+			// Will trigger each time db is successfully opened.
+			console.warn('the DB is now open and ready');
+			setDbUpgradeIndicatorIsVisible(false);
+		}, true);
+	}, []);
+	
 	return (
 			<>
 		{/*<div className="columns">
@@ -118,6 +144,31 @@ function Builder({
 				<div>
 					<Outlet />
 				</div>
+				<div 
+					style={{
+						height: '90vh', 
+						width: '90vw', 
+						backgroundColor: 'rgba(0,0,0,0.81)', 
+						borderRadius: '2rem',
+						position: 'absolute', 
+						top: '5vh', 
+						left: '5vw',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						boxSizing: 'border-box'
+					}}
+					className={ dbUpgradeIndicatorIsVisible ? '' : 'is-hidden'}
+				>
+					<div
+						style={{margin: 'auto auto'}} 
+					>
+						<LoadingIndicator 
+							loadingText=" "
+						/>
+						<p style={{color: '#FFF'}}>Database is upgrading. Please wait...</p>	
+					</div>
+				</div> 
 				{/*
 				<SetupModal 
 					globalState={globalState} 
