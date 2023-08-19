@@ -69,6 +69,7 @@ function StatsComponent({
 	let [chartLabels, setChartLabels] = useState([]);
 	let [chartWeightData, setChartWeightData] = useState([]);
 	let [chartMovingAverageWeightData, setChartMovingAverageWeightData] = useState([]);
+	let [chartMedianWeightData, setChartMedianWeightData] = useState([]);
 
 	let movingAverageWindowSize = 7;
 	
@@ -107,29 +108,47 @@ function StatsComponent({
 	);
 
 	useEffect( () => {
-	//console.log('stats component allEntries=');
-	//console.dir(allEntries);
+		//console.log('stats component allEntries=');
+		//console.dir(allEntries);
 
-	if(showAllData && Array.isArray(allEntries) && allEntries) {	
-		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];	
-		setChartLabels(allEntries.map( (entry) => {
-				let curDate = new Date(entry.date);
-				return months[curDate.getMonth()] + ' ' + curDate.getDate();
+		if(showAllData && Array.isArray(allEntries) && allEntries) {	
+			const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];	
+			setChartLabels(allEntries.map( (entry) => {
+					let curDate = new Date(entry.date);
+					return months[curDate.getMonth()] + ' ' + curDate.getDate();
+				}));
+			setChartWeightData(allEntries.map( (entry) => entry.weight));
+			setChartMovingAverageWeightData(allEntries.map( (entry, index, entries) => {
+				let entriesInWindow = entries.slice(
+					index-((movingAverageWindowSize-1)/2) > -1 ? index-((movingAverageWindowSize-1)/2) : 0, 
+					(index+((movingAverageWindowSize-1)/2) < entries.length ? index+((movingAverageWindowSize-1)/2) : entries.length) + 1
+				)
+				//console.log("entriesInWindow=");
+				//console.dir(entriesInWindow);
+				let windowSum = entriesInWindow.reduce( (total, curVal, curIndex) => total+Number(curVal.weight), 0 );
+				//console.log(`windowSum = ${windowSum} avg=${windowSum/entriesInWindow.length}`);
+				return windowSum/entriesInWindow.length;
 			}));
-		setChartWeightData(allEntries.map( (entry) => entry.weight));
-		setChartMovingAverageWeightData(allEntries.map( (entry, index, entries) => {
-			let entriesInWindow = entries.slice(
-				index-((movingAverageWindowSize-1)/2) > -1 ? index-((movingAverageWindowSize-1)/2) : 0, 
-				(index+((movingAverageWindowSize-1)/2) < entries.length ? index+((movingAverageWindowSize-1)/2) : entries.length) + 1
-			)
-			//console.log("entriesInWindow=");
-			//console.dir(entriesInWindow);
-			let windowSum = entriesInWindow.reduce( (total, curVal, curIndex) => total+Number(curVal.weight), 0 );
-			//console.log(`windowSum = ${windowSum} avg=${windowSum/entriesInWindow.length}`);
-			return windowSum/entriesInWindow.length;
-		}));
-		setPointStyle(false);
-	}
+			let chunkSize = 7;
+			let chunkedWeightData = allEntries.map( entry => Number(entry.weight)).reduce( (chunks, curWeight, curIndex, allEntries) => {
+				//console.log(`curIndex%chunkSize=${curIndex%chunkSize}`);	
+				//console.log(`(curIndex-(curIndex%chunkSize))/chunkSize=${(curIndex-(curIndex%chunkSize))/chunkSize}`);	
+				if(curIndex%chunkSize === 0) {
+					chunks.push([curWeight]);	
+				} else {
+					chunks[(curIndex-(curIndex%chunkSize))/chunkSize].push(curWeight);
+				}
+				return chunks;
+			}, []);
+			//console.dir(chunkedWeightData);
+			setChartMedianWeightData(chunkedWeightData.map( (chunk) => {
+					let sortedChunk = chunk.sort();
+					let medianWeight = chunk[Math.ceil(chunkSize/2)];
+					return chunk.map( weight => medianWeight);
+			}).flat());
+			//console.dir(chartMedianWeightData);
+			setPointStyle(false);
+		}
 	},[showAllData, allEntries]);
 	
 	useEffect( () => {
@@ -180,6 +199,13 @@ function StatsComponent({
 									borderColor: 'rgb(128, 64, 192)',
 									backgroundColor: 'rgba(55, 99, 232, 0.5)',
 									pointStyle: pointStyle 
+								},
+								{
+									label: 'Median Weight',
+									data: chartMedianWeightData,
+									borderColor: 'rgb(55, 192, 100)',
+									backgroundColor: 'rgba(65, 188, 121, 0.5)',
+									pointStyle: pointStyle
 								},
 								{
 									label: 'Weight',
