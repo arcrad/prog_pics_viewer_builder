@@ -65,15 +65,10 @@ function EntryComponent({
 	setGlobalState
 } : EntryAttributes ) {
 
-	//let [currentEntryWeight, setCurrentEntryWeight] = useState("");
-	//let [currentEntryDate, setCurrentEntryDate] = useState("");
-	//let [currentEntryNotes, setCurrentEntryNotes] = useState("");
-	//let [changeImageModalIsVisible, setChangeImageModalIsVisible] = useState(false);
-	//let [markImageModalIsVisible, setMarkImageModalIsVisible] = useState(false);
-	//let [addEntryModalIsVisible, setAddEntryModalIsVisible] = useState(false);
 	let [entryIdBeingEdited, setEntryIdBeingEdited] = useState(-1);
 	let [pagerOffset, setPagerOffset] = useState(0);
-	let [entryThumbnailImageUrls, setEntryThumbnailImageUrls] = useState<{[key:number]:string}>();
+	let [entryThumbnailImageUrls, setEntryThumbnailImageUrls] = useState<{[key:string]:string}>({});
+	//let entryThumbnailImageUrls:{[key:number]:string} = {};
 	
 	let addEntryRef = useRef<HTMLButtonElement>(null);
 	//let imageUploadRef = useRef<HTMLInputElement>(null);
@@ -92,50 +87,52 @@ function EntryComponent({
 		] 
 	);
 	const entries = useLiveQuery(
-		() => db.entries
+		() => {
+			return db.entries
 			//.where('isDraft').anyOf(globalState.settings.showDraftsInEntries ? [1,0] : [0])
 			.where('isDraft').below(globalState.settings.showDraftsInEntries ? 2 : 1)
 			.reverse() 
 			.offset(pagerOffset)
 			.limit(pagerLimit)
-			.sortBy('date')
+				.sortBy('date', (data) => {
+					return data;
+				});
+		}
 		, [
 			pagerOffset, 
 			pagerLimit,
 			globalState.settings.showDraftsInEntries 
 		]
+		, undefined
 	);
 
 	useEffect( () => {
-		//remove old urls 
-		setEntryThumbnailImageUrls( (cs) => {
-			if(cs) {
-				Object.keys(cs).forEach( (key) => {
-					console.log(`revokeObjectUrl(${cs[parseInt(key)]})`);
-					URL.revokeObjectURL(cs[parseInt(key)]);
+		if(entries) {
+			let newUrls = {};
+			entries.forEach( entry => {
+				if(!entryThumbnailImageUrls[entry.imageHash]) {
+					//console.log(`adding new imageHash url, hash =${entry.imageHash}`);
+					newUrls[entry.imageHash] = URL.createObjectURL(new Blob([entry.thumbImageBlob.buffer]));
+				}	
+			});
+			if(Object.keys(newUrls).length > 0) {
+				setEntryThumbnailImageUrls( {
+					...entryThumbnailImageUrls,  
+					...newUrls
 				});
 			}
-			return {};
-		});
-		//generate new urls 
-		if(entries) {
-			const entryThumbnailUrls = entries.reduce( (accumulator, currentEntry) => {
-				//const enc = new TextDecoder("utf-8");
-				//enc.decode(currentEntry.imageBlob.buffer);
-				//console.log('sha256=');
-				//console.log(sha256(currentEntry.imageBlob.buffer));
-				/////sha256(currentEntry.imageBlob.buffer).then( (hashString) => { console.log(`sha256=${hashString}`) } );
-				if(currentEntry.thumbImageBlob) {
-					let newData = {
-						[currentEntry.id as number]: URL.createObjectURL(new Blob([currentEntry.thumbImageBlob.buffer]))
-					};
-					return { ...accumulator, ...newData};
-				}
-				return accumulator;
-			}, {});
-			console.dir(entryThumbnailUrls);
-			setEntryThumbnailImageUrls(entryThumbnailUrls);
 		}
+		/*
+		return () => {
+			console.log('unmount called');
+			if(entryThumbnailImageUrls) {
+			Object.keys(entryThumbnailImageUrls).forEach( entryKey => {
+				URL.revokeObjectURL(entryThumbnailImageUrls[entryKey]);
+				entryThumbnailImageUrls[entryKey] = undefined;
+			});
+			}
+		}
+		*/
 	}, [entries]);
 
 	async function handleAddEntry(event:MouseEvent<HTMLButtonElement>) {
@@ -363,9 +360,9 @@ function EntryComponent({
 						<li key={entry.id} className="box">
 							<div className="columns is-centered is-mobile">
 							<div className="column is-narrow">
-							{ entryThumbnailImageUrls && entry.id && entryThumbnailImageUrls[entry.id] != null &&
+							{ entryThumbnailImageUrls && entry.imageHash && entryThumbnailImageUrls[entry.imageHash] != null &&
 								<a onClick={ () => {
-									if( entryThumbnailImageUrls[entry.id] != null) {
+									if( entryThumbnailImageUrls[entry.imageHash] != null) {
 										navigate(`./image/${entry.id}`);
 									}
 								}}>
@@ -373,12 +370,12 @@ function EntryComponent({
 									border: '0px solid #000',
 									height: '7rem',
 									width: '7rem',
-									background: `url(${entryThumbnailImageUrls[entry.id]}) center / contain no-repeat #ded`,
+									background: `url(${entryThumbnailImageUrls[entry.imageHash]}) center / contain no-repeat #ded`,
 								}}>
 								</div>
 								</a>
 							}
-							{ entryThumbnailImageUrls && entry.id && entryThumbnailImageUrls[entry.id] == null &&
+							{ entryThumbnailImageUrls && entry.imageHash && entryThumbnailImageUrls[entry.imageHash] == null &&
 								<div style={{
 									border: '0px solid #000',
 									height: '7rem',
