@@ -46,7 +46,7 @@ function Adjust({
 	let [currentSelectValue, setCurrentSelectValue] = useState(-1);
 	let [scaleWidth, setScaleWidth] = useState('0');
 	let [scaleHeight, setScaleHeight] = useState('0');
-	let [resizeCanary, setResizeCanary] = useState(0);
+	//let [resizeCanary, setResizeCanary] = useState(0);
 	let [renderTrigger, setRenderTrigger] = useState(Date.now());
 	let [cropCornerCoordinatesInitialized, setCropCornerCoordinatesInitialized] = useState(false);
 	//let [scaledImageData, setScaledImageData] = useState<Blob | null>(null);
@@ -78,14 +78,10 @@ function Adjust({
 				y: globalState.settings.bottomLeftCornerCropCoordinateY as number
 			});
 	
-	let imageTopLeftCoordinateRef
-		= useRef<Coordinate>({ x: 0, y: 0});
-	let imageTopRightCoordinateRef
-		= useRef<Coordinate>({ x: 0, y: 0});
-	let imageBottomRightCoordinateRef
-		= useRef<Coordinate>({ x: 0, y: 0});
-	let imageBottomLeftCoordinateRef
-		= useRef<Coordinate>({ x: 0, y: 0});
+	let imageTopLeftCoordinateRef = useRef<Coordinate>({ x: 0, y: 0});
+	let imageTopRightCoordinateRef = useRef<Coordinate>({ x: 0, y: 0});
+	let imageBottomRightCoordinateRef = useRef<Coordinate>({ x: 0, y: 0});
+	let imageBottomLeftCoordinateRef = useRef<Coordinate>({ x: 0, y: 0});
 
 	const initialized = useRef<boolean>(false);
 	const loadingIndicatorRef = useRef<HTMLDivElement>(null);
@@ -476,20 +472,36 @@ function Adjust({
 		}
 		console.log('fetch all initial data and then set intializedData flag');
 		initialized.current = true;
-		//db.settings.get('chosenEntryIdForAdjustments').then((_chosenEntryIdForAdjustments) => {
-			Promise.all([
-				db.settings.get('topLeftCornerCropCoordinateX'),
-				db.settings.get('topLeftCornerCropCoordinateY'),
-				db.settings.get('topRightCornerCropCoordinateX'),
-				db.settings.get('topRightCornerCropCoordinateY'),
-				db.settings.get('bottomRightCornerCropCoordinateX'),
-				db.settings.get('bottomRightCornerCropCoordinateY'),
-				db.settings.get('bottomLeftCornerCropCoordinateX'),
-				db.settings.get('bottomLeftCornerCropCoordinateY'),
-				db.settings.get('scaleWidth'),
-				db.settings.get('scaleHeight'),
-				db.settings.get('chosenEntryIdForAdjustments')
-			]).then(([
+		Promise.all([
+			db.settings.get('topLeftCornerCropCoordinateX'),
+			db.settings.get('topLeftCornerCropCoordinateY'),
+			db.settings.get('topRightCornerCropCoordinateX'),
+			db.settings.get('topRightCornerCropCoordinateY'),
+			db.settings.get('bottomRightCornerCropCoordinateX'),
+			db.settings.get('bottomRightCornerCropCoordinateY'),
+			db.settings.get('bottomLeftCornerCropCoordinateX'),
+			db.settings.get('bottomLeftCornerCropCoordinateY'),
+			db.settings.get('scaleWidth'),
+			db.settings.get('scaleHeight'),
+			db.settings.get('chosenEntryIdForAdjustments')
+		]).then(([
+			_topLeftCornerCropCoordinateX,
+			_topLeftCornerCropCoordinateY,
+			_topRightCornerCropCoordinateX,
+			_topRightCornerCropCoordinateY,
+			_bottomRightCornerCropCoordinateX,
+			_bottomRightCornerCropCoordinateY,
+			_bottomLeftCornerCropCoordinateX,
+			_bottomLeftCornerCropCoordinateY,
+			_scaleWidthSetting,
+			_scaleHeightSetting,
+			_chosenEntryIdForAdjustments
+		]) => {
+			console.group('got data from db'); 
+			//console.log('got data from db'); 
+			//console.dir(coordinates);
+			//	originalCoordinatesFromDbRef.current = coordinates;
+			originalCoordinatesFromDbRef.current = [
 				_topLeftCornerCropCoordinateX,
 				_topLeftCornerCropCoordinateY,
 				_topRightCornerCropCoordinateX,
@@ -498,41 +510,23 @@ function Adjust({
 				_bottomRightCornerCropCoordinateY,
 				_bottomLeftCornerCropCoordinateX,
 				_bottomLeftCornerCropCoordinateY,
-				_scaleWidthSetting,
-				_scaleHeightSetting,
-				_chosenEntryIdForAdjustments
-			]) => {
-				console.group('got data from db'); 
-				//console.log('got data from db'); 
-				//console.dir(coordinates);
-				//	originalCoordinatesFromDbRef.current = coordinates;
-				originalCoordinatesFromDbRef.current = [
-					_topLeftCornerCropCoordinateX,
-					_topLeftCornerCropCoordinateY,
-					_topRightCornerCropCoordinateX,
-					_topRightCornerCropCoordinateY,
-					_bottomRightCornerCropCoordinateX,
-					_bottomRightCornerCropCoordinateY,
-					_bottomLeftCornerCropCoordinateX,
-					_bottomLeftCornerCropCoordinateY,
-				];
-				if(_scaleWidthSetting) {
-					setScaleWidth(_scaleWidthSetting.value as string);
-					setSelectedImageBaseWidth(_scaleWidthSetting.value);
-				}
-				if(_scaleHeightSetting) {
-					setScaleHeight(_scaleHeightSetting.value as string);
-					setSelectedImageBaseHeight(_scaleHeightSetting.value);
-				}
-				//setChosenEntryIdIsValid(isChosenEntryIdForAdjustmentsValid());
-				//setIsLoaded(true);
-		if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
-			scaleChosenImage(_scaleWidthSetting, _scaleHeightSetting, _chosenEntryIdForAdjustments);
-		}
-				console.groupEnd();
-				setLoadedInitialData(true);
-			});
-		//});
+			];
+			if(_scaleWidthSetting) {
+				setScaleWidth(_scaleWidthSetting.value as string);
+				setSelectedImageBaseWidth(_scaleWidthSetting.value);
+			}
+			if(_scaleHeightSetting) {
+				setScaleHeight(_scaleHeightSetting.value as string);
+				setSelectedImageBaseHeight(_scaleHeightSetting.value);
+			}
+			//setChosenEntryIdIsValid(isChosenEntryIdForAdjustmentsValid());
+			//setIsLoaded(true);
+			if(_scaleWidthSetting && _scaleHeightSetting && _chosenEntryIdForAdjustments && _chosenEntryIdForAdjustments.value) {
+				scaleChosenImage(_scaleWidthSetting, _scaleHeightSetting, _chosenEntryIdForAdjustments);
+			}
+			console.groupEnd();
+			setLoadedInitialData(true);
+		});
 	}, [initialized.current]);
 
 	useEffect( () => {
@@ -547,35 +541,29 @@ function Adjust({
 		}
 	}, [renderTrigger, cropCornerCoordinatesInitialized]);
 
+	const resizeDebounceTimeoutId = useRef(0);
 	useEffect( () => {
-		function updateResizeCanary() {
-			setResizeCanary( Date.now());
+		function handleResize() {
+			//setResizeCanary( Date.now());
+			if( resizeDebounceTimeoutId.current === 0) {
+				resizeDebounceTimeoutId.current = window.setTimeout( () => {
+					console.log('handle resize');
+					loadCropCoordinatesFromDb().then( () => {
+						console.log('after loadCropCordinates resolves');
+						updateAdjustmentImageCornerCoordinates();
+						updateScaledCornerCropCoordinates();
+						setRenderTrigger(Date.now());
+						resizeDebounceTimeoutId.current = 0;
+					});
+				}, 50);
+			}
 		}
-		window.addEventListener('resize', updateResizeCanary);
+		window.addEventListener('resize', handleResize);
 		return( () => {
-			window.removeEventListener('resize', updateResizeCanary);
+			window.removeEventListener('resize', handleResize);
 		});
 	}, []);
 
-	const resizeDebounceTimeoutId = useRef(0);
-	useEffect( () => {
-		//handle resize
-		//clearTimeout(resizeDebounceTimeoutId.current);
-		if( resizeCanary > 0 && resizeDebounceTimeoutId.current === 0) {
-			resizeDebounceTimeoutId.current = window.setTimeout( () => {
-				console.log('handle resize');
-				loadCropCoordinatesFromDb().then( () => {
-					console.log('after loadCropCordinates resolves');
-					updateAdjustmentImageCornerCoordinates();
-					updateScaledCornerCropCoordinates();
-					setRenderTrigger(Date.now());
-					resizeDebounceTimeoutId.current = 0;
-				});
-			}, 50);
-		}
-	}, [resizeCanary]);
-
-	
 	useEffect( () => {
 		function handleAdjustCropMarkerStart(event: any) {
 			console.log('handleAdjustCropMarkerStart() called');
@@ -752,7 +740,7 @@ function Adjust({
 			window.removeEventListener('touchmove', handleAdjustCropMarkerMove);
 			window.removeEventListener('touchend', handleAdjustCropMarkerEnd);
 		});
-	});
+	},[]);
 	
 	async function scaleChosenImage(scaleWidthSetting:Setting, scaleHeightSetting:Setting, chosenEntryIdForAdjustments:Setting) {
 		console.group('scaledChosenImage() called');
@@ -798,10 +786,7 @@ function Adjust({
 	};
 
 	useEffect( () => {
-		if(
-			chosenEntryIdForAdjustments
-			&& chosenEntryIdForAdjustments.value
-		) {
+		if( chosenEntryIdForAdjustments && chosenEntryIdForAdjustments.value ) {
 			setCurrentSelectValue( parseInt(chosenEntryIdForAdjustments.value as string));
 		}
 	}, [chosenEntryIdForAdjustments]);
