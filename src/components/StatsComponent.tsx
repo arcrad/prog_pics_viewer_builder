@@ -48,6 +48,45 @@ const testData = {
 						]
 };
 
+function calculateMovingAverage( 
+	inputDataArray:number[],
+	movingAverageWindowSize: number
+) {
+	return inputDataArray.map( (entry, index, entries) => {
+		let entriesInWindow = entries.slice(
+			index-((movingAverageWindowSize-1)/2) > -1 ? index-((movingAverageWindowSize-1)/2) : 0, 
+			(index+((movingAverageWindowSize-1)/2) < entries.length ? index+((movingAverageWindowSize-1)/2) : entries.length) + 1
+		)
+		//console.log("entriesInWindow=");
+		//console.dir(entriesInWindow);
+		let windowSum = entriesInWindow.reduce( (total, curVal, curIndex) => total+curVal, 0 );
+		//console.log(`windowSum = ${windowSum} avg=${windowSum/entriesInWindow.length}`);
+		return windowSum/entriesInWindow.length;
+	});
+}
+
+function calculateMovingMedian(
+	inputDataArray:number[],
+	medianCalcChunkSize: number
+) {
+	const chunkedData = inputDataArray.toReversed().reduce( (chunks, curValue, curIndex) => {
+		//console.log(`curIndex%medianCalcChunkSize=${curIndex%medianCalcChunkSize}`);	
+		//console.log(`(curIndex-(curIndex%medianCalcChunkSize))/medianCalcChunkSize=${(curIndex-(curIndex%medianCalcChunkSize))/medianCalcChunkSize}`);	
+		if(curIndex%medianCalcChunkSize === 0) {
+			chunks.push([curValue]);	
+		} else {
+			chunks[(curIndex-(curIndex%medianCalcChunkSize))/medianCalcChunkSize].push(curValue);
+		}
+		return chunks;
+	}, []);
+	//console.dir(chunkedData);
+	return chunkedData.map( (chunk) => {
+		let sortedChunk = chunk.sort();
+		let medianWeight = chunk[Math.ceil(chunk.length/2)-1];
+		return chunk.map( weight => medianWeight);
+	}).flat().reverse();
+}
+
 type StatsComponentProps = {
 	globalState: GlobalState;
 	pagerOffset: number;
@@ -109,52 +148,26 @@ function StatsComponent({
 	let pointStyle = false;
 
 	let activeChartDataToProcess = [];
-	//compute allEntriesData
+	//setup to compute allEntriesData
 	if(showAllData && Array.isArray(allEntries) && allEntries) {
 		activeChartDataToProcess = allEntries;
 		pointStyle = false;
 	}
-	//compute pagedEntries data
+	//setup to compute pagedEntries data
 	if(!showAllData && Array.isArray(pagedEntries) && pagedEntries) {	
 		activeChartDataToProcess = pagedEntries;
 		pointStyle = 'circle';
 	}
-
+	//calculate appropriate data
 	if(activeChartDataToProcess && activeChartDataToProcess.length > 0) {	
 		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];	
 		chartLabels = activeChartDataToProcess.map( (entry) => {
 			let curDate = new Date(entry.date);
 			return months[curDate.getMonth()] + ' ' + curDate.getDate();
 		});
-		chartWeightData = activeChartDataToProcess.map( (entry) => entry.weight);
-		chartMovingAverageWeightData = activeChartDataToProcess.map( (entry, index, entries) => {
-			let entriesInWindow = entries.slice(
-				index-((movingAverageWindowSize-1)/2) > -1 ? index-((movingAverageWindowSize-1)/2) : 0, 
-				(index+((movingAverageWindowSize-1)/2) < entries.length ? index+((movingAverageWindowSize-1)/2) : entries.length) + 1
-			)
-			//console.log("entriesInWindow=");
-			//console.dir(entriesInWindow);
-			let windowSum = entriesInWindow.reduce( (total, curVal, curIndex) => total+Number(curVal.weight), 0 );
-			//console.log(`windowSum = ${windowSum} avg=${windowSum/entriesInWindow.length}`);
-			return windowSum/entriesInWindow.length;
-		});
-		let chunkedWeightData = activeChartDataToProcess.toReversed().map( entry => Number(entry.weight)).reduce( (chunks, curWeight, curIndex, activeChartDataToProcess) => {
-			//console.log(`curIndex%medianCalcChunkSize=${curIndex%medianCalcChunkSize}`);	
-			//console.log(`(curIndex-(curIndex%medianCalcChunkSize))/medianCalcChunkSize=${(curIndex-(curIndex%medianCalcChunkSize))/medianCalcChunkSize}`);	
-			if(curIndex%medianCalcChunkSize === 0) {
-				chunks.push([curWeight]);	
-			} else {
-				chunks[(curIndex-(curIndex%medianCalcChunkSize))/medianCalcChunkSize].push(curWeight);
-			}
-			return chunks;
-		}, []);
-		//console.dir(chunkedWeightData);
-		chartMedianWeightData = chunkedWeightData.map( (chunk) => {
-				let sortedChunk = chunk.sort();
-				let medianWeight = chunk[Math.ceil(chunk.length/2)-1];
-				return chunk.map( weight => medianWeight);
-		}).flat().reverse();
-		//console.dir(chartMedianWeightData);
+		chartWeightData = activeChartDataToProcess.map( (entry) => Number(entry.weight));
+		chartMovingAverageWeightData = calculateMovingAverage(chartWeightData, movingAverageWindowSize);
+		chartMedianWeightData = calculateMovingMedian(chartWeightData, medianCalcChunkSize);
 	}
 
 	return (
