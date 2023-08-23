@@ -110,7 +110,7 @@ function EntryComponent({
 		if(entries) {
 			let newUrls = {};
 			entries.forEach( entry => {
-				if(!entryThumbnailImageUrls[entry.imageHash]) {
+				if(!entryThumbnailImageUrls[entry.imageHash] && entry.thumbImageBlob) {
 					//console.log(`adding new imageHash url, hash =${entry.imageHash}`);
 					newUrls[entry.imageHash] = URL.createObjectURL(new Blob([entry.thumbImageBlob.buffer]));
 				}	
