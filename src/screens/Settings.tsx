@@ -201,7 +201,7 @@ function SettingsComponent({
 	useEffect( () => {
 		console.log('based on current settings change, update settings');
 		updateGlobalStateSettings();
-	}, [currentSettings, updateGlobalStateSettings]);
+	}, [currentSettings]);
 	
 	let debounceInputTimeout = useRef(0);
 	async function handleSettingInputChange(event:ChangeEvent<HTMLInputElement>) {
